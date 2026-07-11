@@ -11,6 +11,92 @@
   const lvlText = document.getElementById('lvlText');
   const goldText = document.getElementById('goldText');
 
+  // --- HUD VISIBILITY (hide HP/XP/Gold bars until Play is pressed) ---
+  function nearestCommonAncestor(a, b) {
+    if (!a && !b) return null;
+    if (!a) return b;
+    if (!b) return a;
+    const chainA = [];
+    for (let el = a; el; el = el.parentElement) chainA.push(el);
+    for (let el = b; el; el = el.parentElement) {
+      if (chainA.includes(el)) return el;
+    }
+    return document.body;
+  }
+  function hudGroup(el1, el2) {
+    const anc = nearestCommonAncestor(el1, el2);
+    if (!anc || anc === document.body || anc === document.documentElement) {
+      // ancestor too broad (or none) — fall back to hiding the elements themselves
+      return [el1, el2].filter(Boolean);
+    }
+    return [anc];
+  }
+  const hudTargets = [
+    ...hudGroup(hpBar, hpText),
+    ...hudGroup(xpBar, lvlText),
+    ...(goldText && goldText.parentElement && goldText.parentElement !== document.body
+      ? [goldText.parentElement] : [goldText])
+  ].filter(Boolean);
+  const uniqueHudTargets = [...new Set(hudTargets)];
+  const hudOriginalDisplay = new Map();
+  uniqueHudTargets.forEach(el => hudOriginalDisplay.set(el, el.style.display));
+  function setHudVisible(visible) {
+    uniqueHudTargets.forEach(el => {
+      el.style.display = visible ? (hudOriginalDisplay.get(el) || '') : 'none';
+    });
+  }
+  setHudVisible(false); // hidden until the player presses Play
+
+  // --- MOBILE / DESKTOP-ONLY GATE ---
+  function isMobileDevice() {
+    const uaMobile = /Android|iPhone|iPad|iPod|Windows Phone|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const touchOnly = ('maxTouchPoints' in navigator) && navigator.maxTouchPoints > 0 && window.matchMedia('(pointer: coarse)').matches;
+    const narrowViewport = Math.min(window.innerWidth, window.innerHeight) < 700;
+    return uaMobile || (touchOnly && narrowViewport);
+  }
+
+  let isMobileBlocked = isMobileDevice();
+
+  window.addEventListener('resize', () => {
+    isMobileBlocked = isMobileDevice();
+  });
+
+  function drawMobileBlockScreen() {
+    ctx.save();
+    ctx.fillStyle = '#14160f';
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+    ctx.textAlign = 'center';
+
+    // icon: simple desktop monitor glyph
+    ctx.strokeStyle = '#e8c93c';
+    ctx.lineWidth = 3;
+    const iw = 70, ih = 46;
+    const ix = VIEW_W / 2 - iw / 2, iy = VIEW_H / 2 - 160;
+    roundRect(ctx, ix, iy, iw, ih, 6);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(VIEW_W / 2, iy + ih);
+    ctx.lineTo(VIEW_W / 2, iy + ih + 14);
+    ctx.moveTo(VIEW_W / 2 - 18, iy + ih + 14);
+    ctx.lineTo(VIEW_W / 2 + 18, iy + ih + 14);
+    ctx.stroke();
+
+    ctx.fillStyle = '#e8c93c';
+    ctx.font = 'bold 36px sans-serif';
+    ctx.fillText('Desktop Only', VIEW_W / 2, VIEW_H / 2 - 50);
+
+    ctx.fillStyle = '#c9c5b8';
+    ctx.font = '32px sans-serif';
+    const msg = wrapPlain(ctx, 'This game requires a keyboard and is not playable on mobile devices. Please open it on a desktop or laptop computer.', VIEW_W - 60);
+    msg.forEach((line, i) => {
+      ctx.fillText(line, VIEW_W / 2, VIEW_H / 2 + 8 + i * 32);
+    });
+
+    ctx.textAlign = 'left';
+    ctx.restore();
+  }
+
   initSprites();
 
   const map = new TileMap(28, 22);
@@ -52,11 +138,16 @@
     new Enemy(21 * TILE, 17 * TILE, 'goblinBoss', { aggroRange: 170 }),
   ];
 
-  let gameState = 'playing'; // 'playing' | 'gameover' | 'victory'
+  let gameState = 'start'; // 'start' | 'howtoplay' | 'playing' | 'gameover' | 'victory'
   let questStage = 0; // 0 = not talked, 1 = quest given, 2 = sword found, 3 = boss defeated
   let restartButton = null;
   let screenFlash = null; // {color, alpha}
   let toastMsg = null, toastTimer = 0;
+
+  // --- START SCREEN STATE ---
+  let startButtons = {}; // populated each draw with hit boxes: play, howto, author
+  let howToBackButton = null;
+  const AUTHOR_URL = 'https://mgodlewskidev.pl/';
 
   function toast(msg) { toastMsg = msg; toastTimer = 150; }
 
@@ -116,6 +207,13 @@
   }
 
   function update() {
+    if (isMobileBlocked) return;
+
+    if (gameState === 'start' || gameState === 'howtoplay') {
+      for (const k in justPressed) delete justPressed[k];
+      return;
+    }
+
     dialogue.update();
     inventory.open && inventory.open; // no-op, panel is static while open
 
@@ -359,7 +457,137 @@
     ctx.restore();
   }
 
+  function drawButton(bx, by, bw, bh, label, fill, textColor) {
+    ctx.fillStyle = fill;
+    roundRect(ctx, bx, by, bw, bh, 8);
+    ctx.fill();
+    ctx.strokeStyle = fill;
+    ctx.lineWidth = 2;
+    roundRect(ctx, bx, by, bw, bh, 8);
+    ctx.stroke();
+    ctx.fillStyle = textColor || '#f1efe8';
+    ctx.font = 'bold 15px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, bx + bw / 2, by + bh / 2 + 5);
+    ctx.textAlign = 'left';
+    return { x: bx, y: by, w: bw, h: bh };
+  }
+
+  function drawStartScreen() {
+    ctx.save();
+    // backdrop: reuse the baked map so the title screen isn't a flat void
+    const off = camera.getOffset();
+    const camX = Math.round(off.x), camY = Math.round(off.y);
+    map.drawGround(ctx, camX, camY, VIEW_W, VIEW_H);
+    ctx.fillStyle = 'rgba(8,10,7,0.72)';
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+    ctx.textAlign = 'center';
+
+    // title
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.font = 'bold 40px sans-serif';
+    ctx.fillText('Shattered Vale RPG Game', VIEW_W / 2 + 2, VIEW_H / 2 - 88 + 2);
+    ctx.fillStyle = '#e8c93c';
+    ctx.fillText('Shattered Vale RPG Game', VIEW_W / 2, VIEW_H / 2 - 88);
+
+    ctx.fillStyle = '#c9c5b8';
+    ctx.font = '14px sans-serif';
+    ctx.fillText('A tiny village-defense adventure', VIEW_W / 2, VIEW_H / 2 - 58);
+
+    const bw = 190, bh = 42, gap = 14;
+    const bx = VIEW_W / 2 - bw / 2;
+    let by = VIEW_H / 2 - 10;
+
+    const playBtn = drawButton(bx, by, bw, bh, 'Play', '#3a6b3d');
+    by += bh + gap;
+    const howToBtn = drawButton(bx, by, bw, bh, 'How to Play', '#3a5a7a');
+    by += bh + gap;
+    const authorBtn = drawButton(bx, by, bw, bh, 'Author', '#5a4a3a');
+
+    ctx.restore();
+
+    startButtons = { play: playBtn, howto: howToBtn, author: authorBtn };
+  }
+
+  function drawHowToPlayScreen() {
+    ctx.save();
+    ctx.fillStyle = 'rgba(6,8,5,0.92)';
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+    const panelW = Math.min(420, VIEW_W - 40);
+    const panelH = 400;
+    const px = (VIEW_W - panelW) / 2;
+    const py = (VIEW_H - panelH) / 2;
+
+    ctx.fillStyle = 'rgba(20,22,16,0.95)';
+    roundRect(ctx, px, py, panelW, panelH, 10);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(232,228,216,0.3)';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, px, py, panelW, panelH, 10);
+    ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#e8c93c';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('How to Play', VIEW_W / 2, py + 34);
+
+    ctx.textAlign = 'left';
+    ctx.font = '14px sans-serif';
+    const lines = [
+      ['Move', 'WASD or Arrow Keys'],
+      ['Attack', 'Space'],
+      ['Interact / Talk', 'E'],
+      ['Inventory', 'I'],
+      ['Advance dialogue', 'Space or E'],
+      ['Goal', 'Find the sword, clear the slimes, defeat the goblin chief']
+    ];
+    let ly = py + 68;
+    lines.forEach(([label, val]) => {
+      ctx.fillStyle = '#e8c93c';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.fillText(label, px + 24, ly);
+      ctx.fillStyle = '#e8e4d8';
+      ctx.font = '13px sans-serif';
+      const wrapped = wrapPlain(ctx, val, panelW - 48);
+      wrapped.forEach((wline, i) => {
+        ctx.fillText(wline, px + 24, ly + 18 + i * 17);
+      });
+      ly += 18 + wrapped.length * 17 + 6;
+    });
+
+    const bw = 140, bh = 36;
+    const bx = VIEW_W / 2 - bw / 2;
+    const by = py + panelH - bh - 18;
+    howToBackButton = drawButton(bx, by, bw, bh, 'Back', '#3a6b3d');
+
+    ctx.restore();
+  }
+
+  function wrapPlain(ctx, text, maxWidth) {
+    const words = text.split(' ');
+    const out = [];
+    let line = '';
+    for (const w of words) {
+      const test = line ? line + ' ' + w : w;
+      if (ctx.measureText(test).width > maxWidth && line) {
+        out.push(line);
+        line = w;
+      } else {
+        line = test;
+      }
+    }
+    if (line) out.push(line);
+    return out;
+  }
+
   function draw() {
+    if (isMobileBlocked) { drawMobileBlockScreen(); return; }
+
+    if (gameState === 'start') { drawStartScreen(); return; }
+    if (gameState === 'howtoplay') { drawStartScreen(); drawHowToPlayScreen(); return; }
+
     const t = Date.now();
     const off = camera.getOffset();
     const camX = Math.round(off.x), camY = Math.round(off.y);
@@ -405,20 +633,63 @@
     update();
     draw();
     domTick++;
-    if (domTick % 4 === 0) updateDOM();
+    if (domTick % 4 === 0 && !isMobileBlocked) updateDOM();
     requestAnimationFrame(loop);
   }
 
+  function pointInBtn(mx, my, btn) {
+    return btn && mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h;
+  }
+
   canvas.tabIndex = 0;
+  canvas.addEventListener('mousemove', e => {
+    if (isMobileBlocked) return;
+    if (gameState !== 'start' && gameState !== 'howtoplay' && gameState !== 'gameover' && gameState !== 'victory') {
+      canvas.style.cursor = 'default';
+      return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    let over = false;
+    if (gameState === 'start') {
+      over = pointInBtn(mx, my, startButtons.play) || pointInBtn(mx, my, startButtons.howto) || pointInBtn(mx, my, startButtons.author);
+    } else if (gameState === 'howtoplay') {
+      over = pointInBtn(mx, my, howToBackButton);
+    } else {
+      over = pointInBtn(mx, my, restartButton);
+    }
+    canvas.style.cursor = over ? 'pointer' : 'default';
+  });
   canvas.addEventListener('click', e => {
     canvas.focus();
 
-    if ((gameState !== 'gameover' && gameState !== 'victory') || !restartButton) return;
+    if (isMobileBlocked) return;
 
     const rect = canvas.getBoundingClientRect();
-
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
+
+    if (gameState === 'start') {
+      if (pointInBtn(mx, my, startButtons.play)) {
+        gameState = 'playing';
+        setHudVisible(true);
+      } else if (pointInBtn(mx, my, startButtons.howto)) {
+        gameState = 'howtoplay';
+      } else if (pointInBtn(mx, my, startButtons.author)) {
+        window.open(AUTHOR_URL, '_blank', 'noopener,noreferrer');
+      }
+      return;
+    }
+
+    if (gameState === 'howtoplay') {
+      if (pointInBtn(mx, my, howToBackButton)) {
+        gameState = 'start';
+      }
+      return;
+    }
+
+    if ((gameState !== 'gameover' && gameState !== 'victory') || !restartButton) return;
 
     if (
       mx >= restartButton.x &&
