@@ -37,7 +37,7 @@
   const npcs = [elder, merchant];
 
   const worldItems = [
-    new WorldItem(21 * TILE + 6, 12 * TILE + 6, 'sword'),
+    new WorldItem(21 * TILE + 6, 9 * TILE + 2, 'sword'),
     new WorldItem(6 * TILE, 16 * TILE, 'coin', { value: 5 }),
     new WorldItem(19 * TILE, 4 * TILE, 'coin', { value: 3 }),
     new WorldItem(24 * TILE, 6 * TILE, 'coin', { value: 3 }),

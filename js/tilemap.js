@@ -63,15 +63,6 @@ class TileMap {
       }
     });
 
-    // Pond
-    for (let y = 11; y <= 14; y++) {
-      for (let x = 19; x <= 23; x++) {
-        if (dist(x, y, 21, 12.5) < 2.6) this.set(x, y, TileType.WATER);
-        else if (dist(x, y, 21, 12.5) < 3.3) this.set(x, y, TileType.SAND);
-      }
-    }
-    this.set(21, 11, TileType.BRIDGE); this.set(21, 12, TileType.BRIDGE);
-
 
     // ================================
     // CASTLE FOR TROLL BOSS - LEFT GATE
@@ -138,6 +129,47 @@ class TileMap {
       y: 17
     };
 
+    // ================================
+    // WATER MOAT AROUND THE CASTLE
+    // ================================
+
+    for (let y = castle.top - 1; y <= castle.bottom + 1; y++) {
+      for (let x = castle.left - 1; x <= castle.right + 1; x++) {
+
+        const isCastleArea =
+          x >= castle.left &&
+          x <= castle.right &&
+          y >= castle.top &&
+          y <= castle.bottom;
+
+        if (!isCastleArea) {
+          this.set(x, y, TileType.WATER);
+        }
+      }
+    }
+
+    // ================================
+    // BRIDGE TO THE CASTLE GATE
+    // ================================
+
+    // Restore the path leading to the bridge
+    for (let x = 5; x < castle.left - 1; x++) {
+      this.set(x, 17, TileType.PATH);
+    }
+
+    // Wooden bridge crossing the moat (vertical)
+    this.set(castle.left - 1, 17, TileType.BRIDGE);
+    
+    // Restore gate entrance
+    this.set(castle.left, 17, TileType.GATE);
+
+    // ================================
+    // PATH INSIDE THE CASTLE
+    // ================================
+
+    for (let x = castle.left + 1; x < 21; x++) {
+      this.set(x, 17, TileType.PATH);
+    }
 
     // Decorative flowers / tall grass sprinkled on grass tiles
     for (let y = 1; y < this.rows - 1; y++) {
@@ -238,52 +270,52 @@ class TileMap {
     } else if (t === TileType.TREE) {
       ctx.fillStyle = h > 0.5 ? '#3a6b3d' : '#356339';
       ctx.fillRect(px, py, TILE, TILE);
-} else if (t === TileType.WALL) {
-  // Castle stone wall base
-  const stone = h > 0.66 ? '#8d8b82' :
-                h > 0.33 ? '#7d7c73' :
-                           '#72736b';
+    } else if (t === TileType.WALL) {
+      // Castle stone wall base
+      const stone = h > 0.66 ? '#8d8b82' :
+                    h > 0.33 ? '#7d7c73' :
+                              '#72736b';
 
-  ctx.fillStyle = stone;
-  ctx.fillRect(px, py, TILE, TILE);
+      ctx.fillStyle = stone;
+      ctx.fillRect(px, py, TILE, TILE);
 
-  // stone block mortar lines
-  ctx.strokeStyle = 'rgba(40,40,35,0.35)';
-  ctx.lineWidth = 1;
+      // stone block mortar lines
+      ctx.strokeStyle = 'rgba(40,40,35,0.35)';
+      ctx.lineWidth = 1;
 
-  ctx.beginPath();
-  ctx.moveTo(px, py + 10);
-  ctx.lineTo(px + TILE, py + 10);
-  ctx.moveTo(px, py + 22);
-  ctx.lineTo(px + TILE, py + 22);
+      ctx.beginPath();
+      ctx.moveTo(px, py + 10);
+      ctx.lineTo(px + TILE, py + 10);
+      ctx.moveTo(px, py + 22);
+      ctx.lineTo(px + TILE, py + 22);
 
-  // alternating vertical joints
-  const offset = (y % 2) * 8;
-  ctx.moveTo(px + 8 + offset, py);
-  ctx.lineTo(px + 8 + offset, py + 10);
+      // alternating vertical joints
+      const offset = (y % 2) * 8;
+      ctx.moveTo(px + 8 + offset, py);
+      ctx.lineTo(px + 8 + offset, py + 10);
 
-  ctx.moveTo(px + 20 + offset, py + 10);
-  ctx.lineTo(px + 20 + offset, py + 22);
+      ctx.moveTo(px + 20 + offset, py + 10);
+      ctx.lineTo(px + 20 + offset, py + 22);
 
-  ctx.moveTo(px + 10 + offset, py + 22);
-  ctx.lineTo(px + 10 + offset, py + TILE);
+      ctx.moveTo(px + 10 + offset, py + 22);
+      ctx.lineTo(px + 10 + offset, py + TILE);
 
-  ctx.stroke();
+      ctx.stroke();
 
-  // rough stone texture
-  ctx.fillStyle = 'rgba(255,255,255,0.08)';
-  ctx.fillRect(px + 3, py + 3, TILE - 6, 2);
+      // rough stone texture
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.fillRect(px + 3, py + 3, TILE - 6, 2);
 
-  ctx.fillStyle = 'rgba(0,0,0,0.12)';
-  ctx.fillRect(px, py + TILE - 3, TILE, 3);
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.fillRect(px, py + TILE - 3, TILE, 3);
 
-  // small cracks / imperfections
-  ctx.fillStyle = 'rgba(0,0,0,0.12)';
-  if (h > 0.7) {
-    ctx.fillRect(px + 6, py + 15, 3, 2);
-    ctx.fillRect(px + 18, py + 5, 2, 3);
-  }
-}
+      // small cracks / imperfections
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      if (h > 0.7) {
+        ctx.fillRect(px + 6, py + 15, 3, 2);
+        ctx.fillRect(px + 18, py + 5, 2, 3);
+      }
+    }
 
     // Tree canopy is drawn as an overlay so it visually overlaps tiles above it
     if (t === TileType.TREE) {
