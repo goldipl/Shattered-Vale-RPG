@@ -312,17 +312,49 @@
         w: bw,
         h: bh
       };
-    } else {
-      ctx.fillStyle = '#a8e07a';
-      ctx.font = 'bold 30px sans-serif';
-      ctx.fillText('Victory! The village is saved', VIEW_W / 2, VIEW_H / 2 - 16);
-      ctx.fillStyle = '#e8e4d8';
-      ctx.font = '15px sans-serif';
-      ctx.fillText(`Level ${player.lvl} · ${player.gold} gold collected`, VIEW_W / 2, VIEW_H / 2 + 14);
-      ctx.fillStyle = '#8a8578';
-      ctx.font = '12px sans-serif';
-      ctx.fillText('Refresh the page to play again', VIEW_W / 2, VIEW_H / 2 + 40);
-    }
+      } else {
+        ctx.fillStyle = '#a8e07a';
+        ctx.font = 'bold 30px sans-serif';
+        ctx.fillText('Victory! The village is saved', VIEW_W / 2, VIEW_H / 2 - 16);
+
+        ctx.fillStyle = '#e8e4d8';
+        ctx.font = '15px sans-serif';
+        ctx.fillText(
+          `Level ${player.lvl} · ${player.gold} gold collected`,
+          VIEW_W / 2,
+          VIEW_H / 2 + 14
+        );
+
+        // Play Again button
+        const bw = 150;
+        const bh = 38;
+        const bx = VIEW_W / 2 - bw / 2;
+        const by = VIEW_H / 2 + 55;
+
+        ctx.fillStyle = '#3a6b3d';
+        roundRect(ctx, bx, by, bw, bh, 8);
+        ctx.fill();
+
+        ctx.strokeStyle = '#3a6b3d';
+        ctx.lineWidth = 2;
+        roundRect(ctx, bx, by, bw, bh, 8);
+        ctx.stroke();
+
+        ctx.fillStyle = '#f1efe8';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.fillText(
+          'Play Again',
+          VIEW_W / 2,
+          by + 25
+        );
+
+        restartButton = {
+          x: bx,
+          y: by,
+          w: bw,
+          h: bh
+        };
+      }
     ctx.textAlign = 'left';
     ctx.restore();
   }
@@ -381,7 +413,7 @@
   canvas.addEventListener('click', e => {
     canvas.focus();
 
-    if (gameState !== 'gameover' || !restartButton) return;
+    if ((gameState !== 'gameover' && gameState !== 'victory') || !restartButton) return;
 
     const rect = canvas.getBoundingClientRect();
 
