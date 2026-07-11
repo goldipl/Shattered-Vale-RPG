@@ -1,0 +1,84 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+  background: #0a0f0a;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+}
+#wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 10px;
+}
+#hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 800px;
+  max-width: 96vw;
+  color: #e8e4d8;
+  font-size: 13px;
+}
+#hud .stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#hpBarOuter,
+#xpBarOuter {
+  width: 140px;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  overflow: hidden;
+}
+#hpBarInner {
+  height: 100%;
+  background: linear-gradient(90deg, #e24b4a, #f09595);
+  width: 100%;
+  transition: width 0.15s;
+}
+#xpBarInner {
+  height: 100%;
+  background: linear-gradient(90deg, #378add, #85b7eb);
+  width: 0%;
+  transition: width 0.15s;
+}
+#canvasHolder {
+  position: relative;
+  border: 2px solid #3c3428;
+  border-radius: 8px;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.6),
+    inset 0 0 60px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+canvas {
+  display: block;
+  image-rendering: pixelated;
+  background: #000;
+}
+#hint {
+  color: #8a8578;
+  font-size: 11.5px;
+  width: 800px;
+  max-width: 96vw;
+  text-align: center;
+}
+#hint kbd {
+  background: #2a271f;
+  border: 1px solid #4a4536;
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: #e8e4d8;
+  font-family: monospace;
+}

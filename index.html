@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shattered Vale — Top-Down RPG</title>
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<div id="wrap">
+  <div id="hud">
+    <div class="stat">❤ <div id="hpBarOuter"><div id="hpBarInner"></div></div> <span id="hpText">10/10</span></div>
+    <div class="stat">⭐ Lv <span id="lvlText">1</span> <div id="xpBarOuter"><div id="xpBarInner"></div></div></div>
+    <div class="stat">🪙 <span id="goldText">0</span></div>
+  </div>
+  <div id="canvasHolder">
+    <canvas id="game" width="800" height="576"></canvas>
+  </div>
+  <div id="hint">
+    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or arrows to move &nbsp;·&nbsp;
+    <kbd>Space</kbd> attack &nbsp;·&nbsp; <kbd>E</kbd> interact/talk &nbsp;·&nbsp;
+    <kbd>I</kbd> inventory
+  </div>
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/tilemap.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/dialogue.js"></script>
+<script src="js/inventory.js"></script>
+<script src="js/camera.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
