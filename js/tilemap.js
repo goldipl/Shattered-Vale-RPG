@@ -39,7 +39,13 @@ class TileMap {
     for (let x = 10; x < 17; x++) this.set(x, 5, TileType.PATH);
 
     // Tree clusters (forest borders)
-    const clusters = [[3,3,4],[20,3,3],[3,17,4],[20,16,4],[2,11,3],[22,9,3]];
+    const clusters = [
+      [3,3,4],
+      [20,3,3],
+      [3,17,4],
+      [20,16,4],
+      [2,11,3]
+    ];
     clusters.forEach(([cx, cy, r]) => {
       for (let y = cy - r; y <= cy + r; y++) {
         for (let x = cx - r; x <= cx + r; x++) {
@@ -55,7 +61,7 @@ class TileMap {
         else if (dist(x, y, 21, 12.5) < 3.3) this.set(x, y, TileType.SAND);
       }
     }
-    this.set(21, 9, TileType.BRIDGE); this.set(21, 10, TileType.BRIDGE);
+    this.set(21, 11, TileType.BRIDGE); this.set(21, 12, TileType.BRIDGE);
 
     // Boss clearing (open circle, no trees) bottom-right forest
     for (let y = 15; y <= 19; y++) for (let x = 18; x <= 24; x++) {
