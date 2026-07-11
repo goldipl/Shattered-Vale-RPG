@@ -133,6 +133,20 @@
 
       npcs.forEach(n => n.update());
       enemies.forEach(en => en.update(player, map, particles));
+
+      // --- BOSS GATE LOGIC ---
+      const slimesAlive = enemies.some(e => 
+        (e.type === 'slimeGreen' || e.type === 'slimeBlue') && e.alive
+      );
+
+      // If all slimes are dead and the gate is closed, open it!
+      if (!slimesAlive && !map.isGateOpen) {
+        map.openGate();
+        toast('The gate to the goblin boss has opened!');
+        screenFlash = { color: '200,200,200', alpha: 0.3 }; // Subtle flash
+      }
+      // -----------------------
+
       worldItems.forEach(item => {
         item.update();
         if (!item.taken && rectsOverlap(player, item)) {

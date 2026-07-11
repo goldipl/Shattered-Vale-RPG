@@ -2,10 +2,10 @@
 // decorations (flowers, rocks, tall grass) and collision data.
 
 const TileType = {
-  GRASS: 0, PATH: 1, WATER: 2, TREE: 3, WALL: 4, FLOWER: 5, TALLGRASS: 6, BRIDGE: 7, SAND: 8
+  GRASS: 0, PATH: 1, WATER: 2, TREE: 3, WALL: 4, FLOWER: 5, TALLGRASS: 6, BRIDGE: 7, SAND: 8, GATE: 9
 };
 
-const SOLID_TILES = new Set([TileType.WATER, TileType.TREE, TileType.WALL]);
+const SOLID_TILES = new Set([TileType.WATER, TileType.TREE, TileType.WALL, TileType.GATE]);
 
 class TileMap {
   constructor(cols, rows) {
@@ -13,6 +13,8 @@ class TileMap {
     this.rows = rows;
     this.tiles = [];
     this.decor = []; // sparkle/foliage overlay, non-blocking
+    this.isGateOpen = false; // Flag to track if boss gate is open
+    
     for (let y = 0; y < rows; y++) {
       const row = [];
       for (let x = 0; x < cols; x++) row.push(TileType.GRASS);
@@ -63,16 +65,72 @@ class TileMap {
     }
     this.set(21, 11, TileType.BRIDGE); this.set(21, 12, TileType.BRIDGE);
 
-    // Boss clearing (open circle, no trees) bottom-right forest
-    for (let y = 15; y <= 19; y++) for (let x = 18; x <= 24; x++) {
-      if (dist(x, y, 21, 17) < 4) this.set(x, y, TileType.GRASS);
+
+    // ================================
+    // CASTLE FOR TROLL BOSS - LEFT GATE
+    // ================================
+
+    const castle = {
+      left: 17,
+      right: 25,
+      top: 13,
+      bottom: 21
+    };
+
+    // Clear the inside area of the castle
+    for (let y = castle.top + 1; y < castle.bottom; y++) {
+      for (let x = castle.left + 1; x < castle.right; x++) {
+        this.set(x, y, TileType.GRASS);
+      }
     }
-    // ring of trees around clearing
-    for (let a = 0; a < Math.PI * 2; a += 0.35) {
-      const tx = Math.round(21 + Math.cos(a) * 4.3);
-      const ty = Math.round(17 + Math.sin(a) * 4.3);
-      if (this.get(tx, ty) !== TileType.WALL) this.set(tx, ty, TileType.TREE);
+
+    // Create horizontal castle walls
+    for (let x = castle.left; x <= castle.right; x++) {
+      this.set(x, castle.top, TileType.WALL);
+      this.set(x, castle.bottom, TileType.WALL);
     }
+
+    // Create vertical castle walls
+    for (let y = castle.top; y <= castle.bottom; y++) {
+      this.set(castle.left, y, TileType.WALL);
+      this.set(castle.right, y, TileType.WALL);
+    }
+
+
+    // ================================
+    // LEFT SIDE CASTLE GATE
+    // ================================
+
+    // Place the gate in the center of the left wall
+    this.set(castle.left, 17, TileType.GATE);
+
+    // ================================
+    // PATH LEADING TO THE CASTLE FROM THE LEFT
+    // ================================
+
+    for (let x = 13; x < castle.left; x++) {
+      this.set(x, 17, TileType.PATH);
+    }
+
+
+    // ================================
+    // PATH INSIDE THE CASTLE
+    // ================================
+
+    for (let x = castle.left + 1; x < 21; x++) {
+      this.set(x, 17, TileType.PATH);
+    }
+
+
+    // ================================
+    // TROLL SPAWN POSITION
+    // ================================
+
+    this.trollSpawn = {
+      x: 21,
+      y: 17
+    };
+
 
     // Decorative flowers / tall grass sprinkled on grass tiles
     for (let y = 1; y < this.rows - 1; y++) {
@@ -84,6 +142,23 @@ class TileMap {
           else if (h > 0.80) this.decor.push({ x, y, type: 'rock' });
         }
       }
+    }
+  }
+
+  openGate() {
+    let gateOpened = false;
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        if (this.get(x, y) === TileType.GATE) {
+          this.set(x, y, TileType.PATH); // Convert gate to a walkable path
+          gateOpened = true;
+        }
+      }
+    }
+    
+    if (gateOpened) {
+      this.isGateOpen = true;
+      this._bakeStatic(); // Re-render the static background so the path appears
     }
   }
 
@@ -145,15 +220,63 @@ class TileMap {
       for (let i = 0; i < 4; i++) ctx.fillRect(px, py + i * 8, TILE, 5);
       ctx.fillStyle = '#5a4020';
       for (let i = 0; i < 4; i++) ctx.fillRect(px, py + i * 8 + 5, TILE, 1);
+    } else if (t === TileType.GATE) {
+      // Draw a wooden barricade/gate
+      ctx.fillStyle = '#4a3626';
+      ctx.fillRect(px, py, TILE, TILE);
+      ctx.fillStyle = '#2a1e15';
+      for (let i = 0; i < 4; i++) ctx.fillRect(px + i * 8, py, 4, TILE);
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillRect(px, py + 12, TILE, 6);
     } else if (t === TileType.TREE) {
       ctx.fillStyle = h > 0.5 ? '#3a6b3d' : '#356339';
       ctx.fillRect(px, py, TILE, TILE);
-    } else if (t === TileType.WALL) {
-      ctx.fillStyle = '#1a1f16';
-      ctx.fillRect(px, py, TILE, TILE);
-      ctx.fillStyle = 'rgba(255,255,255,0.03)';
-      ctx.fillRect(px, py, TILE, 2);
-    }
+} else if (t === TileType.WALL) {
+  // Castle stone wall base
+  const stone = h > 0.66 ? '#8d8b82' :
+                h > 0.33 ? '#7d7c73' :
+                           '#72736b';
+
+  ctx.fillStyle = stone;
+  ctx.fillRect(px, py, TILE, TILE);
+
+  // stone block mortar lines
+  ctx.strokeStyle = 'rgba(40,40,35,0.35)';
+  ctx.lineWidth = 1;
+
+  ctx.beginPath();
+  ctx.moveTo(px, py + 10);
+  ctx.lineTo(px + TILE, py + 10);
+  ctx.moveTo(px, py + 22);
+  ctx.lineTo(px + TILE, py + 22);
+
+  // alternating vertical joints
+  const offset = (y % 2) * 8;
+  ctx.moveTo(px + 8 + offset, py);
+  ctx.lineTo(px + 8 + offset, py + 10);
+
+  ctx.moveTo(px + 20 + offset, py + 10);
+  ctx.lineTo(px + 20 + offset, py + 22);
+
+  ctx.moveTo(px + 10 + offset, py + 22);
+  ctx.lineTo(px + 10 + offset, py + TILE);
+
+  ctx.stroke();
+
+  // rough stone texture
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillRect(px + 3, py + 3, TILE - 6, 2);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
+  ctx.fillRect(px, py + TILE - 3, TILE, 3);
+
+  // small cracks / imperfections
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
+  if (h > 0.7) {
+    ctx.fillRect(px + 6, py + 15, 3, 2);
+    ctx.fillRect(px + 18, py + 5, 2, 3);
+  }
+}
 
     // Tree canopy is drawn as an overlay so it visually overlaps tiles above it
     if (t === TileType.TREE) {
