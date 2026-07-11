@@ -54,6 +54,7 @@
 
   let gameState = 'playing'; // 'playing' | 'gameover' | 'victory'
   let questStage = 0; // 0 = not talked, 1 = quest given, 2 = sword found, 3 = boss defeated
+  let restartButton = null;
   let screenFlash = null; // {color, alpha}
   let toastMsg = null, toastTimer = 0;
 
@@ -214,6 +215,44 @@
     }
   }
 
+  function restartGame() {
+  player.x = 13 * TILE;
+  player.y = 9 * TILE + 20;
+
+  player.hp = player.maxHp;
+  player.xp = 0;
+  player.xpNext = 10;
+  player.lvl = 1;
+  player.gold = 0;
+  player.atk = 3;
+  player.hasSword = false;
+  player.attacking = 0;
+  player.attackCooldown = 0;
+  player.invuln = 0;
+
+  questStage = 0;
+  gameState = 'playing';
+
+  merchantGaveGift = false;
+
+  worldItems.forEach(item => {
+    item.taken = false;
+  });
+
+  enemies = [
+    new Enemy(15 * TILE, 3 * TILE, 'slimeGreen'),
+    new Enemy(18 * TILE, 7 * TILE, 'slimeGreen'),
+    new Enemy(8 * TILE, 15 * TILE, 'slimeBlue'),
+    new Enemy(10 * TILE, 17 * TILE, 'slimeBlue'),
+    new Enemy(23 * TILE, 4 * TILE, 'slimeGreen'),
+    new Enemy(21 * TILE, 17 * TILE, 'goblinBoss', { aggroRange: 170 }),
+  ];
+
+  toastMsg = null;
+  toastTimer = 0;
+  restartButton = null;
+}
+
   function drawEndScreen() {
     ctx.save();
     ctx.fillStyle = 'rgba(0,0,0,0.72)';
@@ -225,7 +264,40 @@
       ctx.fillText('You were defeated', VIEW_W / 2, VIEW_H / 2 - 10);
       ctx.fillStyle = '#c9c5b8';
       ctx.font = '14px sans-serif';
-      ctx.fillText('Refresh the page to try again', VIEW_W / 2, VIEW_H / 2 + 20);
+      ctx.fillText(
+        'Try again and save the village!',
+        VIEW_W / 2,
+        VIEW_H / 2 + 20
+      );
+
+      const bw = 150;
+      const bh = 38;
+      const bx = VIEW_W / 2 - bw / 2;
+      const by = VIEW_H / 2 + 55;
+
+      ctx.fillStyle = '#3a6b3d';
+      roundRect(ctx, bx, by, bw, bh, 8);
+      ctx.fill();
+
+      ctx.strokeStyle = '#3a6b3d';
+      ctx.lineWidth = 2;
+      roundRect(ctx, bx, by, bw, bh, 8);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f1efe8';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText(
+        'Play Again',
+        VIEW_W / 2,
+        by + 25
+      );
+
+      restartButton = {
+        x: bx,
+        y: by,
+        w: bw,
+        h: bh
+      };
     } else {
       ctx.fillStyle = '#a8e07a';
       ctx.font = 'bold 30px sans-serif';
@@ -292,7 +364,25 @@
   }
 
   canvas.tabIndex = 0;
-  canvas.addEventListener('click', () => canvas.focus());
+  canvas.addEventListener('click', e => {
+    canvas.focus();
+
+    if (gameState !== 'gameover' || !restartButton) return;
+
+    const rect = canvas.getBoundingClientRect();
+
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    if (
+      mx >= restartButton.x &&
+      mx <= restartButton.x + restartButton.w &&
+      my >= restartButton.y &&
+      my <= restartButton.y + restartButton.h
+    ) {
+      restartGame();
+    }
+  });
   canvas.focus();
   loop();
 })();
