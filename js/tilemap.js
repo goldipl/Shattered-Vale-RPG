@@ -31,9 +31,16 @@ class TileMap {
   isSolid(x, y) { return !this.inBounds(x, y) || SOLID_TILES.has(this.get(x, y)); }
 
   _buildWorld() {
-    // Border walls
-    for (let x = 0; x < this.cols; x++) { this.set(x, 0, TileType.WALL); this.set(x, this.rows - 1, TileType.WALL); }
-    for (let y = 0; y < this.rows; y++) { this.set(0, y, TileType.WALL); this.set(this.cols - 1, y, TileType.WALL); }
+    // Map borders with grass
+    for (let x = 0; x < this.cols; x++) {
+      this.set(x, 0, TileType.GRASS);
+      this.set(x, this.rows - 1, TileType.GRASS);
+    }
+
+    for (let y = 0; y < this.rows; y++) {
+      this.set(0, y, TileType.GRASS);
+      this.set(this.cols - 1, y, TileType.GRASS);
+    }
 
     // Cross paths (village center)
     for (let x = 2; x < this.cols - 2; x++) this.set(x, 9, TileType.PATH);
