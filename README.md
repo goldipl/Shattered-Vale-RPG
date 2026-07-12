@@ -4,6 +4,8 @@ A top-down action RPG built with vanilla JavaScript and HTML5 Canvas — no engi
 
 ![screenshot](./screenshots/screenshot01.jpg)
 ![screenshot](./screenshots/screenshot02.jpg)
+![screenshot](./screenshots/screenshot03.jpg)
+![screenshot](./screenshots/screenshot04.jpg)
 
 ## Playing
 
