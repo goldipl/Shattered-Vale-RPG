@@ -3,6 +3,7 @@
 A top-down action RPG built with vanilla JavaScript and HTML5 Canvas — no engine, no build step, no dependencies. Explore a village, talk to NPCs, find a hidden sword, battle slimes, and defeat the goblin chief to save the village.
 
 ![screenshot](./screenshots/screenshot01.jpg)
+![screenshot](./screenshots/screenshot02.jpg)
 
 ## Playing
 
