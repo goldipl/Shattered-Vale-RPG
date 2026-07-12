@@ -586,6 +586,7 @@
     hpBar.style.width = (player.hp / player.maxHp * 100) + '%';
     hpText.textContent = `${player.hp}/${player.maxHp}`;
     xpBar.style.width = (player.xp / player.xpNext * 100) + '%';
+    xpText.textContent = `${player.xp} / ${player.xpNext} Exp`;
     lvlText.textContent = player.lvl;
     goldText.textContent = player.gold;
   }
