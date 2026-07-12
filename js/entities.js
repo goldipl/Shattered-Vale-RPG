@@ -203,7 +203,7 @@ class NPC {
 class Enemy {
   constructor(x, y, type, opts = {}) {
     this.x = x; this.y = y;
-    this.type = type; // 'slimeGreen' | 'slimeBlue' | 'goblinBoss'
+    this.type = type; // 'slimeGreen' | 'slimeBlue' | 'slimeRed' | 'goblinBoss'
     this.isBoss = type === 'goblinBoss';
     if (this.isBoss) {
       this.w = 30; this.h = 32; this.drawW = 40; this.drawH = 42;
@@ -212,8 +212,27 @@ class Enemy {
       this.dir = 'down';
     } else {
       this.w = 20; this.h = 18; this.drawW = 32; this.drawH = 28;
-      this.hp = 5; this.maxHp = 5; this.speed = 0.9; this.contactDmg = 1; this.atkRange = 0;
-      this.anim = new AnimatedSprite(type === 'slimeBlue' ? Sprites.slimeBlue : Sprites.slimeGreen, 32, 28, false);
+      
+      if (type === 'slimeRed') {
+        this.hp = 8;
+        this.maxHp = 8;
+        this.speed = 1.05;
+        this.contactDmg = 2;
+        this.atkRange = 0;
+        this.anim = new AnimatedSprite(Sprites.slimeRed, 32, 28, false);
+      } else {
+        this.hp = 5;
+        this.maxHp = 5;
+        this.speed = 0.9;
+        this.contactDmg = 1;
+        this.atkRange = 0;
+        this.anim = new AnimatedSprite(
+          type === 'slimeBlue' ? Sprites.slimeBlue : Sprites.slimeGreen,
+          32,
+          28,
+          false
+        );
+      }
     }
     this.alive = true;
     this.hitFlash = 0;
@@ -282,12 +301,26 @@ class Enemy {
     if (!this.alive) return;
     this.hp -= amount;
     this.hitFlash = 8;
-    particles.burst(this.centerX, this.centerY, this.isBoss ? '#e8975a' : '#a8e07a', 7);
+    let hitColor = '#a8e07a';
+    if (this.isBoss) hitColor = '#e8975a';
+    else if (this.type === 'slimeRed') hitColor = '#e24b4a';
+
+    particles.burst(this.centerX, this.centerY, hitColor, 7);
     particles.floatText(this.centerX, this.y - 2, '-' + amount, '#f1efe8', this.isBoss ? 15 : 12);
     if (this.hp <= 0) {
       this.hp = 0;
       this.alive = false;
-      particles.burst(this.centerX, this.centerY, this.isBoss ? '#e8975a' : '#a8e07a', this.isBoss ? 24 : 12, { gravity: 0.15 });
+      let deathColor = '#a8e07a';
+      if (this.isBoss) deathColor = '#e8975a';
+      else if (this.type === 'slimeRed') deathColor = '#e24b4a';
+
+      particles.burst(
+        this.centerX,
+        this.centerY,
+        deathColor,
+        this.isBoss ? 24 : 12,
+        { gravity: 0.15 }
+      );
     }
   }
 
@@ -322,7 +355,10 @@ class Enemy {
       const bx = this.centerX - camX - barW / 2, by = drawY - 7;
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
       ctx.fillRect(bx, by, barW, 4);
-      ctx.fillStyle = this.isBoss ? '#e24b4a' : '#97c459';
+      ctx.fillStyle =
+        this.isBoss ? '#e24b4a' :
+        this.type === 'slimeRed' ? '#e24b4a' :
+        '#97c459';
       ctx.fillRect(bx, by, barW * (this.hp / this.maxHp), 4);
     }
   }

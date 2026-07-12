@@ -26,7 +26,6 @@
   function hudGroup(el1, el2) {
     const anc = nearestCommonAncestor(el1, el2);
     if (!anc || anc === document.body || anc === document.documentElement) {
-      // ancestor too broad (or none) — fall back to hiding the elements themselves
       return [el1, el2].filter(Boolean);
     }
     return [anc];
@@ -45,7 +44,7 @@
       el.style.display = visible ? (hudOriginalDisplay.get(el) || '') : 'none';
     });
   }
-  setHudVisible(false); // hidden until the player presses Play
+  setHudVisible(false);
 
   // --- MOBILE / DESKTOP-ONLY GATE ---
   function isMobileDevice() {
@@ -67,8 +66,6 @@
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     ctx.textAlign = 'center';
-
-    // icon: simple desktop monitor glyph
     ctx.strokeStyle = '#e8c93c';
     ctx.lineWidth = 3;
     const iw = 70, ih = 46;
@@ -99,7 +96,8 @@
 
   initSprites();
 
-  const map = new TileMap(28, 22);
+  // Map expanded to 56 columns to fit the second world on the right
+  const map = new TileMap(56, 22);
   const camera = new Camera(VIEW_W, VIEW_H);
   const particles = new ParticleSystem();
   const dialogue = new DialogueSystem();
@@ -136,6 +134,12 @@
     new Enemy(10 * TILE, 17 * TILE, 'slimeBlue'),
     new Enemy(23 * TILE, 4 * TILE, 'slimeGreen'),
     new Enemy(21 * TILE, 17 * TILE, 'goblinBoss', { aggroRange: 170 }),
+    
+    // World 2 Beach Monsters
+    new Enemy(34 * TILE, 6 * TILE, 'slimeRed'),
+    new Enemy(38 * TILE, 12 * TILE, 'slimeRed'),
+    new Enemy(44 * TILE, 5 * TILE, 'slimeRed'),
+    new Enemy(48 * TILE, 15 * TILE, 'slimeRed')
   ];
 
   let gameState = 'start'; // 'start' | 'howtoplay' | 'playing' | 'gameover' | 'victory'
@@ -145,7 +149,7 @@
   let toastMsg = null, toastTimer = 0;
 
   // --- START SCREEN STATE ---
-  let startButtons = {}; // populated each draw with hit boxes: play, howto, author
+  let startButtons = {}; 
   let howToBackButton = null;
   const AUTHOR_URL = 'https://mgodlewskidev.pl/';
 
@@ -181,25 +185,35 @@
   function handleAttack() {
     if (!player.startAttack()) return;
     const hb = player.attackHitbox();
-    let hitSomething = false;
     enemies.forEach(en => {
       if (en.alive && rectsOverlap(hb, en)) {
         const dmg = player.hasSword ? player.atk + 2 : player.atk;
         en.takeDamage(dmg, particles);
-        hitSomething = true;
         camera.shake(2, 4);
+        
         if (!en.alive) {
-          const xpGain = en.isBoss ? 30 : 6;
-          const goldGain = en.isBoss ? 20 : randRange(1, 3) | 0;
+          const xpGain = en.isBoss ? 50 : (en.type === 'slimeRed' ? 15 : 6);
+          const goldGain = en.isBoss ? 40 : (en.type === 'slimeRed' ? 8 : randRange(1, 3) | 0);
           player.gold += goldGain;
+          
           const leveled = player.gainXP(xpGain, particles);
           if (leveled) {
             toast('Level up! Now level ' + player.lvl);
             screenFlash = { color: '255,255,255', alpha: 0.3 };
           }
-          if (en.isBoss) {
+          
+          if (en.type === 'goblinBoss') {
             questStage = 3;
-            gameState = 'victory';
+            map.openWorldTwoGate();
+            toast('Victory! A new world opened to the East!');
+            screenFlash = { color: '232,201,60', alpha: 0.5 };
+            
+            // Optional: Auto-trigger a system message about the new world
+            const systemNPC = new NPC(player.x, player.y, 'System', null, [
+              "The Goblin Boss has been vanquished!",
+              "The Gate to the East has opened. Welcome to the Sand Oasis!"
+            ]);
+            dialogue.open(systemNPC, () => {});
           }
         }
       }
@@ -215,7 +229,7 @@
     }
 
     dialogue.update();
-    inventory.open && inventory.open; // no-op, panel is static while open
+    inventory.open && inventory.open;
 
     if (gameState !== 'playing') return;
 
@@ -237,11 +251,11 @@
         (e.type === 'slimeGreen' || e.type === 'slimeBlue') && e.alive
       );
 
-      // If all slimes are dead and the gate is closed, open it!
+      // If all slimes in the first area are dead and the gate is closed, open it!
       if (!slimesAlive && !map.isGateOpen) {
         map.openGate();
         toast('The gate to the goblin boss has opened!');
-        screenFlash = { color: '200,200,200', alpha: 0.3 }; // Subtle flash
+        screenFlash = { color: '200,200,200', alpha: 0.3 };
       }
       // -----------------------
 
@@ -328,131 +342,82 @@
   }
 
   function restartGame() {
-  player.x = 13 * TILE;
-  player.y = 9 * TILE + 20;
+    player.x = 13 * TILE;
+    player.y = 9 * TILE + 20;
 
-  player.hp = player.maxHp;
-  player.xp = 0;
-  player.xpNext = 10;
-  player.lvl = 1;
-  player.gold = 0;
-  player.atk = 3;
-  player.hasSword = false;
-  player.attacking = 0;
-  player.attackCooldown = 0;
-  player.invuln = 0;
+    player.hp = player.maxHp;
+    player.xp = 0;
+    player.xpNext = 10;
+    player.lvl = 1;
+    player.gold = 0;
+    player.atk = 3;
+    player.hasSword = false;
+    player.attacking = 0;
+    player.attackCooldown = 0;
+    player.invuln = 0;
 
-  questStage = 0;
-  gameState = 'playing';
+    questStage = 0;
+    gameState = 'playing';
 
-  merchantGaveGift = false;
+    merchantGaveGift = false;
 
-  worldItems.forEach(item => {
-    item.taken = false;
-  });
+    worldItems.forEach(item => {
+      item.taken = false;
+    });
 
-  enemies = [
-    new Enemy(15 * TILE, 3 * TILE, 'slimeGreen'),
-    new Enemy(18 * TILE, 7 * TILE, 'slimeGreen'),
-    new Enemy(8 * TILE, 15 * TILE, 'slimeBlue'),
-    new Enemy(10 * TILE, 17 * TILE, 'slimeBlue'),
-    new Enemy(23 * TILE, 4 * TILE, 'slimeGreen'),
-    new Enemy(21 * TILE, 17 * TILE, 'goblinBoss', { aggroRange: 170 }),
-  ];
+    enemies = [
+      new Enemy(15 * TILE, 3 * TILE, 'slimeGreen'),
+      new Enemy(18 * TILE, 7 * TILE, 'slimeGreen'),
+      new Enemy(8 * TILE, 15 * TILE, 'slimeBlue'),
+      new Enemy(10 * TILE, 17 * TILE, 'slimeBlue'),
+      new Enemy(23 * TILE, 4 * TILE, 'slimeGreen'),
+      new Enemy(21 * TILE, 17 * TILE, 'goblinBoss', { aggroRange: 170 }),
+      new Enemy(34 * TILE, 6 * TILE, 'slimeRed'),
+      new Enemy(38 * TILE, 12 * TILE, 'slimeRed'),
+      new Enemy(44 * TILE, 5 * TILE, 'slimeRed'),
+      new Enemy(45 * TILE, 3 * TILE, 'slimeRed')
+    ];
 
-  toastMsg = null;
-  toastTimer = 0;
-  restartButton = null;
-}
+    toastMsg = null;
+    toastTimer = 0;
+    restartButton = null;
+  }
 
   function drawEndScreen() {
     ctx.save();
     ctx.fillStyle = 'rgba(0,0,0,0.72)';
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     ctx.textAlign = 'center';
+    
     if (gameState === 'gameover') {
       ctx.fillStyle = '#f09595';
       ctx.font = 'bold 30px sans-serif';
       ctx.fillText('You were defeated', VIEW_W / 2, VIEW_H / 2 - 10);
       ctx.fillStyle = '#c9c5b8';
       ctx.font = '14px sans-serif';
-      ctx.fillText(
-        'Try again and save the village!',
-        VIEW_W / 2,
-        VIEW_H / 2 + 20
-      );
+      ctx.fillText('Try again and save the village!', VIEW_W / 2, VIEW_H / 2 + 20);
+    } 
 
-      const bw = 150;
-      const bh = 38;
-      const bx = VIEW_W / 2 - bw / 2;
-      const by = VIEW_H / 2 + 55;
+    const bw = 150;
+    const bh = 38;
+    const bx = VIEW_W / 2 - bw / 2;
+    const by = VIEW_H / 2 + 55;
 
-      ctx.fillStyle = '#3a6b3d';
-      roundRect(ctx, bx, by, bw, bh, 8);
-      ctx.fill();
+    ctx.fillStyle = '#3a6b3d';
+    roundRect(ctx, bx, by, bw, bh, 8);
+    ctx.fill();
 
-      ctx.strokeStyle = '#3a6b3d';
-      ctx.lineWidth = 2;
-      roundRect(ctx, bx, by, bw, bh, 8);
-      ctx.stroke();
+    ctx.strokeStyle = '#3a6b3d';
+    ctx.lineWidth = 2;
+    roundRect(ctx, bx, by, bw, bh, 8);
+    ctx.stroke();
 
-      ctx.fillStyle = '#f1efe8';
-      ctx.font = 'bold 15px sans-serif';
-      ctx.fillText(
-        'Play Again',
-        VIEW_W / 2,
-        by + 25
-      );
+    ctx.fillStyle = '#f1efe8';
+    ctx.font = 'bold 15px sans-serif';
+    ctx.fillText('Play Again', VIEW_W / 2, by + 25);
 
-      restartButton = {
-        x: bx,
-        y: by,
-        w: bw,
-        h: bh
-      };
-      } else {
-        ctx.fillStyle = '#a8e07a';
-        ctx.font = 'bold 30px sans-serif';
-        ctx.fillText('Victory! The village is saved', VIEW_W / 2, VIEW_H / 2 - 16);
-
-        ctx.fillStyle = '#e8e4d8';
-        ctx.font = '15px sans-serif';
-        ctx.fillText(
-          `Level ${player.lvl} · ${player.gold} gold collected`,
-          VIEW_W / 2,
-          VIEW_H / 2 + 14
-        );
-
-        // Play Again button
-        const bw = 150;
-        const bh = 38;
-        const bx = VIEW_W / 2 - bw / 2;
-        const by = VIEW_H / 2 + 55;
-
-        ctx.fillStyle = '#3a6b3d';
-        roundRect(ctx, bx, by, bw, bh, 8);
-        ctx.fill();
-
-        ctx.strokeStyle = '#3a6b3d';
-        ctx.lineWidth = 2;
-        roundRect(ctx, bx, by, bw, bh, 8);
-        ctx.stroke();
-
-        ctx.fillStyle = '#f1efe8';
-        ctx.font = 'bold 15px sans-serif';
-        ctx.fillText(
-          'Play Again',
-          VIEW_W / 2,
-          by + 25
-        );
-
-        restartButton = {
-          x: bx,
-          y: by,
-          w: bw,
-          h: bh
-        };
-      }
+    restartButton = { x: bx, y: by, w: bw, h: bh };
+      
     ctx.textAlign = 'left';
     ctx.restore();
   }
@@ -475,7 +440,6 @@
 
   function drawStartScreen() {
     ctx.save();
-    // backdrop: reuse the baked map so the title screen isn't a flat void
     const off = camera.getOffset();
     const camX = Math.round(off.x), camY = Math.round(off.y);
     map.drawGround(ctx, camX, camY, VIEW_W, VIEW_H);
@@ -484,7 +448,6 @@
 
     ctx.textAlign = 'center';
 
-    // title
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.font = 'bold 40px sans-serif';
     ctx.fillText('Shattered Vale RPG Game', VIEW_W / 2 + 2, VIEW_H / 2 - 88 + 2);
@@ -617,7 +580,7 @@
     dialogue.draw(ctx, VIEW_W, VIEW_H);
     inventory.draw(ctx, VIEW_W, VIEW_H);
 
-    if (gameState !== 'playing') drawEndScreen();
+    if (gameState === 'gameover') drawEndScreen();
   }
 
   function updateDOM() {

@@ -302,6 +302,7 @@ function initSprites() {
   Sprites.merchant = buildHumanoidSheet(PAL_MERCH, null);
   Sprites.slimeGreen = buildSlimeSheet('#7bbf5e', '#4a8a35');
   Sprites.slimeBlue = buildSlimeSheet('#5e9ebf', '#356e8a');
+  Sprites.slimeRed = buildSlimeSheet('#b93244', '#da2121');
   Sprites.goblin = buildGoblinSheet();
   Sprites.icons = {
     sword: buildSwordIcon(),
