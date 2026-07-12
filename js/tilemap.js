@@ -100,11 +100,13 @@ class TileMap {
     // WORLD 1 PATH SYSTEM
     // =========================
 
-    for (let x = 2; x < 28; x++) this.set(x, 9, TileType.PATH);
+    for (let x = 14; x < 28; x++) this.set(x, 9, TileType.PATH);
 
-    for (let y = 2; y < this.rows - 2; y++) this.set(13, y, TileType.PATH);
+    for (let y = 9; y < this.rows - 2; y++) this.set(13, y, TileType.PATH);
 
-    for (let x = 10; x < 17; x++) this.set(x, 5, TileType.PATH);
+    for (let x = 14; x < 17; x++) this.set(x, 33, TileType.PATH);
+
+    for (let x = 10; x < 14; x++) this.set(x, 37, TileType.PATH);
 
     // =========================
     // FOREST CLUSTERS
@@ -194,13 +196,7 @@ class TileMap {
 
     // road to castle
 
-    for (let x = 5; x < castle.left; x++) {
-      this.set(x, 17, TileType.PATH);
-    }
-
-    // road inside
-
-    for (let x = castle.left + 1; x < 21; x++) {
+    for (let x = 3; x < castle.left; x++) {
       this.set(x, 17, TileType.PATH);
     }
 
@@ -208,8 +204,8 @@ class TileMap {
     // WATER MOAT
     // =========================
 
-    for (let y = castle.top - 1; y <= castle.bottom + 1; y++) {
-      for (let x = castle.left - 1; x <= castle.right + 1; x++) {
+    for (let y = castle.top - 2; y <= castle.bottom + 2; y++) {
+      for (let x = castle.left - 2; x <= castle.right + 2; x++) {
         const inside =
           x >= castle.left &&
           x <= castle.right &&
@@ -222,15 +218,10 @@ class TileMap {
       }
     }
 
-    // restore entrance path
-
-    for (let x = 5; x < castle.left - 1; x++) {
-      this.set(x, 17, TileType.PATH);
-    }
-
     // wooden bridge
 
     this.set(castle.left - 1, 17, TileType.BRIDGE);
+    this.set(castle.left - 2, 17, TileType.BRIDGE);
 
     this.set(castle.left, 17, TileType.GATE);
 

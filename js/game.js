@@ -97,22 +97,22 @@
   initSprites();
 
   // Map expanded to 56 columns to fit the second world on the right
-  const map = new TileMap(56, 22);
+  const map = new TileMap(56, 48);
   const camera = new Camera(VIEW_W, VIEW_H);
   const particles = new ParticleSystem();
   const dialogue = new DialogueSystem();
   const inventory = new Inventory();
 
-  const player = new Player(13 * TILE, 9 * TILE + 20);
+  const player = new Player(13 * TILE, 44 * TILE + 20);
 
-  const elder = new NPC(9 * TILE, 9 * TILE, 'Elder Rowan', Sprites.elder, [
+  const elder = new NPC(10 * TILE, 37 * TILE, 'Elder Rowan', Sprites.elder, [
     "Traveler, thank the stars you've come.",
     "A goblin chief has made camp in the forest clearing to the southeast, terrorizing our village.",
     "Legend says an iron sword lies hidden near the pond to the east — you'll need it to stand a chance.",
     "Find the sword, then seek out the goblin chief. May fortune guide your blade."
   ], { questGiver: true, hasQuest: true, dir: 'down' });
 
-  const merchant = new NPC(15 * TILE, 4 * TILE, 'Wandering Merchant', Sprites.merchant, [
+  const merchant = new NPC(16 * TILE, 33 * TILE, 'Wandering Merchant', Sprites.merchant, [
     "Ah, a new face! I don't have much to sell today, I'm afraid.",
     "But take this health potion, on the house. Safe travels out there."
   ], { dir: 'down' });
@@ -121,7 +121,8 @@
   const npcs = [elder, merchant];
 
   const worldItems = [
-    new WorldItem(21 * TILE + 6, 9 * TILE + 2, 'sword'),
+    new WorldItem(3 * TILE, 16 * TILE, 'sword'),
+    new WorldItem(25 * TILE + 6, 1 * TILE + 2, 'potionRed'),
     new WorldItem(3 * TILE, 19 * TILE, 'coin', { value: 5 }),
     new WorldItem(19 * TILE, 3 * TILE, 'coin', { value: 3 }),
     new WorldItem(24 * TILE, 2 * TILE, 'coin', { value: 3 }),
@@ -132,14 +133,19 @@
     new Enemy(18 * TILE, 7 * TILE, 'slimeGreen'),
     new Enemy(8 * TILE, 15 * TILE, 'slimeBlue'),
     new Enemy(10 * TILE, 17 * TILE, 'slimeBlue'),
+    new Enemy(12 * TILE, 17 * TILE, 'slimeBlue'),
     new Enemy(23 * TILE, 4 * TILE, 'slimeGreen'),
+    new Enemy(25 * TILE, 4 * TILE, 'slimeGreen'),
     new Enemy(21 * TILE, 17 * TILE, 'goblinBoss', { aggroRange: 170 }),
     
     // World 2 Beach Monsters
     new Enemy(34 * TILE, 6 * TILE, 'slimeRed'),
     new Enemy(38 * TILE, 12 * TILE, 'slimeRed'),
     new Enemy(44 * TILE, 5 * TILE, 'slimeRed'),
-    new Enemy(48 * TILE, 15 * TILE, 'slimeRed')
+    new Enemy(38 * TILE, 15 * TILE, 'slimeRed'),
+    new Enemy(36 * TILE, 35 * TILE, 'slimeRed'),
+    new Enemy(35 * TILE, 22 * TILE, 'slimeRed'),
+    new Enemy(42 * TILE, 36 * TILE, 'slimeRed'),
   ];
 
   let gameState = 'start'; // 'start' | 'howtoplay' | 'playing' | 'gameover' | 'victory'
@@ -343,8 +349,8 @@
 
   function restartGame() {
     player.x = 13 * TILE;
-    player.y = 9 * TILE + 20;
-
+    player.y = 44 * TILE + 20;
+    
     player.hp = player.maxHp;
     player.xp = 0;
     player.xpNext = 10;
