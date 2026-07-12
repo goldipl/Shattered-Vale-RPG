@@ -504,7 +504,6 @@
       ['Interact / Talk', 'E'],
       ['Inventory', 'I'],
       ['Advance dialogue', 'Space or E'],
-      ['Goal', 'Find the sword, clear the slimes, defeat the goblin chief']
     ];
     let ly = py + 68;
     lines.forEach(([label, val]) => {
