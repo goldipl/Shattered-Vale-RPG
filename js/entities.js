@@ -51,6 +51,7 @@ class Player {
     this.animSword = new AnimatedSprite(Sprites.playerSword, 32, 34);
     this.footstepTimer = 0;
     this.bob = 0;
+    this.hitFlash = 0;
   }
 
   get centerX() { return this.x + this.w / 2; }
@@ -100,6 +101,7 @@ class Player {
     if (this.attacking > 0) this.attacking--;
     if (this.attackCooldown > 0) this.attackCooldown--;
     if (this.invuln > 0) this.invuln--;
+    if (this.hitFlash > 0) this.hitFlash--;
     this.bob = this.moving ? Math.sin(Date.now() / 90) * 1.5 : 0;
   }
 
@@ -124,6 +126,7 @@ class Player {
     if (this.invuln > 0) return;
     this.hp = clamp(this.hp - amount, 0, this.maxHp);
     this.invuln = 45;
+    this.hitFlash = 12;
     particles.burst(this.centerX, this.centerY, '#e24b4a', 8);
     particles.floatText(this.centerX, this.y - 4, '-' + amount, '#f09595');
   }
@@ -151,8 +154,17 @@ class Player {
     const flash = this.invuln > 0 && Math.floor(this.invuln / 4) % 2 === 0;
     ctx.save();
     if (this.invuln > 0) ctx.globalAlpha = 0.55;
-    sprite.draw(ctx, drawX, drawY, this.dir, false);
+    sprite.draw(ctx, drawX, drawY, this.dir, flash);
     ctx.restore();
+
+    if (this.hitFlash > 0) {
+      ctx.save();
+      ctx.globalAlpha = (this.hitFlash / 12) * 0.55;
+      ctx.globalCompositeOperation = 'source-atop';
+      ctx.fillStyle = '#e24b4a';
+      ctx.fillRect(drawX, drawY, this.drawW, this.drawH);
+      ctx.restore();
+    }
 
     if (this.attacking > 0) {
       const hb = this.attackHitbox();
@@ -224,14 +236,14 @@ class Enemy {
         this.maxHp = 8;
         this.speed = 1.05;
         this.contactDmg = 2;
-        this.atkRange = 0;
+        this.atkRange = 22;
         this.anim = new AnimatedSprite(Sprites.slimeRed, 32, 28, false);
       } else {
         this.hp = 5;
         this.maxHp = 5;
         this.speed = 0.9;
         this.contactDmg = 1;
-        this.atkRange = 0;
+        this.atkRange = 20;
         this.anim = new AnimatedSprite(
           type === 'slimeBlue' ? Sprites.slimeBlue : Sprites.slimeGreen,
           32,
@@ -271,7 +283,7 @@ class Enemy {
       this.telegraphing--;
       if (this.telegraphing === 0 && rectsOverlap(player, this.attackHitbox())) {
         player.takeDamage(this.contactDmg, particles);
-        this.atkCd = 55;
+        this.atkCd = this.isBoss ? 55 : 40;
       }
     }
 
@@ -281,9 +293,9 @@ class Enemy {
     if (d < this.aggroRange) {
       const ddx = player.centerX - this.centerX, ddy = player.centerY - this.centerY;
       const len = Math.hypot(ddx, ddy) || 1;
-      if (this.isBoss && d < this.atkRange) {
-        // stand and telegraph attack rather than overlap-walk
-        if (this.telegraphing === 0 && this.atkCd === 0) this.telegraphing = 30;
+      if (d < this.atkRange) {
+        // stand beside the player and telegraph an attack instead of overlap-walking into them
+        if (this.telegraphing === 0 && this.atkCd === 0) this.telegraphing = this.isBoss ? 30 : 22;
       } else {
         mx = (ddx / len) * this.speed;
         my = (ddy / len) * this.speed;
@@ -310,14 +322,10 @@ class Enemy {
       }
     }
 
-    this.anim.update(mx !== 0 || my !== 0);
+    this.anim.update((mx !== 0 || my !== 0) && this.telegraphing === 0);
 
-    // contact damage (bosses mid-telegraph deal damage via attackHitbox() above instead)
-    if (!(this.isBoss && this.telegraphing > 0) &&
-        rectsOverlap(player, this) && player.invuln === 0 && this.atkCd === 0) {
-      player.takeDamage(this.contactDmg, particles);
-      this.atkCd = this.isBoss ? 55 : 45;
-    }
+    // contact damage is now fully handled by the telegraph/attackHitbox flow above;
+    // enemies stop at range and attack rather than dealing damage on body overlap.
   }
 
   takeDamage(amount, particles) {
