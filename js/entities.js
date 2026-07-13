@@ -258,16 +258,6 @@ class NPC {
     const drawX = this.x - camX - 4;
     const drawY = this.y - camY - 8 + this.bob;
     this.anim.draw(ctx, drawX, drawY, this.dir, false);
-    if (this.hasQuest) {
-      ctx.save();
-      ctx.font = 'bold 16px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
-      ctx.fillText('!', this.centerX - camX + 1, drawY - 4 + Math.sin(Date.now()/300)*2 + 1);
-      ctx.fillStyle = '#e8c93c';
-      ctx.fillText('!', this.centerX - camX, drawY - 4 + Math.sin(Date.now()/300)*2);
-      ctx.restore();
-    }
   }
 }
 
