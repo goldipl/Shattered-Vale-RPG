@@ -253,11 +253,27 @@ class Enemy {
   get centerX() { return this.x + this.w / 2; }
   get centerY() { return this.y + this.h / 2; }
 
+  attackHitbox() {
+    const range = this.atkRange;
+    let ax = this.x, ay = this.y;
+    if (this.dir === 'up') ay -= range;
+    if (this.dir === 'down') ay += range;
+    if (this.dir === 'left') ax -= range;
+    if (this.dir === 'right') ax += range;
+    return { x: ax, y: ay, w: this.w, h: this.h };
+  }
+
   update(player, map, particles) {
     if (!this.alive) { this.deathTimer++; return; }
     if (this.hitFlash > 0) this.hitFlash--;
     if (this.atkCd > 0) this.atkCd--;
-    if (this.telegraphing > 0) this.telegraphing--;
+    if (this.telegraphing > 0) {
+      this.telegraphing--;
+      if (this.telegraphing === 0 && rectsOverlap(player, this.attackHitbox())) {
+        player.takeDamage(this.contactDmg, particles);
+        this.atkCd = 55;
+      }
+    }
 
     const d = dist(this.centerX, this.centerY, player.centerX, player.centerY);
     let mx = 0, my = 0;
@@ -296,8 +312,9 @@ class Enemy {
 
     this.anim.update(mx !== 0 || my !== 0);
 
-    // contact damage
-    if (rectsOverlap(player, this) && player.invuln === 0 && this.atkCd === 0) {
+    // contact damage (bosses mid-telegraph deal damage via attackHitbox() above instead)
+    if (!(this.isBoss && this.telegraphing > 0) &&
+        rectsOverlap(player, this) && player.invuln === 0 && this.atkCd === 0) {
       player.takeDamage(this.contactDmg, particles);
       this.atkCd = this.isBoss ? 55 : 45;
     }
