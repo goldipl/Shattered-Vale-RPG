@@ -123,6 +123,7 @@ class Inventory {
     }
     for (const item of layout.backpackItems) {
       if (mx >= item.ix && mx <= item.ix + 44 && my >= item.iy && my <= item.iy + 44) {
+        if (!item.kind) return null; // Ignore clicks on empty base slots
         return { region: 'backpack', kind: item.kind };
       }
     }
@@ -133,14 +134,10 @@ class Inventory {
   // gear), backpack grid on the right (found items). Computed once per call
   // so hit-testing and drawing can never drift apart.
   _layout(canvasW, canvasH) {
-    const w = 570, h = 260;
+    const w = 570, h = 280; 
     const x = (canvasW - w) / 2, y = (canvasH - h) / 2;
 
-    // Cross/plus formation on a 3-column grid: helmet top-middle, weapon +
-    // armor + shield across the middle row, boots bottom-middle. Left/right
-    // cells of the top and bottom rows stay empty so the shape reads as a
-    // "+" rather than a dense block.
-    const equipX = x + 18, equipY = y + 52;
+    const equipX = x + 18, equipY = y + 74; 
     const CELL = 56;
     const slotGridPos = {
       helmet: { col: 1, row: 0 },
@@ -159,12 +156,21 @@ class Inventory {
       };
     });
 
-    const bpX = x + 18 + 3 * CELL + 24, bpY = y + 52;
+    const bpX = x + 18 + 3 * CELL + 24, bpY = y + 74;
     const kinds = Object.keys(this.items);
-    const backpackItems = kinds.map((kind, i) => {
-      const col = i % 4, row = Math.floor(i / 4);
-      return { kind, ix: bpX + col * 56, iy: bpY + row * 56 };
-    });
+    
+    // Generate a structural layout for a fixed 18-slot inventory display (6x3 grid)
+    const MAX_BACKPACK_SLOTS = 18;
+    const backpackItems = [];
+    for (let i = 0; i < MAX_BACKPACK_SLOTS; i++) {
+      const col = i % 6;
+      const row = Math.floor(i / 6);
+      backpackItems.push({
+        kind: kinds[i] || null, // Contains item kind identifier or null if empty layout slot
+        ix: bpX + col * 56,
+        iy: bpY + row * 56
+      });
+    }
 
     return { w, h, x, y, equipX, equipY, bpX, bpY, equipSlots, backpackItems };
   }
@@ -195,7 +201,7 @@ class Inventory {
     // --- Left column: equipped gear (character slots) ---
     ctx.fillStyle = 'rgba(232,228,216,0.6)';
     ctx.font = 'bold 11px sans-serif';
-    ctx.fillText('EQUIPPED', equipX, equipY - 8);
+    ctx.fillText('EQUIPPED', equipX, equipY - 16);
 
     equipSlots.forEach(slot => {
       const kind = this.equipped[slot.id];
@@ -214,7 +220,6 @@ class Inventory {
         const icon = Sprites.icons[kind];
         if (icon) ctx.drawImage(icon, slot.ix + 10, slot.iy + 10, 24, 24);
       } else {
-        // Empty slot: show a faint label so the player knows what goes here.
         ctx.fillStyle = 'rgba(232,228,216,0.28)';
         ctx.font = '9px sans-serif';
         ctx.textAlign = 'center';
@@ -226,27 +231,32 @@ class Inventory {
     // --- Right side: backpack grid (found items) ---
     ctx.fillStyle = 'rgba(232,228,216,0.6)';
     ctx.font = 'bold 11px sans-serif';
-    ctx.fillText('BACKPACK', bpX, bpY - 8);
+    ctx.fillText('BACKPACK', bpX, bpY - 16);
 
-    if (backpackItems.length === 0) {
-      ctx.fillStyle = 'rgba(232,228,216,0.5)';
-      ctx.font = '13px sans-serif';
-      ctx.fillText('No items yet — explore to find some.', bpX, bpY + 30);
-    } else {
-      backpackItems.forEach(item => {
-        const isHovered = this.hoveredKind === item.kind;
+    backpackItems.forEach(item => {
+      const isHovered = item.kind && this.hoveredKind === item.kind;
 
-        ctx.fillStyle = isHovered ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)';
+      // Every slot renders a light grey transparent square background box
+      ctx.fillStyle = isHovered ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)';
+      roundRect(ctx, item.ix, item.iy, 44, 44, 6);
+      ctx.fill();
+
+      // Handle custom structural border stylings
+      if (isHovered) {
+        ctx.strokeStyle = 'rgba(232,201,60,0.85)';
+        ctx.lineWidth = 2;
         roundRect(ctx, item.ix, item.iy, 44, 44, 6);
-        ctx.fill();
+        ctx.stroke();
+      } else if (item.kind) {
+        // Light borders applied dynamically to slots holding active items
+        ctx.strokeStyle = 'rgba(232,228,216,0.20)';
+        ctx.lineWidth = 1;
+        roundRect(ctx, item.ix, item.iy, 44, 44, 6);
+        ctx.stroke();
+      }
 
-        if (isHovered) {
-          ctx.strokeStyle = 'rgba(232,201,60,0.85)';
-          ctx.lineWidth = 2;
-          roundRect(ctx, item.ix, item.iy, 44, 44, 6);
-          ctx.stroke();
-        }
-
+      // Render assets and text details for items present in a box sequence
+      if (item.kind) {
         const icon = Sprites.icons[item.kind];
         if (icon) ctx.drawImage(icon, item.ix + 10, item.iy + 10, 24, 24);
         ctx.fillStyle = '#e8e4d8';
@@ -254,14 +264,14 @@ class Inventory {
         ctx.textAlign = 'right';
         ctx.fillText('x' + this.items[item.kind], item.ix + 40, item.iy + 40);
         ctx.textAlign = 'left';
-      });
-    }
+      }
+    });
 
     // Vertical divider between the two panes.
     ctx.strokeStyle = 'rgba(232,228,216,0.15)';
     ctx.beginPath();
     ctx.moveTo(bpX - 16, y + 46);
-    ctx.lineTo(bpX - 16, y + h - 30);
+    ctx.lineTo(bpX - 16, y + h - 36);
     ctx.stroke();
 
     ctx.fillStyle = 'rgba(232,228,216,0.4)';
