@@ -324,7 +324,84 @@
     ctx.fillRect(0, 0, VIEW_W, VIEW_H);
   }
 
+  const BOSS_NAMES = {
+    goblinBoss: 'Goblin King Grimtooth',
+    devilBoss: 'Devil of the Oasis'
+  };
+
+  function getActiveBoss() {
+    // Prefer a boss the player is actively engaged with (in its aggro range),
+    // falling back to the nearest living boss if simply nearby on screen.
+    let engaged = null, engagedDist = Infinity;
+    let nearest = null, nearestDist = Infinity;
+    enemies.forEach(en => {
+      if (!en.isBoss || !en.alive) return;
+      const d = dist(player.centerX, player.centerY, en.centerX, en.centerY);
+      if (d < en.aggroRange && d < engagedDist) { engaged = en; engagedDist = d; }
+      if (d < nearestDist) { nearest = en; nearestDist = d; }
+    });
+    if (engaged) return engaged;
+    // show the banner briefly even just walking up to a boss
+    if (nearest && nearestDist < Math.max(VIEW_W, VIEW_H) * 0.2) return nearest;
+    return null;
+  }
+
+  function drawBossBanner() {
+    const boss = getActiveBoss();
+    if (!boss) return;
+
+    const name = BOSS_NAMES[boss.type] || 'Boss';
+    const pct = clamp(boss.hp / boss.maxHp, 0, 1);
+    const low = pct <= 0.25;
+
+    const barW = Math.min(340, VIEW_W - 80);
+    const barH = 16;
+    const x = (VIEW_W - barW) / 2;
+    const nameY = 22;
+    const barY = nameY + 10;
+
+    ctx.save();
+    ctx.textAlign = 'center';
+
+    // name, with a soft drop-shadow so it reads over any background
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillText(name, VIEW_W / 2 + 2, nameY + 2);
+    ctx.fillStyle = boss.isDevil ? '#f4a13c' : '#e8975a';
+    ctx.fillText(name, VIEW_W / 2, nameY);
+
+    // HP bar frame
+    ctx.fillStyle = 'rgba(10,12,8,0.75)';
+    roundRect(ctx, x - 3, barY - 3, barW + 6, barH + 6, 6);
+    ctx.fill();
+    ctx.strokeStyle = low && Math.floor(Date.now() / 250) % 2 === 0 ? '#da1f1f' : 'rgba(232,228,216,0.4)';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, x - 3, barY - 3, barW + 6, barH + 6, 6);
+    ctx.stroke();
+
+    // HP bar background
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    roundRect(ctx, x, barY, barW, barH, 4);
+    ctx.fill();
+
+    // HP bar fill
+    const fillColor = low ? '#da1f1f' : (boss.isDevil ? '#f4a13c' : '#e8975a');
+    ctx.fillStyle = fillColor;
+    roundRect(ctx, x, barY, Math.max(0, barW * pct), barH, 4);
+    ctx.fill();
+
+    // HP text, centered on the bar
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillStyle = '#f1efe8';
+    ctx.fillText(`${Math.max(0, boss.hp)} / ${boss.maxHp}`, VIEW_W / 2, barY + barH - 4);
+
+    ctx.textAlign = 'left';
+    ctx.restore();
+  }
+
   function drawHUDcanvas() {
+    drawBossBanner();
+
     if (toastMsg) {
       ctx.save();
       const w = ctx.measureText(toastMsg).width + 40;
