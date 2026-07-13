@@ -285,8 +285,9 @@
         if (!item.taken && rectsOverlap(player, item)) {
           item.taken = true;
           if (item.kind === 'sword') {
+            inventory.add('sword', 1);
+            inventory.equip('sword');
             player.hasSword = true;
-            player.atk += 2;
             questStage = Math.max(questStage, 2);
             toast('Found the Iron Sword! Attack increased.');
             screenFlash = { color: '232,201,60', alpha: 0.35 };
@@ -453,6 +454,9 @@
     player.attacking = 0;
     player.attackCooldown = 0;
     player.invuln = 0;
+
+    inventory.items = {};
+    EQUIP_SLOTS.forEach(s => { inventory.equipped[s.id] = null; });
 
     questStage = 0;
     gameState = 'playing';
@@ -740,13 +744,22 @@
     const my = e.clientY - rect.top;
 
     if (gameState === 'playing' && inventory.open) {
-      const clickedKind = inventory.clickAt(mx, my, VIEW_W, VIEW_H);
-      if (clickedKind === 'potionRed') {
-        const used = inventory.usePotionRed(player);
-        if (used) {
-          particles.floatText(player.centerX, player.y - 10, 'Healed!', '#f09595');
-          toast('Drank a Health Potion — HP restored!');
+      const hit = inventory.clickAt(mx, my, VIEW_W, VIEW_H);
+      if (hit && hit.region === 'backpack') {
+        if (hit.kind === 'potionRed') {
+          const used = inventory.usePotionRed(player);
+          if (used) {
+            particles.floatText(player.centerX, player.y - 10, 'Healed!', '#f09595');
+            toast('Drank a Health Potion — HP restored!');
+          }
+        } else if (hit.kind === 'sword') {
+          inventory.equip('sword');
+          player.hasSword = true;
         }
+      } else if (hit && hit.region === 'equip' && hit.slotId === 'weapon') {
+        // Unequipping the sword drops the player back to bare-handed damage.
+        inventory.unequip('weapon');
+        player.hasSword = false;
       }
       return;
     }
