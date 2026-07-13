@@ -35,11 +35,54 @@ class Inventory {
   constructor() {
     this.items = {}; // kind -> count
     this.open = false;
+    this.hoveredKind = null; // kind currently hovered for hover-border effect
   }
   add(kind, count = 1) {
     this.items[kind] = (this.items[kind] || 0) + count;
   }
   toggle() { this.open = !this.open; }
+
+  // Attempt to use/drink a red potion. Returns true if one was consumed.
+  usePotionRed(player) {
+    if (!this.items.potionRed || this.items.potionRed <= 0) return false;
+    this.items.potionRed -= 1;
+    if (this.items.potionRed <= 0) delete this.items.potionRed;
+    if (player) player.hp = player.maxHp;
+    return true;
+  }
+
+  // Call from mousemove with canvas-space coordinates to drive the hover effect.
+  updateHover(mx, my, canvasW, canvasH) {
+    this.hoveredKind = null;
+    if (!this.open) return;
+    const w = 260, h = 220;
+    const x = (canvasW - w) / 2, y = (canvasH - h) / 2;
+    const kinds = Object.keys(this.items);
+    for (let i = 0; i < kinds.length; i++) {
+      const col = i % 4, row = Math.floor(i / 4);
+      const ix = x + 18 + col * 56, iy = y + 52 + row * 56;
+      if (mx >= ix && mx <= ix + 44 && my >= iy && my <= iy + 44) {
+        this.hoveredKind = kinds[i];
+        return;
+      }
+    }
+  }
+
+  // Attempt to click a slot at canvas-space coordinates. Returns the kind clicked, or null.
+  clickAt(mx, my, canvasW, canvasH) {
+    if (!this.open) return null;
+    const w = 260, h = 220;
+    const x = (canvasW - w) / 2, y = (canvasH - h) / 2;
+    const kinds = Object.keys(this.items);
+    for (let i = 0; i < kinds.length; i++) {
+      const col = i % 4, row = Math.floor(i / 4);
+      const ix = x + 18 + col * 56, iy = y + 52 + row * 56;
+      if (mx >= ix && mx <= ix + 44 && my >= iy && my <= iy + 44) {
+        return kinds[i];
+      }
+    }
+    return null;
+  }
 
   draw(ctx, canvasW, canvasH) {
     if (!this.open) return;
@@ -72,9 +115,19 @@ class Inventory {
       kinds.forEach((kind, i) => {
         const col = i % 4, row = Math.floor(i / 4);
         const ix = x + 18 + col * 56, iy = y + 52 + row * 56;
-        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+        const isHovered = this.hoveredKind === kind;
+
+        ctx.fillStyle = isHovered ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)';
         roundRect(ctx, ix, iy, 44, 44, 6);
         ctx.fill();
+
+        if (isHovered) {
+          ctx.strokeStyle = 'rgba(232,201,60,0.85)';
+          ctx.lineWidth = 2;
+          roundRect(ctx, ix, iy, 44, 44, 6);
+          ctx.stroke();
+        }
+
         const icon = Sprites.icons[kind];
         if (icon) ctx.drawImage(icon, ix + 10, iy + 10, 24, 24);
         ctx.fillStyle = '#e8e4d8';
@@ -87,7 +140,7 @@ class Inventory {
 
     ctx.fillStyle = 'rgba(232,228,216,0.4)';
     ctx.font = '11px sans-serif';
-    ctx.fillText('[I to close]', x + 18, y + h - 14);
+    ctx.fillText('[Esc to close]', x + 18, y + h - 14);
     ctx.restore();
   }
 }

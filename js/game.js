@@ -256,7 +256,7 @@
     if (dialogue.isOpen()) {
       if (justPressed[' '] || justPressed['e']) dialogue.advance();
     } else if (inventory.open) {
-      if (justPressed['i']) inventory.toggle();
+      if (justPressed['i'] || justPressed['escape']) inventory.toggle();
     } else {
       player.update(keys, map, particles);
       if (justPressed['e']) checkInteract();
@@ -627,13 +627,21 @@
   canvas.tabIndex = 0;
   canvas.addEventListener('mousemove', e => {
     if (isMobileBlocked) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    if (gameState === 'playing' && inventory.open) {
+      inventory.updateHover(mx, my, VIEW_W, VIEW_H);
+      canvas.style.cursor = 'default';
+      return;
+    }
+
     if (gameState !== 'start' && gameState !== 'howtoplay' && gameState !== 'gameover' && gameState !== 'victory') {
       canvas.style.cursor = 'default';
       return;
     }
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
     let over = false;
     if (gameState === 'start') {
       over = pointInBtn(mx, my, startButtons.play) || pointInBtn(mx, my, startButtons.howto) || pointInBtn(mx, my, startButtons.author);
@@ -652,6 +660,18 @@
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
+
+    if (gameState === 'playing' && inventory.open) {
+      const clickedKind = inventory.clickAt(mx, my, VIEW_W, VIEW_H);
+      if (clickedKind === 'potionRed') {
+        const used = inventory.usePotionRed(player);
+        if (used) {
+          particles.floatText(player.centerX, player.y - 10, 'Healed!', '#f09595');
+          toast('Drank a Health Potion — HP restored!');
+        }
+      }
+      return;
+    }
 
     if (gameState === 'start') {
       if (pointInBtn(mx, my, startButtons.play)) {
