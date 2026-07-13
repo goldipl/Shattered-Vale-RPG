@@ -113,6 +113,9 @@
 
     const player = new Player(13 * TILE, 44 * TILE + 20);
 
+    player.maxHp = 150;
+    player.hp = 150;
+
     const elder = new NPC(10 * TILE, 37 * TILE, 'Elder Rowan', Sprites.elder, [
         "Traveler, thank the stars you've come.",
         "The Goblin King Grimtooth has claimed a castle in the northern lands as his stronghold, sending his forces to terrorize our village.",
@@ -251,7 +254,7 @@ function checkInteract() {
                 camera.shake(2, 4);
 
                 if (!en.alive) {
-                    const xpGain = en.isDevil ? 250 : en.isBoss ? 50 : (en.type === 'slimeRed' ? 15 : 6);
+                    const xpGain = en.isDevil ? 250 : en.isBoss ? 50 : (en.type === 'slimeRed' ? 25 : 10);
                     const goldGain = en.isDevil ? 200 : en.isBoss ? 40 : (en.type === 'slimeRed' ? 8 : randRange(1, 3) | 0);
                     player.gold += goldGain;
 
@@ -543,7 +546,8 @@ function checkInteract() {
         player.x = 13 * TILE;
         player.y = 44 * TILE + 20;
 
-        player.hp = player.maxHp;
+        player.maxHp = 150;
+        player.hp = 150;
         player.xp = 0;
         player.xpNext = 10;
         player.lvl = 1;
