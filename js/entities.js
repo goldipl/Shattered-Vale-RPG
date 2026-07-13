@@ -198,7 +198,7 @@ if (this.mana < this.maxMana) {
 
   castFireball() {
 
-    if (this.mana < 50) {
+    if (this.mana < 30) {
       return false;
     }
 
@@ -206,7 +206,7 @@ if (this.mana < this.maxMana) {
       return false;
     }
 
-    this.mana -= 50;
+    this.mana -= 30;
     this.fireballCooldown = 25;
 
 

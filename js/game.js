@@ -281,7 +281,7 @@ const hudTargets = [
       if (keys[' ']) handleAttack();
       if (justPressed['f']) {
         if (player.castFireball()) {
-          toast("Fireball cast! -50 Mana");
+          toast("Fireball cast! -30 Mana");
         } else {
           toast("Not enough mana!");
         }
