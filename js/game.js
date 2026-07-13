@@ -148,7 +148,7 @@
     new Enemy(42 * TILE, 36 * TILE, 'slimeRed'),
 
     // World 2 — Devil Boss of the Sand Oasis
-    new Enemy(46 * TILE, 24 * TILE, 'devilBoss', { aggroRange: 190 }),
+    new Enemy(50 * TILE, 40 * TILE, 'devilBoss', { aggroRange: 190 }),
   ];
 
   let gameState = 'start'; // 'start' | 'howtoplay' | 'playing' | 'gameover' | 'victory'
