@@ -115,9 +115,9 @@
 
     const elder = new NPC(10 * TILE, 37 * TILE, 'Elder Rowan', Sprites.elder, [
         "Traveler, thank the stars you've come.",
-        "A goblin chief has made camp in the forest clearing to the southeast, terrorizing our village.",
+        "The Goblin King Grimtooth has claimed a castle in the northern lands as his stronghold, sending his forces to terrorize our village.",
         "Legend says an iron sword is hidden in the forest west of the castle — you'll need it to stand a chance.",
-        "Find the sword, then seek out the goblin chief. May fortune guide your blade.",
+        "Find the sword, then seek out the Goblin King Grimtooth. May fortune guide your blade.",
         "The castle gate will open only after you've defeated all the Blue and Green Slimes."
     ], {
         questGiver: true,
