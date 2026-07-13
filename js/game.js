@@ -108,8 +108,9 @@
   const elder = new NPC(10 * TILE, 37 * TILE, 'Elder Rowan', Sprites.elder, [
     "Traveler, thank the stars you've come.",
     "A goblin chief has made camp in the forest clearing to the southeast, terrorizing our village.",
-    "Legend says an iron sword lies hidden near the pond to the east — you'll need it to stand a chance.",
-    "Find the sword, then seek out the goblin chief. May fortune guide your blade."
+    "Legend says an iron sword is hidden in the forest west of the castle — you'll need it to stand a chance.",
+    "Find the sword, then seek out the goblin chief. May fortune guide your blade.",
+    "The castle gate will open only after you've defeated all the Blue and Green Slimes."
   ], { questGiver: true, hasQuest: true, dir: 'down' });
 
   const merchant = new NPC(16 * TILE, 33 * TILE, 'Wandering Merchant', Sprites.merchant, [
