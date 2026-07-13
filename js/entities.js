@@ -52,6 +52,11 @@ class Player {
     this.footstepTimer = 0;
     this.bob = 0;
     this.hitFlash = 0;
+    this.mana = 100;
+    this.maxMana = 100;
+    this.manaRegen = 0.01;
+    this.fireballCooldown = 0;
+    this.fireballs = [];
   }
 
   get centerX() { return this.x + this.w / 2; }
@@ -98,10 +103,23 @@ class Player {
 
     this.anim.update(this.moving);
     this.animSword.update(this.moving);
-    if (this.attacking > 0) this.attacking--;
-    if (this.attackCooldown > 0) this.attackCooldown--;
-    if (this.invuln > 0) this.invuln--;
-    if (this.hitFlash > 0) this.hitFlash--;
+if (this.attacking > 0) this.attacking--;
+if (this.attackCooldown > 0) this.attackCooldown--;
+if (this.invuln > 0) this.invuln--;
+if (this.hitFlash > 0) this.hitFlash--;
+
+// Fireball cooldown
+if (this.fireballCooldown > 0) {
+  this.fireballCooldown--;
+}
+
+// Mana regeneration
+if (this.mana < this.maxMana) {
+  this.mana = Math.min(
+    this.maxMana,
+    this.mana + this.manaRegen
+  );
+}
     this.bob = this.moving ? Math.sin(Date.now() / 90) * 1.5 : 0;
   }
 
@@ -176,6 +194,47 @@ class Player {
       ctx.fill();
       ctx.restore();
     }
+  }
+
+  castFireball() {
+
+    if (this.mana < 50) {
+      return false;
+    }
+
+    if (this.fireballCooldown > 0) {
+      return false;
+    }
+
+    this.mana -= 50;
+    this.fireballCooldown = 25;
+
+
+    let dx = 0;
+    let dy = 1;
+
+    if (this.dir === "up") dy = -1;
+    if (this.dir === "down") dy = 1;
+    if (this.dir === "left") {
+      dx = -1;
+      dy = 0;
+    }
+    if (this.dir === "right") {
+      dx = 1;
+      dy = 0;
+    }
+
+
+    this.fireballs.push(
+      new Fireball(
+        this.centerX,
+        this.centerY,
+        dx,
+        dy
+      )
+    );
+
+    return true;
   }
 }
 
@@ -395,5 +454,72 @@ class Enemy {
         '#97c459';
       ctx.fillRect(bx, by, barW * (this.hp / this.maxHp), 4);
     }
+  }
+}
+
+class Fireball {
+  constructor(x, y, dirX, dirY) {
+    this.x = x;
+    this.y = y;
+    this.w = 18;
+    this.h = 18;
+
+    this.speed = 8;
+    this.damage = 12;
+
+    this.dirX = dirX;
+    this.dirY = dirY;
+
+    this.life = 90;
+  }
+
+  update(enemies, particles) {
+    this.x += this.dirX * this.speed;
+    this.y += this.dirY * this.speed;
+
+    this.life--;
+
+    enemies.forEach(en => {
+      if (en.alive && rectsOverlap(this, en)) {
+        en.takeDamage(this.damage, particles);
+
+        particles.floatText(
+          en.x,
+          en.y - 10,
+          "-" + this.damage,
+          "#ff6b2c"
+        );
+
+        this.life = 0;
+      }
+    });
+  }
+
+  draw(ctx, camX, camY) {
+    ctx.save();
+
+    ctx.fillStyle = "#ff7b22";
+    ctx.beginPath();
+    ctx.arc(
+      this.x - camX + this.w / 2,
+      this.y - camY + this.h / 2,
+      9,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+
+    ctx.fillStyle = "#ffd35a";
+    ctx.beginPath();
+    ctx.arc(
+      this.x - camX + this.w / 2,
+      this.y - camY + this.h / 2,
+      4,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+
+    ctx.restore();
   }
 }

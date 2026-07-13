@@ -10,6 +10,8 @@
   const xpBar = document.getElementById('xpBarInner');
   const lvlText = document.getElementById('lvlText');
   const goldText = document.getElementById('goldText');
+  const manaBar = document.getElementById('manaBarInner');
+  const manaText = document.getElementById('manaText');
 
   // --- HUD VISIBILITY (hide HP/XP/Gold bars until Play is pressed) ---
   function nearestCommonAncestor(a, b) {
@@ -30,12 +32,13 @@
     }
     return [anc];
   }
-  const hudTargets = [
-    ...hudGroup(hpBar, hpText),
-    ...hudGroup(xpBar, lvlText),
-    ...(goldText && goldText.parentElement && goldText.parentElement !== document.body
-      ? [goldText.parentElement] : [goldText])
-  ].filter(Boolean);
+const hudTargets = [
+  ...hudGroup(hpBar, hpText),
+  ...hudGroup(xpBar, lvlText),
+  ...hudGroup(manaBar, manaText),
+  ...(goldText && goldText.parentElement && goldText.parentElement !== document.body
+    ? [goldText.parentElement] : [goldText])
+].filter(Boolean);
   const uniqueHudTargets = [...new Set(hudTargets)];
   const hudOriginalDisplay = new Map();
   uniqueHudTargets.forEach(el => hudOriginalDisplay.set(el, el.style.display));
@@ -268,8 +271,21 @@
       if (justPressed['i'] || justPressed['escape']) inventory.toggle();
     } else {
       player.update(keys, map, particles);
+      player.fireballs.forEach(f =>
+        f.update(enemies, particles)
+      );
+
+      player.fireballs =
+      player.fireballs.filter(f => f.life > 0);
       if (justPressed['e']) checkInteract();
       if (keys[' ']) handleAttack();
+      if (justPressed['f']) {
+        if (player.castFireball()) {
+          toast("Fireball cast! -50 Mana");
+        } else {
+          toast("Not enough mana!");
+        }
+      }
       if (justPressed['i']) inventory.toggle();
 
       npcs.forEach(n => n.update());
@@ -619,6 +635,7 @@
       ['Attack', 'Space'],
       ['Interact / Talk', 'E'],
       ['Inventory', 'I'],
+      ['Fire ball', 'F'],
       ['Advance dialogue', 'Space or E'],
     ];
     let ly = py + 68;
@@ -680,6 +697,12 @@
     npcs.forEach(n => drawables.push({ y: n.y + n.h, draw: () => n.draw(ctx, camX, camY) }));
     enemies.forEach(en => drawables.push({ y: en.y + en.h, draw: () => en.draw(ctx, camX, camY) }));
     drawables.push({ y: player.y + player.h, draw: () => player.draw(ctx, camX, camY) });
+    player.fireballs.forEach(f => {
+      drawables.push({
+        y: f.y + f.h,
+        draw: () => f.draw(ctx, camX, camY)
+      });
+    });
     drawables.sort((a, b) => a.y - b.y);
     drawables.forEach(d => d.draw());
 
@@ -705,6 +728,11 @@
     xpText.textContent = `${player.xp} / ${player.xpNext} Exp`;
     lvlText.textContent = player.lvl;
     goldText.textContent = player.gold;
+    manaBar.style.width =
+    (player.mana / player.maxMana * 100) + '%';
+
+    manaText.textContent =
+    `${Math.floor(player.mana)}/${player.maxMana}`;
   }
 
   let domTick = 0;
