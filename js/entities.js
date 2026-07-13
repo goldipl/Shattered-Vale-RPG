@@ -220,12 +220,12 @@ class Enemy {
     this.isBoss = type === 'goblinBoss' || this.isDevil;
     if (this.isDevil) {
       this.w = 30; this.h = 32; this.drawW = 40; this.drawH = 42;
-      this.hp = 380; this.maxHp = 110; this.speed = 1.3; this.contactDmg = 4; this.atkRange = 34;
+      this.hp = 380; this.maxHp = 380; this.speed = 1.3; this.contactDmg = 4; this.atkRange = 34;
       this.anim = new AnimatedSprite(Sprites.devil, 40, 42);
       this.dir = 'down';
     } else if (this.isBoss) {
       this.w = 30; this.h = 32; this.drawW = 40; this.drawH = 42;
-      this.hp = 250; this.maxHp = 22; this.speed = 1.15; this.contactDmg = 3; this.atkRange = 30;
+      this.hp = 250; this.maxHp = 250; this.speed = 1.15; this.contactDmg = 3; this.atkRange = 30;
       this.anim = new AnimatedSprite(Sprites.goblin, 40, 42);
       this.dir = 'down';
     } else {
