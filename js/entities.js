@@ -203,11 +203,17 @@ class NPC {
 class Enemy {
   constructor(x, y, type, opts = {}) {
     this.x = x; this.y = y;
-    this.type = type; // 'slimeGreen' | 'slimeBlue' | 'slimeRed' | 'goblinBoss'
-    this.isBoss = type === 'goblinBoss';
-    if (this.isBoss) {
+    this.type = type; // 'slimeGreen' | 'slimeBlue' | 'slimeRed' | 'goblinBoss' | 'devilBoss'
+    this.isDevil = type === 'devilBoss';
+    this.isBoss = type === 'goblinBoss' || this.isDevil;
+    if (this.isDevil) {
       this.w = 30; this.h = 32; this.drawW = 40; this.drawH = 42;
-      this.hp = 22; this.maxHp = 22; this.speed = 1.15; this.contactDmg = 3; this.atkRange = 30;
+      this.hp = 380; this.maxHp = 110; this.speed = 1.3; this.contactDmg = 4; this.atkRange = 34;
+      this.anim = new AnimatedSprite(Sprites.devil, 40, 42);
+      this.dir = 'down';
+    } else if (this.isBoss) {
+      this.w = 30; this.h = 32; this.drawW = 40; this.drawH = 42;
+      this.hp = 250; this.maxHp = 22; this.speed = 1.15; this.contactDmg = 3; this.atkRange = 30;
       this.anim = new AnimatedSprite(Sprites.goblin, 40, 42);
       this.dir = 'down';
     } else {
@@ -302,7 +308,8 @@ class Enemy {
     this.hp -= amount;
     this.hitFlash = 8;
     let hitColor = '#a8e07a';
-    if (this.isBoss) hitColor = '#e8975a';
+    if (this.isDevil) hitColor = '#f4d43c';
+    else if (this.isBoss) hitColor = '#e8975a';
     else if (this.type === 'slimeRed') hitColor = '#e24b4a';
 
     particles.burst(this.centerX, this.centerY, hitColor, 7);
@@ -311,7 +318,8 @@ class Enemy {
       this.hp = 0;
       this.alive = false;
       let deathColor = '#a8e07a';
-      if (this.isBoss) deathColor = '#e8975a';
+      if (this.isDevil) deathColor = '#f4d43c';
+      else if (this.isBoss) deathColor = '#e8975a';
       else if (this.type === 'slimeRed') deathColor = '#e24b4a';
 
       particles.burst(
@@ -356,6 +364,7 @@ class Enemy {
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
       ctx.fillRect(bx, by, barW, 4);
       ctx.fillStyle =
+        this.isDevil ? '#f4a13c' :
         this.isBoss ? '#e24b4a' :
         this.type === 'slimeRed' ? '#e24b4a' :
         '#97c459';

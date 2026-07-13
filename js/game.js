@@ -146,6 +146,9 @@
     new Enemy(36 * TILE, 35 * TILE, 'slimeRed'),
     new Enemy(35 * TILE, 22 * TILE, 'slimeRed'),
     new Enemy(42 * TILE, 36 * TILE, 'slimeRed'),
+
+    // World 2 — Devil Boss of the Sand Oasis
+    new Enemy(46 * TILE, 24 * TILE, 'devilBoss', { aggroRange: 190 }),
   ];
 
   let gameState = 'start'; // 'start' | 'howtoplay' | 'playing' | 'gameover' | 'victory'
@@ -198,8 +201,8 @@
         camera.shake(2, 4);
         
         if (!en.alive) {
-          const xpGain = en.isBoss ? 50 : (en.type === 'slimeRed' ? 15 : 6);
-          const goldGain = en.isBoss ? 40 : (en.type === 'slimeRed' ? 8 : randRange(1, 3) | 0);
+          const xpGain = en.isDevil ? 250 : en.isBoss ? 50 : (en.type === 'slimeRed' ? 15 : 6);
+          const goldGain = en.isDevil ? 200 : en.isBoss ? 40 : (en.type === 'slimeRed' ? 8 : randRange(1, 3) | 0);
           player.gold += goldGain;
           
           const leveled = player.gainXP(xpGain, particles);
@@ -218,6 +221,17 @@
             const systemNPC = new NPC(player.x, player.y, 'System', null, [
               "The Goblin Boss has been vanquished!",
               "The Gate to the East has opened. Welcome to the Sand Oasis!"
+            ]);
+            dialogue.open(systemNPC, () => {});
+          }
+
+          if (en.type === 'devilBoss') {
+            toast('The Devil of the Oasis has fallen!');
+            screenFlash = { color: '244,212,60', alpha: 0.55 };
+
+            const systemNPC = new NPC(player.x, player.y, 'System', null, [
+              "The Devil of the Sand Oasis has been vanquished!",
+              "Its dark hold over the dunes is broken at last."
             ]);
             dialogue.open(systemNPC, () => {});
           }

@@ -220,6 +220,78 @@ function buildGoblinSheet() {
   return sheet;
 }
 
+// ---------- Devil Boss ----------
+function buildDevilSheet() {
+  const FW = 40, FH = 42;
+  const sheet = makeCanvas(FW * 4, FH * 4);
+  const ctx = sheet.getContext('2d');
+  const dirs = ['down', 'left', 'right', 'up'];
+  dirs.forEach((dir, row) => {
+    for (let frame = 0; frame < 4; frame++) {
+      ctx.save();
+      ctx.translate(frame * FW, row * FH);
+      const bob = (frame === 1 || frame === 3) ? 1 : 0;
+      ctx.translate(0, -bob);
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.beginPath(); ctx.ellipse(20, 38, 14, 5, 0, 0, Math.PI * 2); ctx.fill();
+      // legs (dark hooved)
+      ctx.fillStyle = '#1a1210';
+      ctx.fillRect(12, 28, 7, 9);
+      ctx.fillRect(21, 28, 7, 9);
+      // tail
+      ctx.strokeStyle = '#6b1414';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(20, 30);
+      ctx.quadraticCurveTo(28, 34, 26, 40);
+      ctx.stroke();
+      ctx.fillStyle = '#6b1414';
+      ctx.beginPath();
+      ctx.moveTo(26, 40); ctx.lineTo(30, 38); ctx.lineTo(27, 43); ctx.closePath();
+      ctx.fill();
+      // body (dark red hide)
+      ctx.fillStyle = '#7a1c1c';
+      roundRect(ctx, 8, 12, 24, 18, 4); ctx.fill();
+      ctx.fillStyle = '#2a1414';
+      ctx.fillRect(8, 20, 24, 4); // chest strap
+      // arms + trident
+      ctx.fillStyle = '#671717';
+      ctx.fillRect(4, 14, 6, 12);
+      ctx.fillRect(30, 14, 6, 12);
+      ctx.fillStyle = '#8a8578';
+      ctx.fillRect(33, 2, 3, 20);
+      ctx.beginPath();
+      ctx.moveTo(31, 2); ctx.lineTo(33, -4); ctx.lineTo(35, 2); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(34.5, 2); ctx.lineTo(36.5, -5); ctx.lineTo(38.5, 2); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(38, 2); ctx.lineTo(40, -4); ctx.lineTo(42, 2); ctx.closePath(); ctx.fill();
+      // head
+      ctx.fillStyle = '#8a1f1f';
+      roundRect(ctx, 10, 0, 20, 16, 5); ctx.fill();
+      // horns
+      ctx.fillStyle = '#2a2420';
+      ctx.beginPath(); ctx.moveTo(11, 3); ctx.lineTo(4, -6); ctx.lineTo(13, 2); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(29, 3); ctx.lineTo(36, -6); ctx.lineTo(27, 2); ctx.closePath(); ctx.fill();
+      // eyes (glowing)
+      ctx.fillStyle = '#f4d43c';
+      if (dir !== 'up') {
+        ctx.fillRect(14, 6, 3, 3);
+        ctx.fillRect(23, 6, 3, 3);
+      }
+      // fangs
+      ctx.fillStyle = '#e8e4d8';
+      if (dir === 'down') {
+        ctx.fillRect(13, 12, 2, 4);
+        ctx.fillRect(25, 12, 2, 4);
+      }
+      ctx.restore();
+    }
+  });
+  return sheet;
+}
+
 // ---------- Item icons ----------
 function buildSwordIcon() {
   const c = makeCanvas(24, 24);
@@ -304,6 +376,7 @@ function initSprites() {
   Sprites.slimeBlue = buildSlimeSheet('#5e9ebf', '#356e8a');
   Sprites.slimeRed = buildSlimeSheet('#b93244', '#da2121');
   Sprites.goblin = buildGoblinSheet();
+  Sprites.devil = buildDevilSheet();
   Sprites.icons = {
     sword: buildSwordIcon(),
     potionRed: buildPotionIcon('#c94040'),
