@@ -4,7 +4,7 @@ class WorldItem {
   constructor(x, y, kind, opts = {}) {
     this.x = x; this.y = y;
     this.w = 20; this.h = 20;
-    this.kind = kind; // 'sword' | 'potionRed' | 'coin' | 'key' | 'shield'
+    this.kind = kind; // 'sword' | 'potionRed' | 'coin' | 'key' | 'shield' | 'armor'
     this.taken = false;
     this.bobT = Math.random() * 10;
     this.value = opts.value || 1;

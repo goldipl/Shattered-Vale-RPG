@@ -366,6 +366,48 @@ function buildShieldIcon() {
   ctx.lineTo(7, 8); ctx.closePath(); ctx.fill();
   return c;
 }
+function buildArmorIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+
+  // Outer armor
+  ctx.fillStyle = '#5a6a7a';
+  ctx.beginPath();
+  ctx.moveTo(8, 3);
+  ctx.lineTo(10, 5);
+  ctx.lineTo(14, 5);
+  ctx.lineTo(16, 3);
+  ctx.lineTo(20, 7);
+  ctx.lineTo(18, 20);
+  ctx.lineTo(6, 20);
+  ctx.lineTo(4, 7);
+  ctx.closePath();
+  ctx.fill();
+
+  // Inner plate
+  ctx.fillStyle = '#7a8a9a';
+  ctx.beginPath();
+  ctx.moveTo(9, 6);
+  ctx.lineTo(11, 7);
+  ctx.lineTo(13, 7);
+  ctx.lineTo(15, 6);
+  ctx.lineTo(17, 8);
+  ctx.lineTo(16, 17);
+  ctx.lineTo(8, 17);
+  ctx.lineTo(7, 8);
+  ctx.closePath();
+  ctx.fill();
+
+  // Center seam
+  ctx.strokeStyle = '#4a5866';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(12, 7);
+  ctx.lineTo(12, 17);
+  ctx.stroke();
+
+  return c;
+}
 
 function initSprites() {
   Sprites.player = buildHumanoidSheet(PAL_PLAYER, null);
@@ -379,6 +421,7 @@ function initSprites() {
   Sprites.devil = buildDevilSheet();
   Sprites.icons = {
     sword: buildSwordIcon(),
+    armor: buildArmorIcon(),
     potionRed: buildPotionIcon('#c94040'),
     potionBlue: buildPotionIcon('#4070c9'),
     coin: buildCoinIcon(),

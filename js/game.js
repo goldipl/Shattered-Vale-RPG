@@ -213,17 +213,25 @@
           }
           
           if (en.type === 'goblinBoss') {
-            questStage = 3;
-            map.openWorldTwoGate();
-            toast('Victory! A new world opened to the East!');
-            screenFlash = { color: '232,201,60', alpha: 0.5 };
-            
-            // Optional: Auto-trigger a system message about the new world
-            const systemNPC = new NPC(player.x, player.y, 'System', null, [
-              "The Goblin Boss has been vanquished!",
-              "The Gate to the East has opened. Welcome to the Sand Oasis!"
-            ]);
-            dialogue.open(systemNPC, () => {});
+              // Drop armor next to the dead goblin
+              worldItems.push(
+                  new WorldItem(
+                      en.x + 10,
+                      en.y + 6,
+                      'armor'
+                  )
+              );
+
+              questStage = 3;
+              map.openWorldTwoGate();
+              toast('The Goblin King dropped Iron Armor!');
+              screenFlash = { color: '232,201,60', alpha: 0.5 };
+
+              const systemNPC = new NPC(player.x, player.y, 'System', null, [
+                  "The Goblin Boss has been vanquished!",
+                  "The Gate to the East has opened. Welcome to the Sand Oasis!"
+              ]);
+              dialogue.open(systemNPC, () => {});
           }
 
           if (en.type === 'devilBoss') {
@@ -294,6 +302,12 @@
           } else if (item.kind === 'coin') {
             player.gold += item.value;
             particles.floatText(item.x, item.y - 6, '+' + item.value + 'g', '#e8c93c');
+          } 
+          else if (item.kind === 'armor') {
+            inventory.add('armor', 1);
+            inventory.equip('armor');
+            toast('Picked up Iron Armor!');
+            inventory.equip('armor');
           } else {
             inventory.add(item.kind, 1);
             toast('Picked up an item');
@@ -745,22 +759,29 @@
 
     if (gameState === 'playing' && inventory.open) {
       const hit = inventory.clickAt(mx, my, VIEW_W, VIEW_H);
-      if (hit && hit.region === 'backpack') {
-        if (hit.kind === 'potionRed') {
-          const used = inventory.usePotionRed(player);
-          if (used) {
-            particles.floatText(player.centerX, player.y - 10, 'Healed!', '#f09595');
-            toast('Drank a Health Potion — HP restored!');
+        if (hit && hit.region === 'backpack') {
+          if (hit.kind === 'potionRed') {
+            const used = inventory.usePotionRed(player);
+            if (used) {
+              particles.floatText(player.centerX, player.y - 10, 'Healed!', '#f09595');
+              toast('Drank a Health Potion — HP restored!');
+            }
+          } else if (hit.kind === 'sword') {
+            inventory.equip('sword');
+            player.hasSword = true;
+            toast('Equipped Iron Sword!');
+          } else if (hit.kind === 'armor') {
+            inventory.equip('armor');
+            toast('Equipped Iron Armor!');
           }
-        } else if (hit.kind === 'sword') {
-          inventory.equip('sword');
-          player.hasSword = true;
+        } else if (hit && hit.region === 'equip') {
+          if (hit.slotId === 'weapon') {
+            inventory.unequip('weapon');
+            player.hasSword = false;
+          } else if (hit.slotId === 'armor') {
+            inventory.unequip('armor');
+          }
         }
-      } else if (hit && hit.region === 'equip' && hit.slotId === 'weapon') {
-        // Unequipping the sword drops the player back to bare-handed damage.
-        inventory.unequip('weapon');
-        player.hasSword = false;
-      }
       return;
     }
 
