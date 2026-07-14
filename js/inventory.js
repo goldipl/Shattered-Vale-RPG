@@ -36,7 +36,7 @@ class WorldItem {
 const EQUIP_SLOTS = [
   { id: 'helmet', label: 'Helmet', accepts: k => k === 'helmet' },
   { id: 'weapon', label: 'Weapon', accepts: k => k === 'sword' || k === 'weapon' || k === 'swordLegendary' },
-  { id: 'armor',  label: 'Armor',  accepts: k => k === 'armor' },
+  { id: 'armor',  label: 'Armor',  accepts: k => k === 'armor' || k === 'armorJungle' },
   { id: 'shield', label: 'Shield', accepts: k => k === 'shield' },
   { id: 'boots',  label: 'Boots',  accepts: k => k === 'boots' },
 ];
