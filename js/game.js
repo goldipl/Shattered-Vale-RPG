@@ -1313,7 +1313,7 @@ npcs.forEach(n => drawables.push({
                     inventory.equip('crownSkeleton');
                     toast('Equipped the Skeleton Crown!');
                 } else if (hit.kind === 'potionBlue') {
-                    const used = inventory.usepotionBlue(player);
+                    const used = inventory.usePotionBlue(player);
                     if (used) {
                         particles.floatText(player.centerX, player.y - 10, 'Mana restored!', '#a878e0');
                         toast('Consumed a Blue Potion — Mana fully restored!');
