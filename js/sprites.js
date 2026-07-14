@@ -130,6 +130,8 @@ const PAL_PLAYER = { skin:'#e8c39e', hair:'#5a3a22', shirt:'#3a6ea5', pants:'#2d
 const PAL_ELDER  = { skin:'#d9b48f', hair:'#c8c4b8', shirt:'#7a4a8a', pants:'#4a3a52', boots:'#3a2e28', belt:'#5a4438', eyes:'#2c2c2a' };
 const PAL_MERCH  = { skin:'#c99a72', hair:'#2a2420', shirt:'#a5622d', pants:'#3a3226', boots:'#2a2420', belt:'#6b4423', eyes:'#2c2c2a' };
 
+// Jungle slime palette (used with buildSlimeSheet below, same builder as other slimes)
+
 // ---------- Slime (blob monster) ----------
 function buildSlimeSheet(baseColor, darkColor) {
   const FW = 32, FH = 28;
@@ -292,6 +294,148 @@ function buildDevilSheet() {
   return sheet;
 }
 
+// ---------- Orc Warlord Boss (Jungle) ----------
+function buildOrcSheet() {
+  const FW = 40, FH = 42;
+  const sheet = makeCanvas(FW * 4, FH * 4);
+  const ctx = sheet.getContext('2d');
+  const dirs = ['down', 'left', 'right', 'up'];
+  dirs.forEach((dir, row) => {
+    for (let frame = 0; frame < 4; frame++) {
+      ctx.save();
+      ctx.translate(frame * FW, row * FH);
+      const bob = (frame === 1 || frame === 3) ? 1 : 0;
+      ctx.translate(0, -bob);
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.beginPath(); ctx.ellipse(20, 38, 14, 5, 0, 0, Math.PI * 2); ctx.fill();
+      // legs
+      ctx.fillStyle = '#241a10';
+      ctx.fillRect(12, 28, 7, 9);
+      ctx.fillRect(21, 28, 7, 9);
+      // body (mossy hide armor)
+      ctx.fillStyle = '#3a5a2a';
+      roundRect(ctx, 8, 12, 24, 18, 4); ctx.fill();
+      ctx.fillStyle = '#5a4a2e';
+      ctx.fillRect(8, 20, 24, 4); // strap
+      // vine wraps
+      ctx.strokeStyle = '#2e6b2a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(9, 14); ctx.quadraticCurveTo(20, 18, 31, 14);
+      ctx.stroke();
+      // arms + club
+      ctx.fillStyle = '#33502a';
+      ctx.fillRect(4, 14, 6, 12);
+      ctx.fillRect(30, 14, 6, 12);
+      ctx.fillStyle = '#5a4020';
+      ctx.fillRect(33, 8, 4, 15);
+      ctx.fillStyle = '#4a3818';
+      ctx.beginPath();
+      ctx.ellipse(35, 6, 6, 5, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#8a8578';
+      ctx.beginPath(); ctx.arc(32, 4, 1.6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(37, 8, 1.6, 0, Math.PI * 2); ctx.fill();
+      // head
+      ctx.fillStyle = '#4a6b38';
+      roundRect(ctx, 10, 0, 20, 16, 5); ctx.fill();
+      // ears
+      ctx.fillStyle = '#3a5a2a';
+      ctx.beginPath(); ctx.moveTo(10, 6); ctx.lineTo(2, 3); ctx.lineTo(9, 12); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(30, 6); ctx.lineTo(38, 3); ctx.lineTo(31, 12); ctx.fill();
+      // eyes
+      ctx.fillStyle = '#e8d43c';
+      if (dir !== 'up') {
+        ctx.fillRect(14, 6, 3, 3);
+        ctx.fillRect(23, 6, 3, 3);
+      }
+      // tusks
+      ctx.fillStyle = '#e8e4d8';
+      if (dir === 'down') {
+        ctx.fillRect(13, 12, 2, 4);
+        ctx.fillRect(25, 12, 2, 4);
+      }
+      // war paint stripe
+      ctx.fillStyle = '#c94040';
+      if (dir === 'down') ctx.fillRect(15, 4, 10, 2);
+      ctx.restore();
+    }
+  });
+  return sheet;
+}
+
+// ---------- Jungle Witch Boss ----------
+function buildWitchSheet() {
+  const FW = 40, FH = 42;
+  const sheet = makeCanvas(FW * 4, FH * 4);
+  const ctx = sheet.getContext('2d');
+  const dirs = ['down', 'left', 'right', 'up'];
+  dirs.forEach((dir, row) => {
+    for (let frame = 0; frame < 4; frame++) {
+      ctx.save();
+      ctx.translate(frame * FW, row * FH);
+      const bob = (frame === 1 || frame === 3) ? 1 : 0;
+      ctx.translate(0, -bob);
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.beginPath(); ctx.ellipse(20, 38, 13, 5, 0, 0, Math.PI * 2); ctx.fill();
+      // robe (flares at bottom, no separate legs)
+      ctx.fillStyle = '#3a2a4a';
+      ctx.beginPath();
+      ctx.moveTo(14, 14);
+      ctx.lineTo(26, 14);
+      ctx.lineTo(32, 38);
+      ctx.lineTo(8, 38);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#4a3560';
+      ctx.beginPath();
+      ctx.moveTo(16, 20);
+      ctx.lineTo(24, 20);
+      ctx.lineTo(27, 34);
+      ctx.lineTo(13, 34);
+      ctx.closePath();
+      ctx.fill();
+      // trim glow
+      ctx.strokeStyle = '#8a5ec9';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(9, 37); ctx.lineTo(31, 37); ctx.stroke();
+      // arms + staff
+      ctx.fillStyle = '#332246';
+      ctx.fillRect(4, 15, 6, 11);
+      ctx.fillRect(30, 15, 6, 11);
+      ctx.fillStyle = '#4a3018';
+      ctx.fillRect(33, 4, 3, 20);
+      ctx.fillStyle = '#3fd4a8';
+      ctx.beginPath(); ctx.arc(34, 3, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(63,212,168,0.4)';
+      ctx.beginPath(); ctx.arc(34, 3, 7, 0, Math.PI * 2); ctx.fill();
+      // head
+      ctx.fillStyle = '#c9a882';
+      roundRect(ctx, 11, 1, 18, 14, 5); ctx.fill();
+      // hood
+      ctx.fillStyle = '#2e2040';
+      ctx.beginPath();
+      ctx.moveTo(9, 6);
+      ctx.quadraticCurveTo(20, -6, 31, 6);
+      ctx.quadraticCurveTo(31, 14, 26, 15);
+      ctx.lineTo(14, 15);
+      ctx.quadraticCurveTo(9, 14, 9, 6);
+      ctx.closePath();
+      ctx.fill();
+      // eyes (glowing)
+      ctx.fillStyle = '#3fd4a8';
+      if (dir !== 'up') {
+        ctx.fillRect(15, 8, 3, 3);
+        ctx.fillRect(22, 8, 3, 3);
+      }
+      ctx.restore();
+    }
+  });
+  return sheet;
+}
+
 // ---------- Item icons ----------
 function buildSwordIcon() {
   const c = makeCanvas(24, 24);
@@ -409,6 +553,105 @@ function buildArmorIcon() {
   return c;
 }
 
+function buildHelmetIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  // dome
+  ctx.fillStyle = '#8a7a5a';
+  ctx.beginPath();
+  ctx.moveTo(4, 15);
+  ctx.quadraticCurveTo(4, 4, 12, 4);
+  ctx.quadraticCurveTo(20, 4, 20, 15);
+  ctx.closePath();
+  ctx.fill();
+  // inner shading
+  ctx.fillStyle = '#a89a72';
+  ctx.beginPath();
+  ctx.moveTo(7, 13);
+  ctx.quadraticCurveTo(7, 6, 12, 6);
+  ctx.quadraticCurveTo(17, 6, 17, 13);
+  ctx.closePath();
+  ctx.fill();
+  // eye slit
+  ctx.fillStyle = '#2a2420';
+  ctx.fillRect(6, 14, 12, 2.5);
+  // brim
+  ctx.fillStyle = '#5a4e38';
+  ctx.fillRect(3, 15, 18, 3);
+  // small plume
+  ctx.fillStyle = '#4a8a5a';
+  ctx.beginPath();
+  ctx.moveTo(12, 4); ctx.lineTo(9, -3); ctx.lineTo(15, -3); ctx.closePath();
+  ctx.fill();
+  return c;
+}
+function buildLegendarySwordIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.save();
+  ctx.translate(12, 12);
+  ctx.rotate(-0.78);
+  // glow
+  ctx.fillStyle = 'rgba(63,212,168,0.35)';
+  ctx.beginPath(); ctx.ellipse(0, -2, 9, 13, 0, 0, Math.PI * 2); ctx.fill();
+  // blade
+  ctx.fillStyle = '#e8e4d8';
+  ctx.fillRect(-2, -11, 4, 17);
+  ctx.fillStyle = '#3fd4a8';
+  ctx.fillRect(-0.7, -11, 1.4, 17);
+  ctx.fillStyle = '#8a8578';
+  ctx.fillRect(-2, -11, 4, 3);
+  // crossguard
+  ctx.fillStyle = '#c8a83c';
+  ctx.fillRect(-6, 5, 12, 3);
+  // hilt
+  ctx.fillStyle = '#4a2e18';
+  ctx.fillRect(-1.5, 8, 3, 7);
+  ctx.fillStyle = '#3fd4a8';
+  ctx.beginPath(); ctx.arc(0, 16, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  return c;
+}
+
+function buildJungleArmorIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#2e5a30';
+  ctx.beginPath();
+  ctx.moveTo(8, 3); ctx.lineTo(10, 5); ctx.lineTo(14, 5); ctx.lineTo(16, 3);
+  ctx.lineTo(20, 7); ctx.lineTo(18, 20); ctx.lineTo(6, 20); ctx.lineTo(4, 7);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#48824a';
+  ctx.beginPath();
+  ctx.moveTo(9, 6); ctx.lineTo(11, 7); ctx.lineTo(13, 7); ctx.lineTo(15, 6);
+  ctx.lineTo(17, 8); ctx.lineTo(16, 17); ctx.lineTo(8, 17); ctx.lineTo(7, 8);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#1e3a1e';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(12, 7); ctx.lineTo(12, 17); ctx.stroke();
+  ctx.fillStyle = '#3fd4a8';
+  ctx.fillRect(11, 9, 2, 2);
+  return c;
+}
+function buildBootsIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#4a3626';
+  ctx.fillRect(6, 3, 5, 11);
+  ctx.fillRect(13, 3, 5, 11);
+  ctx.fillStyle = '#3a2a1c';
+  ctx.beginPath();
+  ctx.moveTo(6, 14); ctx.lineTo(11, 14); ctx.lineTo(11, 17); ctx.lineTo(3, 17);
+  ctx.quadraticCurveTo(3, 15, 6, 14); ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(13, 14); ctx.lineTo(18, 14); ctx.lineTo(18, 17); ctx.lineTo(21, 17);
+  ctx.quadraticCurveTo(21, 15, 18, 14); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#8a6438';
+  ctx.fillRect(6, 6, 5, 1.5);
+  ctx.fillRect(13, 6, 5, 1.5);
+  return c;
+}
+
 function initSprites() {
   Sprites.player = buildHumanoidSheet(PAL_PLAYER, null);
   Sprites.playerSword = buildHumanoidSheet(PAL_PLAYER, drawSword);
@@ -417,11 +660,18 @@ function initSprites() {
   Sprites.slimeGreen = buildSlimeSheet('#7bbf5e', '#4a8a35');
   Sprites.slimeBlue = buildSlimeSheet('#5e9ebf', '#356e8a');
   Sprites.slimeRed = buildSlimeSheet('#b93244', '#da2121');
+  Sprites.slimeJungle = buildSlimeSheet('#6ec95e', '#2a8a3a');
   Sprites.goblin = buildGoblinSheet();
   Sprites.devil = buildDevilSheet();
+  Sprites.orcWarlord = buildOrcSheet();
+  Sprites.jungleWitch = buildWitchSheet();
   Sprites.icons = {
     sword: buildSwordIcon(),
     armor: buildArmorIcon(),
+    helmet: buildHelmetIcon(),
+    swordLegendary: buildLegendarySwordIcon(),
+    armorJungle: buildJungleArmorIcon(),
+    boots: buildBootsIcon(),
     potionRed: buildPotionIcon('#c94040'),
     potionBlue: buildPotionIcon('#4070c9'),
     coin: buildCoinIcon(),

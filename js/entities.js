@@ -60,6 +60,7 @@ class Player {
         this.xpNext = 10;
         this.gold = 0;
         this.hasSword = false;
+        this.hasLegendarySword = false;
         this.attacking = 0;
         this.attackCooldown = 0;
         this.invuln = 0;
@@ -322,9 +323,9 @@ class Enemy {
     constructor(x, y, type, opts = {}) {
         this.x = x;
         this.y = y;
-        this.type = type; // 'slimeGreen' | 'slimeBlue' | 'slimeRed' | 'goblinBoss' | 'devilBoss'
+        this.type = type; // 'slimeGreen' | 'slimeBlue' | 'slimeRed' | 'slimeJungle' | 'goblinBoss' | 'devilBoss' | 'orcBoss' | 'witchBoss'
         this.isDevil = type === 'devilBoss';
-        this.isBoss = type === 'goblinBoss' || this.isDevil;
+        this.isBoss = type === 'goblinBoss' || type === 'orcBoss' || type === 'witchBoss' || this.isDevil;
         if (this.isDevil) {
             this.w = 30;
             this.h = 32;
@@ -336,6 +337,30 @@ class Enemy {
             this.contactDmg = 6;
             this.atkRange = 34;
             this.anim = new AnimatedSprite(Sprites.devil, 40, 42);
+            this.dir = 'down';
+        } else if (type === 'orcBoss') {
+            this.w = 30;
+            this.h = 32;
+            this.drawW = 40;
+            this.drawH = 42;
+            this.hp = opts.hp || 280;
+            this.maxHp = this.hp;
+            this.speed = 1.2;
+            this.contactDmg = 6;
+            this.atkRange = 32;
+            this.anim = new AnimatedSprite(Sprites.orcWarlord, 40, 42);
+            this.dir = 'down';
+        } else if (type === 'witchBoss') {
+            this.w = 30;
+            this.h = 32;
+            this.drawW = 40;
+            this.drawH = 42;
+            this.hp = opts.hp || 260;
+            this.maxHp = this.hp;
+            this.speed = 1.1;
+            this.contactDmg = 5;
+            this.atkRange = 40; // ranged-style caster, longer reach
+            this.anim = new AnimatedSprite(Sprites.jungleWitch, 40, 42);
             this.dir = 'down';
         } else if (this.isBoss) {
             this.w = 30;
@@ -362,6 +387,13 @@ class Enemy {
                 this.contactDmg = 3;
                 this.atkRange = 22;
                 this.anim = new AnimatedSprite(Sprites.slimeRed, 32, 28, false);
+            } else if (type === 'slimeJungle') {
+                this.hp = 20;
+                this.maxHp = 20;
+                this.speed = 1.15;
+                this.contactDmg = 3;
+                this.atkRange = 22;
+                this.anim = new AnimatedSprite(Sprites.slimeJungle, 32, 28, false);
             } else {
                 this.hp = 10;
                 this.maxHp = 10;
@@ -487,6 +519,7 @@ class Enemy {
         if (this.isDevil) hitColor = '#f4d43c';
         else if (this.isBoss) hitColor = '#e8975a';
         else if (this.type === 'slimeRed') hitColor = '#e24b4a';
+        else if (this.type === 'slimeJungle') hitColor = '#2fae4a';
 
         particles.burst(this.centerX, this.centerY, hitColor, 7);
         particles.floatText(this.centerX, this.y - 2, '-' + amount, '#f1efe8', this.isBoss ? 15 : 12);
@@ -497,6 +530,7 @@ class Enemy {
             if (this.isDevil) deathColor = '#f4d43c';
             else if (this.isBoss) deathColor = '#e8975a';
             else if (this.type === 'slimeRed') deathColor = '#e24b4a';
+            else if (this.type === 'slimeJungle') deathColor = '#2fae4a';
 
             particles.burst(
                 this.centerX,
@@ -545,6 +579,7 @@ class Enemy {
                 this.isDevil ? '#f4a13c' :
                 this.isBoss ? '#e24b4a' :
                 this.type === 'slimeRed' ? '#e24b4a' :
+                this.type === 'slimeJungle' ? '#2fae4a' :
                 '#97c459';
             ctx.fillRect(bx, by, barW * (this.hp / this.maxHp), 4);
         }

@@ -104,8 +104,9 @@
 
     initSprites();
 
-    // Map expanded to 56 columns to fit the second world on the right
-    const map = new TileMap(56, 48);
+    // Map expanded to 56 columns to fit the second world (oasis) on the right,
+    // and 40 rows taller to fit the new, 3x-larger Jungle area south of the oasis.
+    const map = new TileMap(56, 88);
     const camera = new Camera(VIEW_W, VIEW_H);
     const particles = new ParticleSystem();
     const dialogue = new DialogueSystem();
@@ -180,6 +181,32 @@ const npcs = [elder, merchant];
         new Enemy(50 * TILE, 40 * TILE, 'devilBoss', {
             aggroRange: 190
         }),
+
+        // World 3 — Jungle (south of the oasis, behind the Jungle Gates), spread across the full 3x area
+        new Enemy(8 * TILE, 51 * TILE, 'slimeJungle'),
+        new Enemy(14 * TILE, 54 * TILE, 'slimeJungle'),
+        new Enemy(20 * TILE, 50 * TILE, 'slimeJungle'),
+        new Enemy(6 * TILE, 58 * TILE, 'slimeJungle'),
+        new Enemy(18 * TILE, 60 * TILE, 'slimeJungle'),
+        new Enemy(32 * TILE, 52 * TILE, 'slimeJungle'),
+        new Enemy(40 * TILE, 55 * TILE, 'slimeJungle'),
+        new Enemy(46 * TILE, 51 * TILE, 'slimeJungle'),
+        new Enemy(36 * TILE, 60 * TILE, 'slimeJungle'),
+        new Enemy(44 * TILE, 62 * TILE, 'slimeJungle'),
+        new Enemy(52 * TILE, 53 * TILE, 'slimeJungle'),
+        new Enemy(8 * TILE, 68 * TILE, 'slimeJungle'),
+        new Enemy(16 * TILE, 70 * TILE, 'slimeJungle'),
+        new Enemy(24 * TILE, 66 * TILE, 'slimeJungle'),
+        new Enemy(4 * TILE, 72 * TILE, 'slimeJungle'),
+
+        // World 3 — Jungle Bosses, placed in two separate arenas on opposite
+        // sides of the jungle (far apart, not together)
+        new Enemy(10 * TILE, (48 + 30) * TILE, 'orcBoss', {
+            aggroRange: 180
+        }),
+        new Enemy(48 * TILE, (48 + 18) * TILE, 'witchBoss', {
+            aggroRange: 200
+        }),
     ];
 
     let gameState = 'start'; // 'start' | 'howtoplay' | 'playing' | 'gameover' | 'victory'
@@ -249,7 +276,7 @@ function checkInteract() {
         const hb = player.attackHitbox();
         enemies.forEach(en => {
             if (en.alive && rectsOverlap(hb, en)) {
-                const dmg = player.hasSword ? player.atk + 2 : player.atk;
+                const dmg = player.hasLegendarySword ? player.atk + 8 : player.hasSword ? player.atk + 2 : player.atk;
                 en.takeDamage(dmg, particles);
                 camera.shake(2, 4);
 
@@ -292,8 +319,41 @@ function checkInteract() {
                         dialogue.open(systemNPC, () => {});
                     }
 
+                    if (en.type === 'orcBoss') {
+                        worldItems.push(
+                            new WorldItem(en.x + 10, en.y + 6, 'armorJungle')
+                        );
+                        toast('The Orc Warlord dropped Jungle Armor!');
+                        screenFlash = { color: '72,140,74', alpha: 0.5 };
+                    }
+
+                    if (en.type === 'witchBoss') {
+                        worldItems.push(
+                            new WorldItem(en.x + 10, en.y + 6, 'boots')
+                        );
+                        toast('The Jungle Witch dropped Swift Boots!');
+                        screenFlash = { color: '63,212,168', alpha: 0.5 };
+                    }
+
                     if (en.type === 'devilBoss') {
-                        toast('The Devil of the Oasis has fallen!');
+                        // Drop a helmet and a new, stronger sword next to the dead Devil
+                        worldItems.push(
+                            new WorldItem(
+                                en.x + 10,
+                                en.y + 6,
+                                'helmet'
+                            )
+                        );
+                        worldItems.push(
+                            new WorldItem(
+                                en.x - 6,
+                                en.y + 6,
+                                'swordLegendary'
+                            )
+                        );
+
+                        map.openJungleGate();
+                        toast('The Devil dropped a Helmet and a legendary blade!');
                         screenFlash = {
                             color: '244,212,60',
                             alpha: 0.55
@@ -301,7 +361,8 @@ function checkInteract() {
 
                         const systemNPC = new NPC(player.x, player.y, 'System', null, [
                             "The Devil of the Sand Oasis has been vanquished!",
-                            "Its dark hold over the dunes is broken at last."
+                            "Its dark hold over the dunes is broken at last.",
+                            "A Jungle Gate has creaked open to the south — but something ancient stirs within."
                         ]);
                         dialogue.open(systemNPC, () => {});
                     }
@@ -387,6 +448,29 @@ function checkInteract() {
                         inventory.equip('armor');
                         toast('Picked up Iron Armor!');
                         inventory.equip('armor');
+                    } else if (item.kind === 'helmet') {
+                        inventory.add('helmet', 1);
+                        inventory.equip('helmet');
+                        toast('Picked up the Devil\'s Helmet!');
+                    } else if (item.kind === 'armorJungle') {
+                        inventory.add('armorJungle', 1);
+                        inventory.equip('armorJungle');
+                        toast('Picked up Jungle Armor!');
+                    } else if (item.kind === 'boots') {
+                        inventory.add('boots', 1);
+                        inventory.equip('boots');
+                        player.speed = 3.2;
+                        toast('Picked up Swift Boots! Movement speed increased.');
+                    } else if (item.kind === 'swordLegendary') {
+                        inventory.add('swordLegendary', 1);
+                        inventory.equip('swordLegendary');
+                        player.hasSword = true;
+                        player.hasLegendarySword = true;
+                        toast('Equipped the Legendary Sword! Attack greatly increased.');
+                        screenFlash = {
+                            color: '63,212,168',
+                            alpha: 0.4
+                        };
                     } else {
                         inventory.add(item.kind, 1);
                         toast('Picked up an item');
@@ -422,7 +506,9 @@ function checkInteract() {
 
     const BOSS_NAMES = {
         goblinBoss: 'Goblin King Grimtooth',
-        devilBoss: 'Devil of the Oasis'
+        devilBoss: 'Devil of the Oasis',
+        orcBoss: 'Orc Warlord Skarn',
+        witchBoss: 'Jungle Witch Maera'
     };
 
     function getActiveBoss() {
@@ -554,6 +640,8 @@ function checkInteract() {
         player.gold = 0;
         player.atk = 3;
         player.hasSword = false;
+        player.hasLegendarySword = false;
+        player.speed = 2.6;
         player.attacking = 0;
         player.attackCooldown = 0;
         player.invuln = 0;
@@ -579,14 +667,47 @@ merchant.talked = false;
             new Enemy(18 * TILE, 7 * TILE, 'slimeGreen'),
             new Enemy(8 * TILE, 15 * TILE, 'slimeBlue'),
             new Enemy(10 * TILE, 17 * TILE, 'slimeBlue'),
+            new Enemy(12 * TILE, 17 * TILE, 'slimeBlue'),
             new Enemy(23 * TILE, 4 * TILE, 'slimeGreen'),
+            new Enemy(25 * TILE, 4 * TILE, 'slimeGreen'),
             new Enemy(21 * TILE, 17 * TILE, 'goblinBoss', {
                 aggroRange: 170
             }),
+
             new Enemy(34 * TILE, 6 * TILE, 'slimeRed'),
             new Enemy(38 * TILE, 12 * TILE, 'slimeRed'),
             new Enemy(44 * TILE, 5 * TILE, 'slimeRed'),
-            new Enemy(45 * TILE, 3 * TILE, 'slimeRed')
+            new Enemy(38 * TILE, 15 * TILE, 'slimeRed'),
+            new Enemy(36 * TILE, 35 * TILE, 'slimeRed'),
+            new Enemy(35 * TILE, 22 * TILE, 'slimeRed'),
+            new Enemy(42 * TILE, 36 * TILE, 'slimeRed'),
+
+            new Enemy(50 * TILE, 40 * TILE, 'devilBoss', {
+                aggroRange: 190
+            }),
+
+            new Enemy(8 * TILE, 51 * TILE, 'slimeJungle'),
+            new Enemy(14 * TILE, 54 * TILE, 'slimeJungle'),
+            new Enemy(20 * TILE, 50 * TILE, 'slimeJungle'),
+            new Enemy(6 * TILE, 58 * TILE, 'slimeJungle'),
+            new Enemy(18 * TILE, 60 * TILE, 'slimeJungle'),
+            new Enemy(32 * TILE, 52 * TILE, 'slimeJungle'),
+            new Enemy(40 * TILE, 55 * TILE, 'slimeJungle'),
+            new Enemy(46 * TILE, 51 * TILE, 'slimeJungle'),
+            new Enemy(36 * TILE, 60 * TILE, 'slimeJungle'),
+            new Enemy(44 * TILE, 62 * TILE, 'slimeJungle'),
+            new Enemy(52 * TILE, 53 * TILE, 'slimeJungle'),
+            new Enemy(8 * TILE, 68 * TILE, 'slimeJungle'),
+            new Enemy(16 * TILE, 70 * TILE, 'slimeJungle'),
+            new Enemy(24 * TILE, 66 * TILE, 'slimeJungle'),
+            new Enemy(4 * TILE, 72 * TILE, 'slimeJungle'),
+
+            new Enemy(10 * TILE, (48 + 30) * TILE, 'orcBoss', {
+                aggroRange: 180
+            }),
+            new Enemy(48 * TILE, (48 + 18) * TILE, 'witchBoss', {
+                aggroRange: 200
+            }),
         ];
 
         toastMsg = null;
@@ -989,17 +1110,39 @@ npcs.forEach(n => drawables.push({
                 } else if (hit.kind === 'sword') {
                     inventory.equip('sword');
                     player.hasSword = true;
+                    player.hasLegendarySword = false;
                     toast('Equipped Iron Sword!');
+                } else if (hit.kind === 'swordLegendary') {
+                    inventory.equip('swordLegendary');
+                    player.hasSword = true;
+                    player.hasLegendarySword = true;
+                    toast('Equipped the Legendary Sword!');
                 } else if (hit.kind === 'armor') {
                     inventory.equip('armor');
                     toast('Equipped Iron Armor!');
+                } else if (hit.kind === 'helmet') {
+                    inventory.equip('helmet');
+                    toast('Equipped the Devil\'s Helmet!');
+                } else if (hit.kind === 'armorJungle') {
+                    inventory.equip('armorJungle');
+                    toast('Equipped Jungle Armor!');
+                } else if (hit.kind === 'boots') {
+                    inventory.equip('boots');
+                    player.speed = 3.2;
+                    toast('Equipped Swift Boots!');
                 }
             } else if (hit && hit.region === 'equip') {
                 if (hit.slotId === 'weapon') {
                     inventory.unequip('weapon');
                     player.hasSword = false;
+                    player.hasLegendarySword = false;
                 } else if (hit.slotId === 'armor') {
                     inventory.unequip('armor');
+                } else if (hit.slotId === 'helmet') {
+                    inventory.unequip('helmet');
+                } else if (hit.slotId === 'boots') {
+                    inventory.unequip('boots');
+                    player.speed = 2.6;
                 }
             }
             return;
