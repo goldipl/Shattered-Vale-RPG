@@ -323,10 +323,25 @@ class Enemy {
     constructor(x, y, type, opts = {}) {
         this.x = x;
         this.y = y;
-        this.type = type; // 'slimeGreen' | 'slimeBlue' | 'slimeRed' | 'slimeJungle' | 'goblinBoss' | 'devilBoss' | 'orcBoss' | 'witchBoss'
+        this.type = type; // 'slimeGreen' | 'slimeBlue' | 'slimeRed' | 'slimeJungle' | 'spider' | 'skeleton' | 'goblinBoss' | 'devilBoss' | 'orcBoss' | 'witchBoss' | 'skeletonKing'
         this.isDevil = type === 'devilBoss';
-        this.isBoss = type === 'goblinBoss' || type === 'orcBoss' || type === 'witchBoss' || this.isDevil;
-        if (this.isDevil) {
+        this.isSkeletonKing = type === 'skeletonKing';
+        this.isBoss = type === 'goblinBoss' || type === 'orcBoss' || type === 'witchBoss' || this.isDevil || this.isSkeletonKing;
+        if (this.isSkeletonKing) {
+            // 2x the frame/hitbox size of a standard boss (40x42 -> 80x84),
+            // 5x the Devil's HP, ~2.7x the Devil's contact damage.
+            this.w = 60;
+            this.h = 64;
+            this.drawW = 80;
+            this.drawH = 84;
+            this.hp = opts.hp || 1750;
+            this.maxHp = this.hp;
+            this.speed = 1.05;
+            this.contactDmg = 16;
+            this.atkRange = 46;
+            this.anim = new AnimatedSprite(Sprites.skeletonKing, 80, 84);
+            this.dir = 'down';
+        } else if (this.isDevil) {
             this.w = 30;
             this.h = 32;
             this.drawW = 40;
@@ -394,6 +409,26 @@ class Enemy {
                 this.contactDmg = 3;
                 this.atkRange = 22;
                 this.anim = new AnimatedSprite(Sprites.slimeJungle, 32, 28, false);
+            } else if (type === 'spider') {
+                // fast, fragile crypt crawler
+                this.hp = 16;
+                this.maxHp = 16;
+                this.speed = 1.6;
+                this.contactDmg = 4;
+                this.atkRange = 20;
+                this.anim = new AnimatedSprite(Sprites.spider, 32, 28, false);
+            } else if (type === 'skeleton') {
+                // slower but tankier crypt warrior
+                this.w = 22;
+                this.h = 26;
+                this.drawW = 32;
+                this.drawH = 34;
+                this.hp = 32;
+                this.maxHp = 32;
+                this.speed = 1.0;
+                this.contactDmg = 5;
+                this.atkRange = 24;
+                this.anim = new AnimatedSprite(Sprites.skeleton, 32, 34);
             } else {
                 this.hp = 10;
                 this.maxHp = 10;
@@ -516,10 +551,13 @@ class Enemy {
         this.hp -= amount;
         this.hitFlash = 8;
         let hitColor = '#a8e07a';
-        if (this.isDevil) hitColor = '#f4d43c';
+        if (this.isSkeletonKing) hitColor = '#e8e2d0';
+        else if (this.isDevil) hitColor = '#f4d43c';
         else if (this.isBoss) hitColor = '#e8975a';
         else if (this.type === 'slimeRed') hitColor = '#e24b4a';
         else if (this.type === 'slimeJungle') hitColor = '#2fae4a';
+        else if (this.type === 'spider') hitColor = '#8a5ec9';
+        else if (this.type === 'skeleton') hitColor = '#d8d2c0';
 
         particles.burst(this.centerX, this.centerY, hitColor, 7);
         particles.floatText(this.centerX, this.y - 2, '-' + amount, '#f1efe8', this.isBoss ? 15 : 12);
@@ -527,10 +565,13 @@ class Enemy {
             this.hp = 0;
             this.alive = false;
             let deathColor = '#a8e07a';
-            if (this.isDevil) deathColor = '#f4d43c';
+            if (this.isSkeletonKing) deathColor = '#e8e2d0';
+            else if (this.isDevil) deathColor = '#f4d43c';
             else if (this.isBoss) deathColor = '#e8975a';
             else if (this.type === 'slimeRed') deathColor = '#e24b4a';
             else if (this.type === 'slimeJungle') deathColor = '#2fae4a';
+            else if (this.type === 'spider') deathColor = '#8a5ec9';
+            else if (this.type === 'skeleton') deathColor = '#d8d2c0';
 
             particles.burst(
                 this.centerX,
@@ -576,10 +617,12 @@ class Enemy {
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
             ctx.fillRect(bx, by, barW, 4);
             ctx.fillStyle =
+                this.isSkeletonKing ? '#e8e2d0' :
                 this.isDevil ? '#f4a13c' :
                 this.isBoss ? '#e24b4a' :
                 this.type === 'slimeRed' ? '#e24b4a' :
                 this.type === 'slimeJungle' ? '#2fae4a' :
+                this.type === 'spider' ? '#8a5ec9' :
                 '#97c459';
             ctx.fillRect(bx, by, barW * (this.hp / this.maxHp), 4);
         }

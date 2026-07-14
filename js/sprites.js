@@ -436,6 +436,214 @@ function buildWitchSheet() {
   return sheet;
 }
 
+// ---------- Spider (crypt crawler) ----------
+function buildSpiderSheet() {
+  const FW = 32, FH = 28;
+  const sheet = makeCanvas(FW * 4, FH * 1); // no directions, just leg-scuttle frames
+  const ctx = sheet.getContext('2d');
+  for (let f = 0; f < 4; f++) {
+    ctx.save();
+    ctx.translate(f * FW, 0);
+    const legSpread = [0, 2, 0, -2][f];
+    const cx = 16, cy = 16;
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath(); ctx.ellipse(cx, 25, 10, 3, 0, 0, Math.PI * 2); ctx.fill();
+    // legs (4 per side, scuttle animated)
+    ctx.strokeStyle = '#1a1410';
+    ctx.lineWidth = 1.6;
+    for (let i = 0; i < 4; i++) {
+      const ly = cy - 5 + i * 3.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - 6, ly);
+      ctx.lineTo(cx - 14 - legSpread, ly - 3 + i);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + 6, ly);
+      ctx.lineTo(cx + 14 + legSpread, ly - 3 + i);
+      ctx.stroke();
+    }
+    // abdomen
+    ctx.fillStyle = '#2a1f18';
+    ctx.beginPath(); ctx.ellipse(cx + 3, cy + 3, 8, 7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#4a2e1e';
+    ctx.beginPath(); ctx.ellipse(cx + 2, cy + 1, 4, 3, 0, 0, Math.PI * 2); ctx.fill();
+    // head/thorax
+    ctx.fillStyle = '#241a14';
+    ctx.beginPath(); ctx.ellipse(cx - 5, cy, 6, 5, 0, 0, Math.PI * 2); ctx.fill();
+    // eyes (glowing cluster)
+    ctx.fillStyle = '#c9403c';
+    ctx.beginPath(); ctx.arc(cx - 8, cy - 1, 1.4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - 8, cy + 2, 1.4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - 6, cy - 3, 1, 0, Math.PI * 2); ctx.fill();
+    // fangs
+    ctx.fillStyle = '#e8e4d8';
+    ctx.fillRect(cx - 10, cy + 2, 1.5, 3);
+    ctx.fillRect(cx - 9, cy + 3, 1.5, 3);
+    ctx.restore();
+  }
+  return sheet;
+}
+
+// ---------- Skeleton (crypt warrior) ----------
+function buildSkeletonSheet() {
+  const FW = 32, FH = 34;
+  const sheet = makeCanvas(FW * 4, FH * 4);
+  const ctx = sheet.getContext('2d');
+  const dirs = ['down', 'left', 'right', 'up'];
+  dirs.forEach((dir, row) => {
+    for (let frame = 0; frame < 4; frame++) {
+      ctx.save();
+      ctx.translate(frame * FW, row * FH);
+      const legOffset = frame % 2 === 0 ? 0 : (frame === 1 ? 2 : -2);
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath(); ctx.ellipse(16, 30, 9, 3, 0, 0, Math.PI * 2); ctx.fill();
+      // leg bones
+      ctx.strokeStyle = '#d8d2c0';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(12, 22 + Math.max(0, legOffset)); ctx.lineTo(12, 29);
+      ctx.moveTo(20, 22 + Math.max(0, -legOffset)); ctx.lineTo(20, 29);
+      ctx.stroke();
+      // ribcage / torso
+      ctx.fillStyle = '#e8e2d0';
+      roundRect(ctx, 9, 11, 14, 11, 3); ctx.fill();
+      ctx.strokeStyle = '#a8a290';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(9, 14 + i * 3); ctx.lineTo(23, 14 + i * 3);
+        ctx.stroke();
+      }
+      // arm bones (swing)
+      const armSwing = frame === 1 ? -2 : frame === 3 ? 2 : 0;
+      ctx.strokeStyle = '#d8d2c0';
+      ctx.lineWidth = 2.5;
+      if (dir !== 'left') { ctx.beginPath(); ctx.moveTo(23, 13 + armSwing); ctx.lineTo(26, 21 + armSwing); ctx.stroke(); }
+      if (dir !== 'right') { ctx.beginPath(); ctx.moveTo(9, 13 - armSwing); ctx.lineTo(6, 21 - armSwing); ctx.stroke(); }
+      // rusty short-sword prop (down/right facing)
+      if (dir === 'down' || dir === 'right') {
+        ctx.fillStyle = '#8a8072';
+        ctx.fillRect(25, 8 + armSwing, 2, 12);
+      }
+      // skull
+      ctx.fillStyle = '#eee8d8';
+      roundRect(ctx, 9, 1, 14, 11, 4); ctx.fill();
+      // eye sockets (glowing embers)
+      ctx.fillStyle = '#1a1410';
+      if (dir !== 'up') {
+        ctx.fillRect(11, 6, 3, 3);
+        ctx.fillRect(18, 6, 3, 3);
+      }
+      ctx.fillStyle = '#e8975a';
+      if (dir !== 'up') {
+        ctx.fillRect(11.5, 6.5, 2, 2);
+        ctx.fillRect(18.5, 6.5, 2, 2);
+      }
+      // jaw
+      if (dir === 'down') {
+        ctx.strokeStyle = '#a8a290';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(11, 11); ctx.lineTo(21, 11); ctx.stroke();
+      }
+      ctx.restore();
+    }
+  });
+  return sheet;
+}
+
+// ---------- Skeleton King Boss (2x size, crypt throne room) ----------
+function buildSkeletonKingSheet() {
+  // Double the standard boss frame size (goblin/orc/witch/devil are 40x42)
+  const FW = 80, FH = 84;
+  const sheet = makeCanvas(FW * 4, FH * 4);
+  const ctx = sheet.getContext('2d');
+  const dirs = ['down', 'left', 'right', 'up'];
+  dirs.forEach((dir, row) => {
+    for (let frame = 0; frame < 4; frame++) {
+      ctx.save();
+      ctx.translate(frame * FW, row * FH);
+      ctx.scale(2, 2); // reuse the 40x42 layout logic, doubled on canvas
+      const bob = (frame === 1 || frame === 3) ? 1 : 0;
+      ctx.translate(0, -bob);
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.beginPath(); ctx.ellipse(20, 38, 16, 6, 0, 0, Math.PI * 2); ctx.fill();
+      // leg bones (thick)
+      ctx.strokeStyle = '#e8e2d0';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(14, 26); ctx.lineTo(14, 37);
+      ctx.moveTo(26, 26); ctx.lineTo(26, 37);
+      ctx.stroke();
+      // tattered royal cloak
+      ctx.fillStyle = '#3a1830';
+      ctx.beginPath();
+      ctx.moveTo(9, 13); ctx.lineTo(31, 13);
+      ctx.lineTo(34, 36); ctx.lineTo(28, 30);
+      ctx.lineTo(24, 37); ctx.lineTo(20, 29);
+      ctx.lineTo(16, 37); ctx.lineTo(12, 30);
+      ctx.lineTo(6, 36);
+      ctx.closePath();
+      ctx.fill();
+      // ribcage / torso armor
+      ctx.fillStyle = '#eee8d8';
+      roundRect(ctx, 9, 11, 22, 17, 4); ctx.fill();
+      ctx.strokeStyle = '#a8a290';
+      ctx.lineWidth = 1.4;
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(9, 14 + i * 3.4); ctx.lineTo(31, 14 + i * 3.4);
+        ctx.stroke();
+      }
+      // arm bones + massive bone greatsword
+      const armSwing = frame === 1 ? -2 : frame === 3 ? 2 : 0;
+      ctx.strokeStyle = '#e8e2d0';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(31, 14 + armSwing); ctx.lineTo(36, 26 + armSwing); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(9, 14 - armSwing); ctx.lineTo(4, 26 - armSwing); ctx.stroke();
+      ctx.fillStyle = '#cfc8b4';
+      ctx.fillRect(35, 2, 4, 26);
+      ctx.fillStyle = '#5a4a3a';
+      ctx.fillRect(32, 25, 10, 3);
+      // skull
+      ctx.fillStyle = '#f2ecd8';
+      roundRect(ctx, 11, -1, 18, 15, 5); ctx.fill();
+      // crown
+      ctx.fillStyle = '#c8a83c';
+      ctx.beginPath();
+      ctx.moveTo(11, 0); ctx.lineTo(13, -6); ctx.lineTo(16, 0);
+      ctx.lineTo(18, -7); ctx.lineTo(20, 0);
+      ctx.lineTo(22, -7); ctx.lineTo(24, 0);
+      ctx.lineTo(27, -6); ctx.lineTo(29, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#8a5ec9';
+      ctx.beginPath(); ctx.arc(20, -5, 1.6, 0, Math.PI * 2); ctx.fill();
+      // eye sockets (burning)
+      ctx.fillStyle = '#1a1410';
+      if (dir !== 'up') {
+        ctx.fillRect(13.5, 5, 4, 4);
+        ctx.fillRect(22.5, 5, 4, 4);
+      }
+      ctx.fillStyle = '#f4d43c';
+      if (dir !== 'up') {
+        ctx.fillRect(14.2, 5.7, 2.6, 2.6);
+        ctx.fillRect(23.2, 5.7, 2.6, 2.6);
+      }
+      // jaw
+      if (dir === 'down') {
+        ctx.strokeStyle = '#a8a290';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(13, 11); ctx.lineTo(27, 11); ctx.stroke();
+      }
+      ctx.restore();
+    }
+  });
+  return sheet;
+}
+
 // ---------- Item icons ----------
 function buildSwordIcon() {
   const c = makeCanvas(24, 24);
@@ -652,6 +860,73 @@ function buildBootsIcon() {
   return c;
 }
 
+function buildBoneShieldIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#dcd6c4';
+  ctx.beginPath();
+  ctx.moveTo(12, 3); ctx.lineTo(20, 6); ctx.lineTo(20, 13);
+  ctx.quadraticCurveTo(20, 19, 12, 22);
+  ctx.quadraticCurveTo(4, 19, 4, 13);
+  ctx.lineTo(4, 6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#a8a290';
+  ctx.beginPath();
+  ctx.moveTo(12, 6); ctx.lineTo(17, 8); ctx.lineTo(17, 13);
+  ctx.quadraticCurveTo(17, 16, 12, 18);
+  ctx.quadraticCurveTo(7, 16, 7, 13);
+  ctx.lineTo(7, 8); ctx.closePath(); ctx.fill();
+  // crossed bones motif
+  ctx.strokeStyle = '#e8e2d0';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(9, 9); ctx.lineTo(15, 16);
+  ctx.moveTo(15, 9); ctx.lineTo(9, 16);
+  ctx.stroke();
+  return c;
+}
+function buildSkeletonCrownIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#c8a83c';
+  ctx.beginPath();
+  ctx.moveTo(4, 18); ctx.lineTo(4, 10);
+  ctx.lineTo(8, 15); ctx.lineTo(12, 6);
+  ctx.lineTo(16, 15); ctx.lineTo(20, 10);
+  ctx.lineTo(20, 18);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#e8d478';
+  ctx.fillRect(4, 16, 16, 3);
+  ctx.fillStyle = '#8a5ec9';
+  ctx.beginPath(); ctx.arc(12, 10, 1.8, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(6, 13, 1.2, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(18, 13, 1.2, 0, Math.PI * 2); ctx.fill();
+  return c;
+}
+function buildSoulGemIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = 'rgba(138,94,201,0.3)';
+  ctx.beginPath(); ctx.ellipse(12, 12, 10, 10, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.save();
+  ctx.translate(12, 12);
+  ctx.fillStyle = '#6a3ea0';
+  ctx.beginPath();
+  ctx.moveTo(0, -8); ctx.lineTo(6, -2); ctx.lineTo(4, 8);
+  ctx.lineTo(-4, 8); ctx.lineTo(-6, -2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#a878e0';
+  ctx.beginPath();
+  ctx.moveTo(0, -5); ctx.lineTo(3, -1); ctx.lineTo(0, 5); ctx.lineTo(-3, -1);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.beginPath(); ctx.ellipse(-2, -3, 1.5, 2, 0.4, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  return c;
+}
+
 function initSprites() {
   Sprites.player = buildHumanoidSheet(PAL_PLAYER, null);
   Sprites.playerSword = buildHumanoidSheet(PAL_PLAYER, drawSword);
@@ -665,6 +940,9 @@ function initSprites() {
   Sprites.devil = buildDevilSheet();
   Sprites.orcWarlord = buildOrcSheet();
   Sprites.jungleWitch = buildWitchSheet();
+  Sprites.spider = buildSpiderSheet();
+  Sprites.skeleton = buildSkeletonSheet();
+  Sprites.skeletonKing = buildSkeletonKingSheet();
   Sprites.icons = {
     sword: buildSwordIcon(),
     armor: buildArmorIcon(),
@@ -676,6 +954,9 @@ function initSprites() {
     potionBlue: buildPotionIcon('#4070c9'),
     coin: buildCoinIcon(),
     key: buildKeyIcon(),
-    shield: buildShieldIcon()
+    shield: buildShieldIcon(),
+    shieldBone: buildBoneShieldIcon(),
+    crownSkeleton: buildSkeletonCrownIcon(),
+    soulGem: buildSoulGemIcon()
   };
 }

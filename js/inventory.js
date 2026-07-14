@@ -34,10 +34,10 @@ class WorldItem {
 // Equipment slot definitions: slotId -> { label, accepts(kind) }
 // accepts() decides which backpack item kinds are droppable into that slot.
 const EQUIP_SLOTS = [
-  { id: 'helmet', label: 'Helmet', accepts: k => k === 'helmet' },
+  { id: 'helmet', label: 'Helmet', accepts: k => k === 'helmet' || k === 'crownSkeleton' },
   { id: 'weapon', label: 'Weapon', accepts: k => k === 'sword' || k === 'weapon' || k === 'swordLegendary' },
   { id: 'armor',  label: 'Armor',  accepts: k => k === 'armor' || k === 'armorJungle' },
-  { id: 'shield', label: 'Shield', accepts: k => k === 'shield' },
+  { id: 'shield', label: 'Shield', accepts: k => k === 'shield' || k === 'shieldBone' },
   { id: 'boots',  label: 'Boots',  accepts: k => k === 'boots' },
 ];
 
@@ -86,6 +86,15 @@ class Inventory {
     this.items.potionRed -= 1;
     if (this.items.potionRed <= 0) delete this.items.potionRed;
     if (player) player.hp = player.maxHp;
+    return true;
+  }
+
+  // Attempt to consume a Soul Gem. Returns true if one was consumed.
+  useSoulGem(player) {
+    if (!this.items.soulGem || this.items.soulGem <= 0) return false;
+    this.items.soulGem -= 1;
+    if (this.items.soulGem <= 0) delete this.items.soulGem;
+    if (player) player.mana = player.maxMana;
     return true;
   }
 

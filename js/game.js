@@ -105,8 +105,11 @@
     initSprites();
 
     // Map expanded to 56 columns to fit the second world (oasis) on the right,
-    // and 40 rows taller to fit the new, 3x-larger Jungle area south of the oasis.
-    const map = new TileMap(56, 88);
+    // and 40 rows taller to fit the 3x-larger Jungle area south of the oasis.
+    // Now further expanded to 109 columns and 166 rows to fit the new
+    // Skeleton Dungeon: 2x the jungle's width and 2x its height appended
+    // below it (south of the Jungle Gate), for ~4x the jungle's tile area.
+    const map = new TileMap(109, 166);
     const camera = new Camera(VIEW_W, VIEW_H);
     const particles = new ParticleSystem();
     const dialogue = new DialogueSystem();
@@ -207,6 +210,73 @@ const npcs = [elder, merchant];
         new Enemy(48 * TILE, (48 + 18) * TILE, 'witchBoss', {
             aggroRange: 200
         }),
+
+        // World 4 — Skeleton Dungeon (south of the Jungle Gate, behind the
+        // new Skeleton Gate — opens once both Jungle bosses are dead).
+        // Spiders and skeletons spread across the full 4x-larger area.
+        new Enemy(8 * TILE, 92 * TILE, 'spider'),
+        new Enemy(16 * TILE, 95 * TILE, 'skeleton'),
+        new Enemy(24 * TILE, 91 * TILE, 'spider'),
+        new Enemy(34 * TILE, 94 * TILE, 'skeleton'),
+        new Enemy(44 * TILE, 92 * TILE, 'spider'),
+        new Enemy(54 * TILE, 95 * TILE, 'spider'),
+        new Enemy(64 * TILE, 91 * TILE, 'skeleton'),
+        new Enemy(74 * TILE, 94 * TILE, 'spider'),
+        new Enemy(84 * TILE, 92 * TILE, 'skeleton'),
+        new Enemy(94 * TILE, 95 * TILE, 'spider'),
+
+        new Enemy(12 * TILE, 101 * TILE, 'skeleton'),
+        new Enemy(22 * TILE, 103 * TILE, 'spider'),
+        new Enemy(32 * TILE, 100 * TILE, 'skeleton'),
+        new Enemy(42 * TILE, 104 * TILE, 'spider'),
+        new Enemy(52 * TILE, 101 * TILE, 'skeleton'),
+        new Enemy(62 * TILE, 103 * TILE, 'spider'),
+        new Enemy(72 * TILE, 100 * TILE, 'skeleton'),
+        new Enemy(82 * TILE, 104 * TILE, 'spider'),
+        new Enemy(92 * TILE, 101 * TILE, 'skeleton'),
+        new Enemy(100 * TILE, 103 * TILE, 'spider'),
+
+        new Enemy(6 * TILE, 111 * TILE, 'spider'),
+        new Enemy(18 * TILE, 113 * TILE, 'skeleton'),
+        new Enemy(30 * TILE, 110 * TILE, 'spider'),
+        new Enemy(40 * TILE, 114 * TILE, 'skeleton'),
+        new Enemy(50 * TILE, 111 * TILE, 'spider'),
+        new Enemy(60 * TILE, 113 * TILE, 'skeleton'),
+        new Enemy(70 * TILE, 110 * TILE, 'spider'),
+        new Enemy(80 * TILE, 114 * TILE, 'skeleton'),
+        new Enemy(90 * TILE, 111 * TILE, 'spider'),
+        new Enemy(100 * TILE, 113 * TILE, 'skeleton'),
+
+        new Enemy(10 * TILE, 121 * TILE, 'skeleton'),
+        new Enemy(20 * TILE, 123 * TILE, 'spider'),
+        new Enemy(30 * TILE, 120 * TILE, 'skeleton'),
+        new Enemy(40 * TILE, 124 * TILE, 'spider'),
+        new Enemy(50 * TILE, 121 * TILE, 'skeleton'),
+        new Enemy(60 * TILE, 123 * TILE, 'spider'),
+        new Enemy(70 * TILE, 120 * TILE, 'skeleton'),
+        new Enemy(80 * TILE, 124 * TILE, 'spider'),
+        new Enemy(90 * TILE, 121 * TILE, 'skeleton'),
+
+        new Enemy(14 * TILE, 133 * TILE, 'spider'),
+        new Enemy(26 * TILE, 135 * TILE, 'skeleton'),
+        new Enemy(38 * TILE, 132 * TILE, 'spider'),
+        new Enemy(50 * TILE, 136 * TILE, 'skeleton'),
+        new Enemy(62 * TILE, 133 * TILE, 'spider'),
+        new Enemy(74 * TILE, 135 * TILE, 'skeleton'),
+        new Enemy(86 * TILE, 132 * TILE, 'spider'),
+        new Enemy(96 * TILE, 136 * TILE, 'skeleton'),
+
+        new Enemy(18 * TILE, 145 * TILE, 'skeleton'),
+        new Enemy(34 * TILE, 147 * TILE, 'spider'),
+        new Enemy(50 * TILE, 144 * TILE, 'skeleton'),
+        new Enemy(66 * TILE, 147 * TILE, 'spider'),
+        new Enemy(82 * TILE, 145 * TILE, 'skeleton'),
+
+        // World 4 — Skeleton King (throne room, far south of the dungeon).
+        // Only reachable after crossing the whole 4x-larger dungeon.
+        new Enemy(53 * TILE, 158 * TILE, 'skeletonKing', {
+            aggroRange: 220
+        }),
     ];
 
     let gameState = 'start'; // 'start' | 'howtoplay' | 'playing' | 'gameover' | 'victory'
@@ -281,8 +351,8 @@ function checkInteract() {
                 camera.shake(2, 4);
 
                 if (!en.alive) {
-                    const xpGain = en.isDevil ? 250 : en.isBoss ? 50 : (en.type === 'slimeRed' ? 25 : 10);
-                    const goldGain = en.isDevil ? 200 : en.isBoss ? 40 : (en.type === 'slimeRed' ? 8 : randRange(1, 3) | 0);
+                    const xpGain = en.type === 'skeletonKing' ? 600 : en.isDevil ? 250 : en.isBoss ? 50 : (en.type === 'slimeRed' ? 25 : (en.type === 'skeleton' ? 14 : en.type === 'spider' ? 9 : 10));
+                    const goldGain = en.type === 'skeletonKing' ? 500 : en.isDevil ? 200 : en.isBoss ? 40 : (en.type === 'slimeRed' ? 8 : (en.type === 'skeleton' || en.type === 'spider' ? randRange(2, 4) | 0 : randRange(1, 3) | 0));
                     player.gold += goldGain;
 
                     const leveled = player.gainXP(xpGain, particles);
@@ -333,6 +403,32 @@ function checkInteract() {
                         );
                         toast('The Jungle Witch dropped Swift Boots!');
                         screenFlash = { color: '63,212,168', alpha: 0.5 };
+                    }
+
+                    if (en.type === 'skeletonKing') {
+                        // Drop three items next to the fallen Skeleton King
+                        worldItems.push(
+                            new WorldItem(en.x + 14, en.y + 10, 'shieldBone')
+                        );
+                        worldItems.push(
+                            new WorldItem(en.x - 10, en.y + 10, 'crownSkeleton')
+                        );
+                        worldItems.push(
+                            new WorldItem(en.x + 2, en.y - 8, 'soulGem')
+                        );
+
+                        toast('The Skeleton King has fallen! Dropped a Bone Shield, Skeleton Crown, and Soul Gem!');
+                        screenFlash = {
+                            color: '232,226,208',
+                            alpha: 0.6
+                        };
+
+                        const systemNPC = new NPC(player.x, player.y, 'System', null, [
+                            "The Skeleton King's throne crumbles to dust!",
+                            "The Skeleton Dungeon falls silent at last.",
+                            "You have conquered every corner of the Shattered Vale."
+                        ]);
+                        dialogue.open(systemNPC, () => {});
                     }
 
                     if (en.type === 'devilBoss') {
@@ -426,6 +522,21 @@ function checkInteract() {
             }
             // -----------------------
 
+            // If both Jungle bosses (Orc Warlord + Jungle Witch) are dead
+            // and the Skeleton Gate is closed, open it!
+            const jungleBossesAlive = enemies.some(e =>
+                (e.type === 'orcBoss' || e.type === 'witchBoss') && e.alive
+            );
+            if (!jungleBossesAlive && !map.isSkeletonGateOpen) {
+                map.openSkeletonGate();
+                toast('The two Jungle bosses have fallen — the Skeleton Gate creaks open to the south!');
+                screenFlash = {
+                    color: '232,151,90',
+                    alpha: 0.4
+                };
+            }
+            // -----------------------
+
             worldItems.forEach(item => {
                 item.update();
                 if (!item.taken && rectsOverlap(player, item)) {
@@ -464,6 +575,15 @@ function checkInteract() {
                             color: '63,212,168',
                             alpha: 0.4
                         };
+                    } else if (item.kind === 'shieldBone') {
+                        inventory.add('shieldBone', 1);
+                        toast('Picked up the Bone Shield!');
+                    } else if (item.kind === 'crownSkeleton') {
+                        inventory.add('crownSkeleton', 1);
+                        toast('Picked up the Skeleton Crown!');
+                    } else if (item.kind === 'soulGem') {
+                        inventory.add('soulGem', 1);
+                        toast('Picked up a Soul Gem! (drink to restore mana)');
                     } else {
                         inventory.add(item.kind, 1);
                         toast('Picked up an item');
@@ -501,7 +621,8 @@ function checkInteract() {
         goblinBoss: 'Goblin King Grimtooth',
         devilBoss: 'Devil of the Oasis',
         orcBoss: 'Orc Warlord Skarn',
-        witchBoss: 'Jungle Witch Maera'
+        witchBoss: 'Jungle Witch Maera',
+        skeletonKing: 'The Skeleton King'
     };
 
     function getActiveBoss() {
@@ -700,6 +821,68 @@ merchant.talked = false;
             }),
             new Enemy(48 * TILE, (48 + 18) * TILE, 'witchBoss', {
                 aggroRange: 200
+            }),
+
+            new Enemy(8 * TILE, 92 * TILE, 'spider'),
+            new Enemy(16 * TILE, 95 * TILE, 'skeleton'),
+            new Enemy(24 * TILE, 91 * TILE, 'spider'),
+            new Enemy(34 * TILE, 94 * TILE, 'skeleton'),
+            new Enemy(44 * TILE, 92 * TILE, 'spider'),
+            new Enemy(54 * TILE, 95 * TILE, 'spider'),
+            new Enemy(64 * TILE, 91 * TILE, 'skeleton'),
+            new Enemy(74 * TILE, 94 * TILE, 'spider'),
+            new Enemy(84 * TILE, 92 * TILE, 'skeleton'),
+            new Enemy(94 * TILE, 95 * TILE, 'spider'),
+
+            new Enemy(12 * TILE, 101 * TILE, 'skeleton'),
+            new Enemy(22 * TILE, 103 * TILE, 'spider'),
+            new Enemy(32 * TILE, 100 * TILE, 'skeleton'),
+            new Enemy(42 * TILE, 104 * TILE, 'spider'),
+            new Enemy(52 * TILE, 101 * TILE, 'skeleton'),
+            new Enemy(62 * TILE, 103 * TILE, 'spider'),
+            new Enemy(72 * TILE, 100 * TILE, 'skeleton'),
+            new Enemy(82 * TILE, 104 * TILE, 'spider'),
+            new Enemy(92 * TILE, 101 * TILE, 'skeleton'),
+            new Enemy(100 * TILE, 103 * TILE, 'spider'),
+
+            new Enemy(6 * TILE, 111 * TILE, 'spider'),
+            new Enemy(18 * TILE, 113 * TILE, 'skeleton'),
+            new Enemy(30 * TILE, 110 * TILE, 'spider'),
+            new Enemy(40 * TILE, 114 * TILE, 'skeleton'),
+            new Enemy(50 * TILE, 111 * TILE, 'spider'),
+            new Enemy(60 * TILE, 113 * TILE, 'skeleton'),
+            new Enemy(70 * TILE, 110 * TILE, 'spider'),
+            new Enemy(80 * TILE, 114 * TILE, 'skeleton'),
+            new Enemy(90 * TILE, 111 * TILE, 'spider'),
+            new Enemy(100 * TILE, 113 * TILE, 'skeleton'),
+
+            new Enemy(10 * TILE, 121 * TILE, 'skeleton'),
+            new Enemy(20 * TILE, 123 * TILE, 'spider'),
+            new Enemy(30 * TILE, 120 * TILE, 'skeleton'),
+            new Enemy(40 * TILE, 124 * TILE, 'spider'),
+            new Enemy(50 * TILE, 121 * TILE, 'skeleton'),
+            new Enemy(60 * TILE, 123 * TILE, 'spider'),
+            new Enemy(70 * TILE, 120 * TILE, 'skeleton'),
+            new Enemy(80 * TILE, 124 * TILE, 'spider'),
+            new Enemy(90 * TILE, 121 * TILE, 'skeleton'),
+
+            new Enemy(14 * TILE, 133 * TILE, 'spider'),
+            new Enemy(26 * TILE, 135 * TILE, 'skeleton'),
+            new Enemy(38 * TILE, 132 * TILE, 'spider'),
+            new Enemy(50 * TILE, 136 * TILE, 'skeleton'),
+            new Enemy(62 * TILE, 133 * TILE, 'spider'),
+            new Enemy(74 * TILE, 135 * TILE, 'skeleton'),
+            new Enemy(86 * TILE, 132 * TILE, 'spider'),
+            new Enemy(96 * TILE, 136 * TILE, 'skeleton'),
+
+            new Enemy(18 * TILE, 145 * TILE, 'skeleton'),
+            new Enemy(34 * TILE, 147 * TILE, 'spider'),
+            new Enemy(50 * TILE, 144 * TILE, 'skeleton'),
+            new Enemy(66 * TILE, 147 * TILE, 'spider'),
+            new Enemy(82 * TILE, 145 * TILE, 'skeleton'),
+
+            new Enemy(53 * TILE, 158 * TILE, 'skeletonKing', {
+                aggroRange: 220
             }),
         ];
 
@@ -1123,6 +1306,18 @@ npcs.forEach(n => drawables.push({
                     inventory.equip('boots');
                     player.speed = 3.2;
                     toast('Equipped Swift Boots!');
+                } else if (hit.kind === 'shieldBone') {
+                    inventory.equip('shieldBone');
+                    toast('Equipped the Bone Shield!');
+                } else if (hit.kind === 'crownSkeleton') {
+                    inventory.equip('crownSkeleton');
+                    toast('Equipped the Skeleton Crown!');
+                } else if (hit.kind === 'soulGem') {
+                    const used = inventory.useSoulGem(player);
+                    if (used) {
+                        particles.floatText(player.centerX, player.y - 10, 'Mana restored!', '#a878e0');
+                        toast('Consumed a Soul Gem — Mana fully restored!');
+                    }
                 }
             } else if (hit && hit.region === 'equip') {
                 if (hit.slotId === 'weapon') {
@@ -1136,6 +1331,8 @@ npcs.forEach(n => drawables.push({
                 } else if (hit.slotId === 'boots') {
                     inventory.unequip('boots');
                     player.speed = 2.6;
+                } else if (hit.slotId === 'shield') {
+                    inventory.unequip('shield');
                 }
             }
             return;
