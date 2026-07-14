@@ -89,11 +89,11 @@ class Inventory {
     return true;
   }
 
-  // Attempt to consume a Soul Gem. Returns true if one was consumed.
-  useSoulGem(player) {
-    if (!this.items.soulGem || this.items.soulGem <= 0) return false;
-    this.items.soulGem -= 1;
-    if (this.items.soulGem <= 0) delete this.items.soulGem;
+  // Attempt to use/drink a blue potion. Returns true if one was consumed.
+  usePotionBlue(player) {
+    if (!this.items.potionBlue || this.items.potionBlue <= 0) return false;
+    this.items.potionBlue -= 1;
+    if (this.items.potionBlue <= 0) delete this.items.potionBlue;
     if (player) player.mana = player.maxMana;
     return true;
   }

@@ -414,10 +414,10 @@ function checkInteract() {
                             new WorldItem(en.x - 10, en.y + 10, 'crownSkeleton')
                         );
                         worldItems.push(
-                            new WorldItem(en.x + 2, en.y - 8, 'soulGem')
+                            new WorldItem(en.x + 2, en.y - 8, 'potionBlue')
                         );
 
-                        toast('The Skeleton King has fallen! Dropped a Bone Shield, Skeleton Crown, and Soul Gem!');
+                        toast('The Skeleton King has fallen! Dropped a Bone Shield, Skeleton Crown, and Blue Potion!');
                         screenFlash = {
                             color: '232,226,208',
                             alpha: 0.6
@@ -581,9 +581,9 @@ function checkInteract() {
                     } else if (item.kind === 'crownSkeleton') {
                         inventory.add('crownSkeleton', 1);
                         toast('Picked up the Skeleton Crown!');
-                    } else if (item.kind === 'soulGem') {
-                        inventory.add('soulGem', 1);
-                        toast('Picked up a Soul Gem! (drink to restore mana)');
+                    } else if (item.kind === 'potionBlue') {
+                        inventory.add('potionBlue', 1);
+                        toast('Picked up a Blue Potion! (drink to restore mana)');
                     } else {
                         inventory.add(item.kind, 1);
                         toast('Picked up an item');
@@ -1312,11 +1312,11 @@ npcs.forEach(n => drawables.push({
                 } else if (hit.kind === 'crownSkeleton') {
                     inventory.equip('crownSkeleton');
                     toast('Equipped the Skeleton Crown!');
-                } else if (hit.kind === 'soulGem') {
-                    const used = inventory.useSoulGem(player);
+                } else if (hit.kind === 'potionBlue') {
+                    const used = inventory.usepotionBlue(player);
                     if (used) {
                         particles.floatText(player.centerX, player.y - 10, 'Mana restored!', '#a878e0');
-                        toast('Consumed a Soul Gem — Mana fully restored!');
+                        toast('Consumed a Blue Potion — Mana fully restored!');
                     }
                 }
             } else if (hit && hit.region === 'equip') {

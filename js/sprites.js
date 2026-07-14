@@ -903,29 +903,6 @@ function buildSkeletonCrownIcon() {
   ctx.beginPath(); ctx.arc(18, 13, 1.2, 0, Math.PI * 2); ctx.fill();
   return c;
 }
-function buildSoulGemIcon() {
-  const c = makeCanvas(24, 24);
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = 'rgba(138,94,201,0.3)';
-  ctx.beginPath(); ctx.ellipse(12, 12, 10, 10, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.save();
-  ctx.translate(12, 12);
-  ctx.fillStyle = '#6a3ea0';
-  ctx.beginPath();
-  ctx.moveTo(0, -8); ctx.lineTo(6, -2); ctx.lineTo(4, 8);
-  ctx.lineTo(-4, 8); ctx.lineTo(-6, -2);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = '#a878e0';
-  ctx.beginPath();
-  ctx.moveTo(0, -5); ctx.lineTo(3, -1); ctx.lineTo(0, 5); ctx.lineTo(-3, -1);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  ctx.beginPath(); ctx.ellipse(-2, -3, 1.5, 2, 0.4, 0, Math.PI * 2); ctx.fill();
-  ctx.restore();
-  return c;
-}
 
 function initSprites() {
   Sprites.player = buildHumanoidSheet(PAL_PLAYER, null);
@@ -957,6 +934,5 @@ function initSprites() {
     shield: buildShieldIcon(),
     shieldBone: buildBoneShieldIcon(),
     crownSkeleton: buildSkeletonCrownIcon(),
-    soulGem: buildSoulGemIcon()
   };
 }
