@@ -117,7 +117,9 @@ class TileMap {
 
     for (let x = 14; x < 28; x++) this.set(x, 9, TileType.PATH);
 
-    for (let y = 9; y < this.rows - 2; y++) this.set(13, y, TileType.PATH);
+    for (let y = 9; y <= this.oasisSouthEdge - 2; y++) {
+      this.set(13, y, TileType.PATH);
+    }
 
     for (let x = 14; x < 17; x++) this.set(x, 33, TileType.PATH);
 
@@ -149,8 +151,8 @@ class TileMap {
     // WORLD TWO BORDER GATE
     // =========================
 
-    for (let y = 0; y < this.rows; y++) {
-      if (y === 9 ) {
+    for (let y = 0; y <= this.oasisSouthEdge; y++) {
+      if (y === 9) {
         this.set(27, y, TileType.WORLD_TWO_GATE);
       } else {
         this.set(27, y, TileType.TREE);
@@ -367,21 +369,9 @@ class TileMap {
       this.set(right + 1, y, TileType.JUNGLE_WALL);
     }
 
-    // Two gates in: one under the original oasis road, one further west so
-    // the much wider jungle has more than one entrance.
-    const gateX1 = 50;
-    const gateX2 = 15;
-    this.set(gateX1, top - 1, TileType.JUNGLE_GATE);
-    this.set(gateX2, top - 1, TileType.JUNGLE_GATE);
-
-    for (let y = top; y <= bottom; y++) {
-      this.set(gateX1, y, TileType.PATH);
-      this.set(gateX2, y, TileType.PATH);
-    }
-    // East-west spine connecting both gates
-    for (let x = left; x <= right; x++) {
-      this.set(x, top + 6, TileType.PATH);
-    }
+    // Single gate connecting the oasis to the jungle
+    const gateX = Math.floor((left + right + (right / 2)) / 2); // centered between jungle edges
+    this.set(gateX, top - 1, TileType.JUNGLE_GATE);
 
     // Dense jungle tree clusters spread across the full 3x-wider/taller area
     const jungleClusters = [
