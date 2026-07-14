@@ -276,7 +276,7 @@ class Inventory {
 
     ctx.fillStyle = 'rgba(232,228,216,0.4)';
     ctx.font = '11px sans-serif';
-    ctx.fillText('[Esc to close] · click a backpack item to equip it', x + 18, y + h - 14);
+    ctx.fillText('[Esc to close] · click a backpack item to use/equip it', x + 18, y + h - 14);
     ctx.restore();
   }
 }
