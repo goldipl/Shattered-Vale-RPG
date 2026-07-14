@@ -432,7 +432,6 @@ function checkInteract() {
                     item.taken = true;
                     if (item.kind === 'sword') {
                         inventory.add('sword', 1);
-                        inventory.equip('sword');
                         player.hasSword = true;
                         questStage = Math.max(questStage, 2);
                         toast('Found the Iron Sword! Attack increased.');
@@ -445,25 +444,19 @@ function checkInteract() {
                         particles.floatText(item.x, item.y - 6, '+' + item.value + 'g', '#e8c93c');
                     } else if (item.kind === 'armor') {
                         inventory.add('armor', 1);
-                        inventory.equip('armor');
                         toast('Picked up Iron Armor!');
-                        inventory.equip('armor');
                     } else if (item.kind === 'helmet') {
                         inventory.add('helmet', 1);
-                        inventory.equip('helmet');
                         toast('Picked up the Devil\'s Helmet!');
                     } else if (item.kind === 'armorJungle') {
                         inventory.add('armorJungle', 1);
-                        inventory.equip('armorJungle');
                         toast('Picked up Jungle Armor!');
                     } else if (item.kind === 'boots') {
                         inventory.add('boots', 1);
-                        inventory.equip('boots');
                         player.speed = 3.2;
                         toast('Picked up Swift Boots! Movement speed increased.');
                     } else if (item.kind === 'swordLegendary') {
                         inventory.add('swordLegendary', 1);
-                        inventory.equip('swordLegendary');
                         player.hasSword = true;
                         player.hasLegendarySword = true;
                         toast('Equipped the Legendary Sword! Attack greatly increased.');
