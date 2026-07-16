@@ -13,11 +13,53 @@ A top-down action RPG built with vanilla JavaScript and HTML5 Canvas — no engi
 
 No installation or server required — just open `index.html` in a browser.
 
+## Architecture
+
 ```
-shattered-vale-rpg/
+├── index.html
 ├── css/
-├── js/
-└── index.html
+│   └── style.css
+└── js/
+    ├── utils.js                    shared math/canvas helpers (+ makeCanvas, wrapPlainText)
+    │
+    ├── config/                     ← pure data, no rendering, no instantiation
+    │   ├── balance.js               player/enemy stats, XP+gold rewards, fireball numbers
+    │   ├── level-layout.js          NPC dialogue, item/enemy spawn placements, boss names
+    │   └── item-effects.js          pickup/equip/unequip tables, boss-defeat scripts, gate-unlock rules
+    │
+    ├── sprites/                    ← procedural pixel-art generation
+    │   ├── humanoid-sprites.js      player/elder/merchant sprite builder + sword overlay
+    │   ├── monster-sprites.js       slime/goblin/devil/orc/witch/spider/skeleton builders
+    │   ├── icon-sprites.js          24x24 item icons
+    │   └── sprites.js               the Sprites registry + initSprites()
+    │
+    ├── world/                      ← the tile map
+    │   ├── tilemap-builder.js       tile types + world/jungle/crypt generation
+    │   ├── tilemap-renderer.js      per-tile drawing, edge blending, decorations
+    │   └── tilemap.js                TileMap class (composes the two above)
+    │
+    ├── entities/
+    │   ├── animated-sprite.js       shared sprite-sheet frame walker
+    │   ├── player.js
+    │   ├── npc.js                   (now also draws its own "Talk with me" bubble)
+    │   ├── enemy.js                 driven by config/balance.js's ENEMY_DEFS table
+    │   └── fireball.js
+    │
+    ├── systems/                    ← unchanged from the original, just relocated
+    │   ├── camera.js
+    │   ├── particles.js
+    │   ├── dialogue.js
+    │   └── inventory.js             (+ new Inventory.reset() method)
+    │
+    ├── ui/
+    │   ├── hud.js                   DOM hp/xp/mana bar sync + boss banner/toast/quest tracker
+    │   └── screens.js                start menu, how-to-play, game-over, desktop-only block
+    │
+    └── core/
+        ├── input.js                 keyboard state + mobile detection
+        ├── world-factory.js         turns level-layout.js data into live NPC/Item/Enemy instances
+        ├── combat.js                 interact/attack/pickup/inventory-click resolution
+        └── game.js                   bootstrap + main loop (the orchestrator — now ~290 lines, was ~1,370)
 ```
 
 Double-click `index.html`, or serve the folder locally if your browser restricts local file access:

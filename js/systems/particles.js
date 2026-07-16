@@ -1,4 +1,4 @@
-// particles.js — lightweight particle & floating-text system
+// systems/particles.js — lightweight particle & floating-text system
 
 class ParticleSystem {
   constructor() {

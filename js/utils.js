@@ -1,4 +1,4 @@
-// utils.js — shared math/helper functions
+// utils.js — shared math/canvas helper functions used across the whole game
 const TILE = 32;
 
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
@@ -27,4 +27,31 @@ function hashTile(x, y) {
   let h = (x * 374761393 + y * 668265263) % 2147483647;
   h = (h ^ (h >> 13)) * 1274126177 % 2147483647;
   return Math.abs(h) / 2147483647;
+}
+
+// Off-screen canvas helper — used by sprite-sheet builders and by the
+// tilemap's baked static layer.
+function makeCanvas(w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  return c;
+}
+
+// Word-wraps plain text to a max pixel width using the ctx's current font.
+// Shared by the dialogue box and the canvas UI screens.
+function wrapPlainText(ctx, text, maxWidth) {
+  const words = text.split(' ');
+  const out = [];
+  let line = '';
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      out.push(line);
+      line = w;
+    } else {
+      line = test;
+    }
+  }
+  if (line) out.push(line);
+  return out;
 }

@@ -1,4 +1,6 @@
-// dialogue.js — styled dialogue box with typewriter text reveal
+// systems/dialogue.js — styled dialogue box with typewriter text reveal.
+// This is purely presentation: it walks whatever `npc.dialogue` array it's
+// given. The actual conversation text lives in config/level-layout.js.
 
 class DialogueSystem {
     constructor() {

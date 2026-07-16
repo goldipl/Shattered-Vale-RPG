@@ -1,4 +1,4 @@
-// inventory.js — item pickups in the world + toggleable inventory panel
+// systems/inventory.js — item pickups in the world + toggleable inventory panel
 
 class WorldItem {
   constructor(x, y, kind, opts = {}) {
@@ -43,13 +43,19 @@ const EQUIP_SLOTS = [
 
 class Inventory {
   constructor() {
-    this.items = {}; // kind -> count (backpack, non-equipped items)
     this.equipped = {}; // slotId -> kind | null
+    this.reset();
+  }
+
+  // Back to a fresh, empty inventory — used at construction and on restart.
+  reset() {
+    this.items = {}; // kind -> count (backpack, non-equipped items)
     EQUIP_SLOTS.forEach(s => { this.equipped[s.id] = null; });
     this.open = false;
     this.hoveredKind = null;   // backpack kind currently hovered
     this.hoveredSlot = null;   // equip slotId currently hovered
   }
+
   add(kind, count = 1) {
     this.items[kind] = (this.items[kind] || 0) + count;
   }

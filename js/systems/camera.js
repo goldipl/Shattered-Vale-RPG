@@ -1,4 +1,4 @@
-// camera.js — smoothly follows the player and clamps to map bounds
+// systems/camera.js — smoothly follows the player and clamps to map bounds
 
 class Camera {
   constructor(viewW, viewH) {
