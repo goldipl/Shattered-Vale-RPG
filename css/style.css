@@ -35,7 +35,7 @@ body {
   display: flex;
   align-items: stretch;
   gap: 0;
-  width: 800px;
+  width: 100%;
   max-width: 96vw;
   background: linear-gradient(180deg, #26201a 0%, #1c1712 55%, #171310 100%);
   border: 2px solid #4a3d2c;
