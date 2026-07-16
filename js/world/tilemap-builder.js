@@ -126,7 +126,12 @@ function buildWorld(map) {
   // =========================
   // TROLL CASTLE
   // =========================
-  const castle = { left: 17, right: 25, top: 13, bottom: 21 };
+const castle = {
+  left: 17,
+  right: 33,  
+  top: 13,
+  bottom: 21
+};
 
   // clear inside
   for (let y = castle.top + 1; y < castle.bottom; y++) {
@@ -134,18 +139,25 @@ function buildWorld(map) {
       map.set(x, y, TileType.GRASS);
     }
   }
-  // horizontal walls
-  for (let x = castle.left; x <= castle.right; x++) {
-    map.set(x, castle.top, TileType.WALL);
-    map.set(x, castle.bottom, TileType.WALL);
-  }
-  // vertical walls
-  for (let y = castle.top; y <= castle.bottom; y++) {
-    map.set(castle.left, y, TileType.WALL);
-    map.set(castle.right, y, TileType.WALL);
-  }
+// horizontal walls (2 tiles thick)
+for (let x = castle.left; x <= castle.right; x++) {
+  map.set(x, castle.top, TileType.WALL);
+  map.set(x, castle.top + 1, TileType.WALL);
+
+  map.set(x, castle.bottom, TileType.WALL);
+  map.set(x, castle.bottom - 1, TileType.WALL);
+}
+// vertical walls (2 tiles thick)
+for (let y = castle.top; y <= castle.bottom; y++) {
+  map.set(castle.left, y, TileType.WALL);
+  map.set(castle.left + 1, y, TileType.WALL);
+
+  map.set(castle.right, y, TileType.WALL);
+  map.set(castle.right - 1, y, TileType.WALL);
+}
   // boss gate
   map.set(castle.left, 17, TileType.GATE);
+  map.set(castle.left + 1, 17, TileType.GATE);
   // road to castle
   for (let x = 3; x < castle.left; x++) {
     map.set(x, 17, TileType.PATH);
