@@ -61,6 +61,7 @@
     merchantGaveGift: false,
     questStage: 0, // 0 = not talked, 1 = quest given, 2 = sword found, 3 = boss defeated
     gameState: 'start', // 'start' | 'howtoplay' | 'playing' | 'gameover'
+    hasStarted: false, // true once Play has been pressed at least once — flips the start-menu button to "Continue"
     screenFlash: null, // {color, alpha}
     toastMsg: null,
     toastTimer: 0,
@@ -93,6 +94,7 @@
 
     state.questStage = 0;
     state.gameState = 'playing';
+    state.hasStarted = true;
     state.merchantGaveGift = false;
 
     WorldFactory.resetNpcsAndItems(npcs, worldItems);
@@ -119,6 +121,9 @@
       if (justPressed[' '] || justPressed['e']) dialogue.advance();
     } else if (inventory.open) {
       if (justPressed['i'] || justPressed['escape']) inventory.toggle();
+    } else if (justPressed['escape']) {
+      state.gameState = 'start';
+      hud.setVisible(false);
     } else {
       player.update(keys, map, particles);
       player.fireballs.forEach((f) => f.update(state.enemies, particles));
@@ -240,6 +245,7 @@
     if (state.gameState === 'start') {
       over = Screens.pointInBtn(mx, my, state.startButtons.play) ||
         Screens.pointInBtn(mx, my, state.startButtons.howto) ||
+        Screens.pointInBtn(mx, my, state.startButtons.restart) ||
         Screens.pointInBtn(mx, my, state.startButtons.author);
     } else if (state.gameState === 'howtoplay') {
       over = Screens.pointInBtn(mx, my, state.howToBackButton);
@@ -266,9 +272,13 @@
     if (state.gameState === 'start') {
       if (Screens.pointInBtn(mx, my, state.startButtons.play)) {
         state.gameState = 'playing';
+        state.hasStarted = true;
         hud.setVisible(true);
       } else if (Screens.pointInBtn(mx, my, state.startButtons.howto)) {
         state.gameState = 'howtoplay';
+      } else if (Screens.pointInBtn(mx, my, state.startButtons.restart)) {
+        restartGame();
+        hud.setVisible(true);
       } else if (Screens.pointInBtn(mx, my, state.startButtons.author)) {
         window.open(AUTHOR_URL, '_blank', 'noopener,noreferrer');
       }

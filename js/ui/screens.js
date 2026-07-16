@@ -86,15 +86,21 @@ const Screens = {
     const bx = viewW / 2 - bw / 2;
     let by = viewH / 2 - 10;
 
-    const playBtn = this.drawButton(ctx, bx, by, bw, bh, 'Play', '#3a6b3d');
+    const playLabel = state.hasStarted ? 'Continue' : 'Play';
+    const playBtn = this.drawButton(ctx, bx, by, bw, bh, playLabel, '#3a6b3d');
     by += bh + gap;
     const howToBtn = this.drawButton(ctx, bx, by, bw, bh, 'How to Play', '#3a5a7a');
     by += bh + gap;
+    let restartBtn = null;
+    if (state.hasStarted) {
+      restartBtn = this.drawButton(ctx, bx, by, bw, bh, 'Restart Game', '#7a3a3a');
+      by += bh + gap;
+    }
     const authorBtn = this.drawButton(ctx, bx, by, bw, bh, 'Author', '#5a4a3a');
 
     ctx.restore();
 
-    state.startButtons = { play: playBtn, howto: howToBtn, author: authorBtn };
+    state.startButtons = { play: playBtn, howto: howToBtn, restart: restartBtn, author: authorBtn };
   },
 
   // Draws the how-to-play panel and stores the back button on
