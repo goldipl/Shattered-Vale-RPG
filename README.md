@@ -2,14 +2,6 @@
 
 A top-down action RPG built with vanilla JavaScript and HTML5 Canvas — no engine, no build step, no dependencies. Explore a village, talk to NPCs, find a hidden sword, battle slimes, and defeat the goblin chief to save the village.
 
-![screenshot](./screenshots/screenshot01.jpg)
-![screenshot](./screenshots/screenshot02.jpg)
-![screenshot](./screenshots/screenshot04.jpg)
-![screenshot](./screenshots/screenshot05.jpg)
-![screenshot](./screenshots/screenshot03.jpg)
-![screenshot](./screenshots/screenshot06.jpg)
-![screenshot](./screenshots/screenshot07.jpg)
-
 ## Playing
 
 No installation or server required — just open `index.html` in a browser.
@@ -102,24 +94,6 @@ Your HP, level/XP, and gold are tracked in the HUD above the game canvas. If you
 - **Inventory panel** for collected items (potions, keys, etc.)
 - **Smooth camera** that follows the player and clamps to the map bounds
 
-## Project structure
-
-| File              | Responsibility                                                                       |
-| ----------------- | ------------------------------------------------------------------------------------ |
-| `index.html`      | Page shell, HUD markup, canvas element, script loading order                         |
-| `css/style.css`   | Game styles                                                                          |
-| `js/utils.js`     | Shared math/helper functions (clamp, lerp, collision, rounded rects)                 |
-| `js/sprites.js`   | Procedural sprite sheet generation for every character and item icon                 |
-| `js/tilemap.js`   | World generation, tile textures, collision, static-layer baking                      |
-| `js/particles.js` | Particle bursts and floating combat text                                             |
-| `js/entities.js`  | `Player`, `NPC`, and `Enemy` classes, animation, and AI                              |
-| `js/dialogue.js`  | Dialogue box UI and typewriter text reveal                                           |
-| `js/inventory.js` | World item pickups and the inventory panel UI                                        |
-| `js/camera.js`    | Camera follow/shake logic                                                            |
-| `js/game.js`      | Game loop, input handling, state management, HUD updates — wires everything together |
-
-Scripts are loaded in dependency order via plain `<script>` tags (no bundler needed): `utils` → `sprites` → `tilemap` → `particles` → `entities` → `dialogue` → `inventory` → `camera` → `game`.
-
 ## Customizing
 
 A few starting points if you want to extend it:
@@ -132,6 +106,16 @@ A few starting points if you want to extend it:
 ## Browser support
 
 Any modern browser with Canvas2D support (Chrome, Firefox, Safari, Edge). No mobile touch controls are implemented — keyboard required.
+
+## Screenshots
+
+![screenshot](./screenshots/screenshot01.jpg)
+![screenshot](./screenshots/screenshot02.jpg)
+![screenshot](./screenshots/screenshot04.jpg)
+![screenshot](./screenshots/screenshot05.jpg)
+![screenshot](./screenshots/screenshot03.jpg)
+![screenshot](./screenshots/screenshot06.jpg)
+![screenshot](./screenshots/screenshot07.jpg)
 
 ## License
 
