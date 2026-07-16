@@ -71,6 +71,7 @@ python3 -m http.server 8000
 | `Space`                       | Attack                  |
 | `E`                           | Talk to NPCs / interact |
 | `I`                           | Toggle inventory        |
+| `F`                           | Use Fire Ball Attack    |
 
 ## How to play
 
