@@ -76,23 +76,27 @@ python3 -m http.server 8000
 ## How to play
 
 1. Explore the village and find **Elder Rowan** — talk to him (`E`) to start the quest.
-2. Head east to the pond and pick up the **Iron Sword** lying in the grass.
-3. Fight **slimes** scattered around the map for gold and XP; leveling up increases your max HP and attack.
-4. Visit the **Wandering Merchant** for a free health potion.
-5. Head to the forest clearing in the southeast and defeat the **Goblin Chief** to win.
+2. Visit the **Wandering Merchant** for a free health potion.
+3. Head west to the castle and pick up the **Iron Sword** lying in the grass.
+4. Fight **slimes** scattered around the map for gold and XP; leveling up increases your max HP and attack.
+5. Head to the castle and defeat the **Goblin King Grimtooth** to open a New Worlds.
 
 Your HP, level/XP, and gold are tracked in the HUD above the game canvas. If your HP reaches 0, refresh the page to try again.
 
 ## Features
 
-- **Procedurally drawn sprites** — layered, directional character sheets (no external image assets) for the player, NPCs, slimes, and the goblin boss, each with walk-cycle animation
-- **Textured world** with autotile edge-blending between grass/path/sand/water, a bridge, animated water shimmer, and scattered decoration (flowers, rocks, tall grass)
-- **Depth-sorted rendering** so characters visually overlap correctly based on their position
-- **Combat system** with hitboxes, knockback-free contact damage, hit-flash feedback, and a telegraphed boss attack
-- **Particle effects** — hit bursts, floating damage/XP numbers, footstep sparkles, screen shake and flash on level-up
-- **Typewriter-style dialogue box** with a simple branching-free quest conversation
-- **Inventory panel** for collected items (potions, keys, etc.)
+- **Procedurally drawn sprites** — layered, directional character sheets (no external image assets) for the player, elder, merchant, all slime variants, the spider, the skeleton, and all five bosses (Goblin King, Devil, Orc Warlord, Jungle Witch, Skeleton King), each with walk-cycle animation
+- **Textured world spanning four zones** — starting village/forest, beach oasis, jungle, and a skeleton dungeon — with autotile edge-blending between grass/path/sand/water/jungle/crypt floor, a bridge, animated water shimmer, and scattered zone-specific decoration (flowers, rocks, tall grass, shells, ferns, vines, bones, braziers)
+- **Depth-sorted rendering** so characters and items visually overlap correctly based on their position
+- **Combat system** with melee hitboxes, ranged fireball projectiles, telegraphed enemy attacks, hit-flash feedback, and per-enemy HP bars
+- **Boss encounters** with a dedicated health banner, low-HP warning pulse, and unique defeat drops/cutscenes for each of the five bosses
+- **Gated progression** — defeating guardian enemies or specific bosses opens new gates (village → oasis → jungle → dungeon), tracked by a simple quest stage
+- **Leveling system** — gaining XP raises level, max HP, and attack; mana regenerates over time to fuel fireballs
+- **Particle effects** — hit bursts, floating damage/XP/gold numbers, footstep sparkles, camera shake, and full-screen flash on level-up, boss kills, and gate openings
+- **Typewriter-style dialogue box** with one-time quest/gift conversations (Elder Rowan, the Wandering Merchant) and short "System" narration cutscenes after boss fights
+- **Full inventory system** — an equip-slot panel (helmet/weapon/armor/shield/boots) alongside a backpack grid, with click-to-equip/unequip and consumable potions (health/mana)
 - **Smooth camera** that follows the player and clamps to the map bounds
+- **Start menu, how-to-play panel, and game-over/restart screen**, plus a desktop-only block screen for mobile visitors (this game requires a keyboard)
 
 ## Customizing
 
