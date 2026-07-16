@@ -51,8 +51,7 @@ No installation or server required — just open `index.html` in a browser.
     └── core/
         ├── input.js                 keyboard state tracking (keys/justPressed) + mobile-device detection
         ├── world-factory.js         turns the plain data in config/level-layout.js into live NPC/WorldItem/Enemy instances; used both at boot and on restart, eliminating the old duplicated 86-line enemy list
-        ├── combat.js                 resolves player interaction: talking to NPCs, melee hit resolution,
-        │                             XP/gold/loot rewards, world-item pickups, inventory-panel clicks, gate-unlock checks
+        ├── combat.js                 resolves player interaction: talking to NPCs, melee hit resolution, XP/gold/loot rewards, world-item pickups, inventory-panel clicks, gate-unlock checks
         └── game.js                   bootstrap + main update/draw loop + restart logic
 ```
 
