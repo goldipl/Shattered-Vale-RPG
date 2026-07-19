@@ -79,6 +79,7 @@ const Combat = {
       advanceQuestTo: (stage) => { state.questStage = Math.max(state.questStage, stage); },
       toast: (msg) => this.toast(state, msg),
       setScreenFlash: (flash) => { state.screenFlash = flash; },
+      setVictory: () => { state.gameState = 'victory'; },
       openSystemDialogue: (lines) => {
         const systemNPC = new NPC(state.player.x, state.player.y, 'System', null, lines);
         state.dialogue.open(systemNPC, () => {});
@@ -96,6 +97,20 @@ const Combat = {
       this.toast(state, gate.toast);
       state.screenFlash = gate.flash;
     });
+  },
+
+  // Standing on lava (Molten Depths) burns the player unless Fireproof
+  // Boots are equipped. Reuses player.invuln as the damage cooldown — the
+  // same brief flicker of immunity a melee hit grants — so this is one
+  // tick roughly every 45 frames, not every single frame.
+  checkHazards(state) {
+    const { player, map, particles } = state;
+    if (player.fireproof) return;
+    const tileX = Math.floor(player.centerX / TILE);
+    const tileY = Math.floor(player.centerY / TILE);
+    if (map.get(tileX, tileY) === TileType.LAVA) {
+      player.takeDamage(LAVA_DAMAGE_PER_TICK, particles);
+    }
   },
 
   // Walking over an un-taken world item picks it up.

@@ -12,7 +12,7 @@ const PLAYER_BASE_STATS = {
   hp: 150,
   maxHp: 150,
   atk: 3,
-  speed: 1.5,
+  speed: 2.6,
   mana: 100,
   maxMana: 100,
   manaRegen: 0.04,
@@ -35,6 +35,7 @@ const WEAPON_ATTACK_BONUS = {
   none: 0,
   sword: 2,
   swordLegendary: 8,
+  swordMolten: 16,
 };
 
 const FIREBALL_STATS = {
@@ -48,6 +49,11 @@ const FIREBALL_STATS = {
 // Swift Boots (see config/item-effects.js) set the player's speed directly
 // rather than adding a bonus, so both values live here for symmetry.
 const BOOTS_SPEED = 3.2;
+
+// Molten Depths lava hazard: damage dealt when standing on a LAVA tile
+// without Fireproof Boots equipped. Reuses player.invuln as its cooldown
+// (see Combat.checkHazards), same as taking a hit from an enemy.
+const LAVA_DAMAGE_PER_TICK = 8;
 
 // --- Enemies ---
 // One row per enemy `type`. `spriteKey` indexes into the Sprites registry
@@ -67,20 +73,32 @@ const ENEMY_DEFS = {
   orcBoss:      { w: 30, h: 32, drawW: 40, drawH: 42, hp: 280, speed: 1.2, contactDmg: 6, atkRange: 32, spriteKey: 'orcWarlord', frameW: 40, frameH: 42, dirRows: true },
   witchBoss:    { w: 30, h: 32, drawW: 40, drawH: 42, hp: 260, speed: 1.1, contactDmg: 5, atkRange: 40, spriteKey: 'jungleWitch', frameW: 40, frameH: 42, dirRows: true },
   skeletonKing: { w: 60, h: 64, drawW: 80, drawH: 84, hp: 1750, speed: 1.05, contactDmg: 16, atkRange: 46, spriteKey: 'skeletonKing', frameW: 80, frameH: 84, dirRows: true },
+
+  // --- Molten Depths (World 5, unlocked after Skeleton King) ---
+  devilLesser:    { w: 24, h: 27, drawW: 34, drawH: 36, hp: 45, speed: 1.3, contactDmg: 6, atkRange: 26, spriteKey: 'devilLesser', frameW: 34, frameH: 36, dirRows: true },
+  orcRaider:      { w: 24, h: 27, drawW: 34, drawH: 36, hp: 50, speed: 1.15, contactDmg: 6, atkRange: 26, spriteKey: 'orcRaider', frameW: 34, frameH: 36, dirRows: true },
+  troll:          { w: 34, h: 36, drawW: 46, drawH: 48, hp: 70, speed: 0.85, contactDmg: 8, atkRange: 30, spriteKey: 'troll', frameW: 46, frameH: 48, dirRows: true },
+  trollChieftain: { w: 44, h: 46, drawW: 58, drawH: 60, hp: 900, speed: 1.0, contactDmg: 14, atkRange: 40, spriteKey: 'trollChieftain', frameW: 58, frameH: 60, dirRows: true },
+  pitDevil:       { w: 50, h: 52, drawW: 66, drawH: 68, hp: 2400, speed: 1.1, contactDmg: 20, atkRange: 50, spriteKey: 'pitDevil', frameW: 66, frameH: 68, dirRows: true },
 };
 
-const BOSS_TYPES = new Set(['goblinBoss', 'devilBoss', 'orcBoss', 'witchBoss', 'skeletonKing']);
+const BOSS_TYPES = new Set(['goblinBoss', 'devilBoss', 'orcBoss', 'witchBoss', 'skeletonKing', 'trollChieftain', 'pitDevil']);
 const DEFAULT_AGGRO_RANGE = 150;
 
 // --- Combat rewards ---
 // XP/gold granted for defeating each enemy type. `gold` may be a fixed
 // number or a `[min, max]` range rolled with randRange(...)|0.
 const COMBAT_REWARDS = {
+  pitDevil:       { xp: 900, gold: 800 },
   skeletonKing: { xp: 600, gold: 500 },
+  trollChieftain: { xp: 400, gold: 350 },
   devilBoss:    { xp: 250, gold: 200 },
   goblinBoss:   { xp: 50, gold: 40 },
   orcBoss:      { xp: 50, gold: 40 },
   witchBoss:    { xp: 50, gold: 40 },
+  troll:          { xp: 28, gold: [4, 6] },
+  orcRaider:      { xp: 22, gold: [3, 5] },
+  devilLesser:    { xp: 20, gold: [3, 5] },
   slimeRed:     { xp: 25, gold: 8 },
   skeleton:     { xp: 14, gold: [2, 4] },
   spider:       { xp: 9, gold: [2, 4] },

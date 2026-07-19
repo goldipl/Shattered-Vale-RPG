@@ -9,50 +9,51 @@ No installation or server required — just open `index.html` in a browser.
 ## Architecture
 
 ```
-├── index.html                      entry page: game canvas + DOM HUD (hp/xp/mana bars, level, gold)
+├── index.html                      entry page: game canvas + DOM HUD (hp/xp/mana bars, level, gold), loads all 27 JS files in dependency order
 ├── css/
 │   └── style.css                   canvas and HUD panel styling
 └── js/
     ├── utils.js                    shared math/canvas helpers (clamp, lerp, dist, rectsOverlap, roundRect, hashTile) + makeCanvas (offscreen canvas creation, shared by sprites/tilemap) + wrapPlainText (text wrapping, shared by the UI screens)
     │
     ├── config/                     ← pure data, no rendering, no class instantiation
-    │   ├── balance.js               every balance number: player stats (hp/atk/speed/mana), level-up progression, weapon bonuses, per-enemy-type stats (ENEMY_DEFS), XP/gold kill rewards (COMBAT_REWARDS)
-    │   ├── level-layout.js          world content: NPC dialogue (Elder, Merchant), world item placements, the full 86-entry enemy list (previously duplicated between initial setup and restartGame), boss display names, player spawn point
-    │   └── item-effects.js          pickup/equip/unequip effect tables (toast text, player-state changes, screen-flash colors), boss-defeat drop/cutscene scripts, gate-unlock conditions (which enemies must be dead before a gate opens)
+    │   ├── balance.js               every balance number: player stats (hp/atk/speed/mana), level-up progression, weapon bonuses (incl. Molten Blade's top tier), per-enemy-type stats (ENEMY_DEFS, now 16 types incl. Molten Depths), XP/gold kill rewards (COMBAT_REWARDS), lava damage-per-tick
+    │   ├── level-layout.js          world content: NPC dialogue (Elder, Merchant), world item placements, the full 99-entry enemy list (86 original + 13 Molten Depths — previously duplicated between initial setup and restartGame, now defined once), boss display names, player spawn point
+    │   └── item-effects.js          pickup/equip/unequip effect tables (toast text, player-state changes, screen-flash colors — incl. Obsidian Armor, Molten Blade, Fireproof Boots), boss-defeat drop/cutscene scripts (Skeleton King now opens the Lava Gate instead of ending the game; Troll Chieftain opens the Pit Gate; Pit Devil triggers victory), gate-unlock conditions (which enemies must be dead before a gate opens), sword pickup guarded so only the first one auto-equips
     │
     ├── sprites/                    ← procedural pixel-art generation
     │   ├── humanoid-sprites.js      palette-swappable humanoid sprite-sheet builder (used for player/elder/merchant) + sword weapon overlay
-    │   ├── monster-sprites.js       sprite-sheet builders for every enemy: slimes, goblin/devil/orc/witch bosses, spider, skeleton, Skeleton King
-    │   ├── icon-sprites.js          24x24 procedural item icons (sword, potions, armor, coin, key, shield, boots, etc.) used in world pickups and the inventory panel
+    │   ├── monster-sprites.js       sprite-sheet builders for the original 8 enemies: slimes, goblin/devil/orc/witch bosses, spider, skeleton, Skeleton King
+    │   ├── molten-sprites.js        sprite-sheet builders for the 5 Molten Depths creatures: devilLesser, orcRaider, troll (grunts), Troll Chieftain and Pit Devil (bosses) — kept in its own file so monster-sprites.js didn't balloon past a comfortable size
+    │   ├── icon-sprites.js          24x24 procedural item icons (sword, potions, armor, coin, key, shield, boots, etc., incl. Obsidian Armor/Molten Blade/Fireproof Boots) used in world pickups and the inventory panel
     │   └── sprites.js               the Sprites registry object + initSprites(), which calls the builders above once at boot and stores every sheet/icon
     │
     ├── world/                      ← the tile map
-    │   ├── tilemap-builder.js       tile type definitions (TileType enum, SOLID_TILES) + world/jungle/crypt terrain generation, gate tile definitions (GATE_DEFS)
-    │   ├── tilemap-renderer.js      per-tile ground rendering, terrain edge blending, decoration drawing (flowers, rocks, ferns, bones, etc.)
-    │   └── tilemap.js               TileMap class: owns the tile grid and gate state, composes the builder + renderer functions above, bakes the static layer to an offscreen canvas
+    │   ├── tilemap-builder.js       tile type definitions (TileType enum, SOLID_TILES) + world/jungle/crypt/Molten Depths terrain generation (buildMoltenDepths), gate tile definitions (GATE_DEFS, now incl. Lava/Pit gates)
+    │   ├── tilemap-renderer.js      per-tile ground rendering, terrain edge blending, decoration drawing (flowers, rocks, ferns, bones, obsidian shards/embers/skulls, etc.)
+    │   └── tilemap.js               TileMap class: owns the tile grid (now 109x236 — grew south to fit Molten Depths, with the Skeleton Dungeon's own size pinned to a fixed constant so it didn't grow too) and gate state, composes the builder + renderer functions above, bakes the static layer to an offscreen canvas, animates water shimmer and lava glow
     │
     ├── entities/
     │   ├── animated-sprite.js       shared sprite-sheet frame-walker, used by Player/NPC/Enemy to animate their 4-directional walk cycles
-    │   ├── player.js                Player class: movement, melee/fireball combat, leveling — reads starting stats from config/balance.js
-    │   ├── npc.js                   NPC class: talkable characters, now also draws its own "Talk with me" speech bubble (moved out of the main draw loop since it's the NPC's own visual state)
-    │   ├── enemy.js                 Enemy class: wander/aggro AI, telegraphed attacks, taking damage — driven entirely by the ENEMY_DEFS table in config/balance.js instead of a 130-line if/else chain
+    │   ├── player.js                Player class: movement, melee/fireball combat, leveling — reads starting stats from config/balance.js; tracks weapon tier (incl. Molten Blade) and fireproof status for the lava hazard
+    │   ├── npc.js                   NPC class: talkable characters, also draws its own "Talk with me" speech bubble (moved out of the main draw loop since it's the NPC's own visual state)
+    │   ├── enemy.js                 Enemy class: wander/aggro AI, telegraphed attacks, taking damage — driven entirely by the ENEMY_DEFS table in config/balance.js instead of a 130-line if/else chain; hit/death/HP-bar colors extended for the two new bosses
     │   └── fireball.js              Fireball projectile class — reads speed/damage/life from config/balance.js's FIREBALL_STATS
     │
     ├── systems/
     │   ├── camera.js                smooth player-follow camera with screen-shake, clamped to map bounds
     │   ├── particles.js             lightweight particle burst + floating damage/XP text system
     │   ├── dialogue.js              typewriter-style dialogue box UI (renders whatever npc.dialogue array it's given)
-    │   └── inventory.js             world item pickups + toggleable inventory panel (equip slots, backpack grid); added a new Inventory.reset() method used by both the constructor and restart
+    │   └── inventory.js             world item pickups + toggleable inventory panel (equip slots, backpack grid); Inventory.reset() used by both the constructor and restart; equip slots now also accept Obsidian Armor/Molten Blade/Fireproof Boots
     │
     ├── ui/
-    │   ├── hud.js                   binds/syncs the DOM hp/xp/mana bars, plus the canvas-drawn boss health banner, toast messages, and quest tracker
-    │   └── screens.js               full-screen canvas UI states: desktop-only block screen, start menu, how-to-play panel, game-over/restart screen
+    │   ├── hud.js                   binds/syncs the DOM hp/xp/mana bars, plus the canvas-drawn boss health banner (colors extended for the two new bosses without changing the original 5), toast messages, and quest tracker
+    │   └── screens.js               full-screen canvas UI states: desktop-only block screen; start menu (Play/Continue toggle based on whether a run has started, plus a Restart Game button once it has); how-to-play panel; game-over/victory screen (victory is a new branch, reached for the first time now that Pit Devil sets it)
     │
     └── core/
         ├── input.js                 keyboard state tracking (keys/justPressed) + mobile-device detection
-        ├── world-factory.js         turns the plain data in config/level-layout.js into live NPC/WorldItem/Enemy instances; used both at boot and on restart, eliminating the old duplicated 86-line enemy list
-        ├── combat.js                 resolves player interaction: talking to NPCs, melee hit resolution, XP/gold/loot rewards, world-item pickups, inventory-panel clicks, gate-unlock checks
-        └── game.js                   bootstrap + main update/draw loop + restart logic
+        ├── world-factory.js         turns the plain data in config/level-layout.js into live NPC/WorldItem/Enemy instances (now 99 enemies); used both at boot and on restart
+        ├── combat.js                 resolves player interaction: talking to NPCs, melee hit resolution, XP/gold/loot rewards, world-item pickups, inventory-panel clicks, gate-unlock checks, and the lava hazard tick (reuses the player's existing hit-invulnerability window as its damage cooldown)
+        └── game.js                   bootstrap + main update/draw loop + restart logic; map grown to 109x236; Escape returns to the start menu mid-run; tracks whether a run has started (for the Continue/Restart buttons); draws the end screen for both gameover and victory
 ```
 
 Double-click `index.html`, or serve the folder locally if your browser restricts local file access:

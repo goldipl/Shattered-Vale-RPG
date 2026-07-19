@@ -14,6 +14,8 @@ const ENEMY_FX_COLOR = {
   slimeJungle: '#2fae4a',
   spider: '#8a5ec9',
   skeleton: '#d8d2c0',
+  trollChieftain: '#8fae5a',
+  pitDevil: '#ff6a1e',
 };
 const DEFAULT_ENEMY_FX_COLOR = '#a8e07a';
 const BOSS_FX_COLOR = '#e8975a'; // any boss not covered by a more specific entry above
@@ -28,6 +30,8 @@ function getEnemyFxColor(enemy) {
 // general read as red here, not the amber used for hit/death sparks).
 function getEnemyHpBarColor(enemy) {
   if (enemy.isSkeletonKing) return '#e8e2d0';
+  if (enemy.type === 'pitDevil') return '#ff6a1e';
+  if (enemy.type === 'trollChieftain') return '#8fae5a';
   if (enemy.isDevil) return '#f4a13c';
   if (enemy.isBoss) return '#e24b4a';
   if (enemy.type === 'slimeRed') return '#e24b4a';

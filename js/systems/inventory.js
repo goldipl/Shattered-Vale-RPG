@@ -35,10 +35,10 @@ class WorldItem {
 // accepts() decides which backpack item kinds are droppable into that slot.
 const EQUIP_SLOTS = [
   { id: 'helmet', label: 'Helmet', accepts: k => k === 'helmet' || k === 'crownSkeleton' },
-  { id: 'weapon', label: 'Weapon', accepts: k => k === 'sword' || k === 'weapon' || k === 'swordLegendary' },
-  { id: 'armor',  label: 'Armor',  accepts: k => k === 'armor' || k === 'armorJungle' },
+  { id: 'weapon', label: 'Weapon', accepts: k => k === 'sword' || k === 'weapon' || k === 'swordLegendary' || k === 'swordMolten' },
+  { id: 'armor',  label: 'Armor',  accepts: k => k === 'armor' || k === 'armorJungle' || k === 'armorObsidian' },
   { id: 'shield', label: 'Shield', accepts: k => k === 'shield' || k === 'shieldBone' },
-  { id: 'boots',  label: 'Boots',  accepts: k => k === 'boots' },
+  { id: 'boots',  label: 'Boots',  accepts: k => k === 'boots' || k === 'bootsFireproof' },
 ];
 
 class Inventory {

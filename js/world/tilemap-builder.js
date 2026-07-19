@@ -22,6 +22,11 @@ const TileType = {
   CRYPT: 14,          // World 4 — Skeleton Dungeon floor
   CRYPT_WALL: 15,     // World 4 — dungeon stone wall
   SKELETON_GATE: 16,  // gate from the jungle into the dungeon
+  OBSIDIAN: 17,        // World 5 — Molten Depths floor
+  OBSIDIAN_WALL: 18,   // World 5 — volcanic rock wall
+  LAVA: 19,            // World 5 — walkable hazard, damages the player over time
+  LAVA_GATE: 20,       // gate from the dungeon into the Molten Depths
+  PIT_GATE: 21,        // gate guarding the Pit Devil's arena within the Molten Depths
 };
 
 const SOLID_TILES = new Set([
@@ -34,6 +39,11 @@ const SOLID_TILES = new Set([
   TileType.JUNGLE_GATE,
   TileType.CRYPT_WALL,
   TileType.SKELETON_GATE,
+  TileType.OBSIDIAN_WALL,
+  TileType.LAVA_GATE,
+  TileType.PIT_GATE,
+  // NOTE: LAVA is intentionally NOT solid — it's a walkable hazard (see
+  // Combat.checkHazards), not a wall.
 ]);
 
 // Every gate in the game, described declaratively: which tile type it is,
@@ -45,6 +55,8 @@ const GATE_DEFS = {
   worldTwo: { tile: TileType.WORLD_TWO_GATE, flag: 'isWorldTwoGateOpen' },
   jungle: { tile: TileType.JUNGLE_GATE, flag: 'isJungleGateOpen' },
   skeleton: { tile: TileType.SKELETON_GATE, flag: 'isSkeletonGateOpen' },
+  lava: { tile: TileType.LAVA_GATE, flag: 'isLavaGateOpen' },
+  pit: { tile: TileType.PIT_GATE, flag: 'isPitGateOpen' },
 };
 
 function buildWorld(map) {
@@ -124,14 +136,14 @@ function buildWorld(map) {
   buildCrypt(map);
 
   // =========================
+  // MOLTEN DEPTHS (below the dungeon)
+  // =========================
+  buildMoltenDepths(map);
+
+  // =========================
   // TROLL CASTLE
   // =========================
-const castle = {
-  left: 17,
-  right: 33,  
-  top: 13,
-  bottom: 21
-};
+  const castle = { left: 17, right: 25, top: 13, bottom: 21 };
 
   // clear inside
   for (let y = castle.top + 1; y < castle.bottom; y++) {
@@ -139,25 +151,18 @@ const castle = {
       map.set(x, y, TileType.GRASS);
     }
   }
-// horizontal walls (2 tiles thick)
-for (let x = castle.left; x <= castle.right; x++) {
-  map.set(x, castle.top, TileType.WALL);
-  map.set(x, castle.top + 1, TileType.WALL);
-
-  map.set(x, castle.bottom, TileType.WALL);
-  map.set(x, castle.bottom - 1, TileType.WALL);
-}
-// vertical walls (2 tiles thick)
-for (let y = castle.top; y <= castle.bottom; y++) {
-  map.set(castle.left, y, TileType.WALL);
-  map.set(castle.left + 1, y, TileType.WALL);
-
-  map.set(castle.right, y, TileType.WALL);
-  map.set(castle.right - 1, y, TileType.WALL);
-}
+  // horizontal walls
+  for (let x = castle.left; x <= castle.right; x++) {
+    map.set(x, castle.top, TileType.WALL);
+    map.set(x, castle.bottom, TileType.WALL);
+  }
+  // vertical walls
+  for (let y = castle.top; y <= castle.bottom; y++) {
+    map.set(castle.left, y, TileType.WALL);
+    map.set(castle.right, y, TileType.WALL);
+  }
   // boss gate
   map.set(castle.left, 17, TileType.GATE);
-  map.set(castle.left + 1, 17, TileType.GATE);
   // road to castle
   for (let x = 3; x < castle.left; x++) {
     map.set(x, 17, TileType.PATH);
@@ -225,6 +230,16 @@ for (let y = castle.top; y <= castle.bottom; y++) {
           map.decor.push({ x, y, type: 'brazier' });
         } else if (h > 0.8) {
           map.decor.push({ x, y, type: 'rubble' });
+        }
+      }
+      // Molten Depths decorations
+      else if (tile === TileType.OBSIDIAN) {
+        if (h > 0.94) {
+          map.decor.push({ x, y, type: 'skullpile' });
+        } else if (h > 0.87) {
+          map.decor.push({ x, y, type: 'emberpile' });
+        } else if (h > 0.8) {
+          map.decor.push({ x, y, type: 'obsidianshard' });
         }
       }
     }
@@ -306,7 +321,9 @@ function buildCrypt(map) {
   // giving a 53-wide span; doubled here to 106-wide).
   const right = 107;
   const top = map.jungleSouthEdge + 1;
-  const bottom = map.rows - 2;
+  // Fixed at the dungeon's own south edge (not tied to map.rows) so growing
+  // the map to fit the Molten Depths below doesn't also grow the crypt.
+  const bottom = map.dungeonSouthEdge;
 
   // Tile coordinates for the many spider/skeleton spawns, plus the
   // Skeleton King's throne room. Kept in sync with ENEMY_PLACEMENTS in
@@ -380,6 +397,94 @@ function buildCrypt(map) {
 
   // Skeleton King throne room — a large cleared arena at the dungeon's far south end
   clearArena(map, 53, top + 71, 10, TileType.CRYPT);
+
+  // Lava Gate — the dungeon's south wall used to be a solid cap (this was
+  // the end of the map); now it opens into the Molten Depths once the
+  // Skeleton King is dead (see BOSS_DEFEAT_EVENTS.skeletonKing).
+  map.set(53, bottom + 1, TileType.LAVA_GATE);
+}
+
+// =========================
+// BUILD MOLTEN DEPTHS (World 5, south of the Skeleton Dungeon)
+// =========================
+function buildMoltenDepths(map) {
+  const left = map.dungeonLeftEdge;
+  const right = map.cols - 2;
+  // One row past the shared wall/gate row buildCrypt already drew at
+  // dungeonSouthEdge + 1 — this zone's own floor starts right after it.
+  const top = map.dungeonSouthEdge + 2;
+  const bottom = map.rows - 2;
+
+  // Side walls for the full height of the zone, plus a south cap.
+  for (let y = top - 1; y <= bottom + 1; y++) {
+    map.set(left - 1, y, TileType.OBSIDIAN_WALL);
+    map.set(right + 1, y, TileType.OBSIDIAN_WALL);
+  }
+  for (let x = left - 1; x <= right + 1; x++) {
+    map.set(x, bottom + 1, TileType.OBSIDIAN_WALL);
+  }
+
+  // A wide clear band runs the full height of the zone. Both boss arenas
+  // and every grunt spawn in ENEMY_PLACEMENTS (config/level-layout.js) sit
+  // inside it, so they're guaranteed to be on open ground regardless of
+  // how the hazard/rubble scattering below shakes out; lava and rubble stay
+  // confined to the outer flanks.
+  const bandLeft = 38, bandRight = 68;
+  for (let y = top; y <= bottom; y++) {
+    for (let x = bandLeft; x <= bandRight; x++) {
+      map.set(x, y, TileType.OBSIDIAN);
+    }
+  }
+
+  // Pit Gate — a full-width wall partway down the band, guarding the Pit
+  // Devil's arena until the Troll Chieftain (guarding the approach) is dead.
+  const gateRow = top + 27;
+  for (let x = bandLeft; x <= bandRight; x++) {
+    map.set(x, gateRow, TileType.OBSIDIAN_WALL);
+  }
+  for (let x = 51; x <= 55; x++) {
+    map.set(x, gateRow, TileType.PIT_GATE);
+  }
+
+  // Obsidian rubble clusters, kept clear of the central band so there's
+  // always a safe route through.
+  const clusters = [
+    [15, top + 8, 4], [92, top + 8, 4], [20, top + 24, 3], [86, top + 24, 3],
+    [12, top + 40, 4], [95, top + 40, 4], [22, top + 54, 3], [84, top + 54, 3],
+    [16, top + 62, 4], [90, top + 62, 4],
+  ];
+  clusters.forEach(([cx, cy, r]) => {
+    for (let y = cy - r; y <= cy + r; y++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (
+          x > left && x < right && y > top - 1 && y < bottom &&
+          (x < bandLeft - 1 || x > bandRight + 1) &&
+          hashTile(x + 29, y + 13) > 0.32 && dist(x, y, cx, cy) <= r
+        ) {
+          map.set(x, y, TileType.OBSIDIAN_WALL);
+        }
+      }
+    }
+  });
+
+  // Lava hazard patches — also kept out of the central band.
+  const lavaPatches = [
+    [24, top + 16, 3], [82, top + 16, 3], [28, top + 34, 3], [78, top + 34, 3],
+    [24, top + 48, 3], [82, top + 48, 3], [30, top + 60, 3], [76, top + 60, 3],
+  ];
+  lavaPatches.forEach(([cx, cy, r]) => {
+    for (let y = cy - r; y <= cy + r; y++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (
+          x > left && x < right && y > top - 1 && y < bottom &&
+          (x < bandLeft - 1 || x > bandRight + 1) &&
+          dist(x, y, cx, cy) <= r
+        ) {
+          map.set(x, y, TileType.LAVA);
+        }
+      }
+    }
+  });
 }
 
 function clearArena(map, cx, cy, r, tileType = TileType.JUNGLE) {

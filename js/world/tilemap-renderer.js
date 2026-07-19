@@ -103,6 +103,44 @@ function drawGroundTile(ctx, map, x, y) {
   }
 
   // =========================
+  // OBSIDIAN GROUND (Molten Depths)
+  // =========================
+  else if (t === TileType.OBSIDIAN) {
+    ctx.fillStyle = h > 0.5 ? '#241f22' : '#1c181a';
+    ctx.fillRect(px, py, TILE, TILE);
+
+    // glassy volcanic-rock fracture lines
+    ctx.strokeStyle = 'rgba(80,40,30,0.18)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px, py + ((hashTile(x, y) * 20) | 0));
+    ctx.lineTo(px + TILE, py + ((hashTile(x + 1, y + 2) * 20) | 0));
+    ctx.stroke();
+
+    // faint ember specks
+    ctx.fillStyle = 'rgba(255,120,40,0.08)';
+    for (let i = 0; i < 2; i++) {
+      const bx = px + ((hashTile(x * 6 + i, y * 4) * TILE) | 0);
+      const by = py + ((hashTile(x * 3, y * 8 + i) * TILE) | 0);
+      ctx.fillRect(bx, by, 2, 2);
+    }
+  }
+
+  // =========================
+  // LAVA (walkable hazard)
+  // =========================
+  else if (t === TileType.LAVA) {
+    ctx.fillStyle = '#4a1608';
+    ctx.fillRect(px, py, TILE, TILE);
+    ctx.fillStyle = '#c9430f';
+    ctx.fillRect(px, py + ((h * 8) | 0), TILE, 6);
+    ctx.fillStyle = 'rgba(255,200,60,0.25)';
+    ctx.fillRect(px + 6, py + 12, 9, 3);
+    // NOTE: the flickering glow overlay is drawn per-frame in
+    // TileMap.drawAnimated, not baked here, so it can pulse.
+  }
+
+  // =========================
   // SAND
   // =========================
   else if (t === TileType.SAND) {
@@ -152,15 +190,19 @@ function drawGroundTile(ctx, map, x, y) {
     t === TileType.GATE ||
     t === TileType.WORLD_TWO_GATE ||
     t === TileType.JUNGLE_GATE ||
-    t === TileType.SKELETON_GATE
+    t === TileType.SKELETON_GATE ||
+    t === TileType.LAVA_GATE ||
+    t === TileType.PIT_GATE
   ) {
     ctx.fillStyle =
+      t === TileType.LAVA_GATE || t === TileType.PIT_GATE ? '#3a1810' :
       t === TileType.SKELETON_GATE ? '#2a2620' :
       t === TileType.JUNGLE_GATE ? '#3a3a1e' :
       '#4a3626';
     ctx.fillRect(px, py, TILE, TILE);
 
     ctx.fillStyle =
+      t === TileType.LAVA_GATE || t === TileType.PIT_GATE ? '#180a06' :
       t === TileType.SKELETON_GATE ? '#141210' :
       t === TileType.JUNGLE_GATE ? '#1e2210' :
       '#2a1e15';
@@ -169,6 +211,7 @@ function drawGroundTile(ctx, map, x, y) {
     }
 
     ctx.fillStyle =
+      t === TileType.LAVA_GATE || t === TileType.PIT_GATE ? 'rgba(255,110,40,0.4)' :
       t === TileType.SKELETON_GATE ? 'rgba(232,151,90,0.35)' :
       t === TileType.JUNGLE_GATE ? 'rgba(120,230,140,0.35)' :
       'rgba(255,210,80,0.35)';
@@ -263,6 +306,40 @@ function drawGroundTile(ctx, map, x, y) {
 
     // faint ember glow crack
     ctx.fillStyle = 'rgba(232,151,90,0.08)';
+    ctx.fillRect(px + 3, py + 3, TILE - 6, 2);
+  }
+
+  // =========================
+  // OBSIDIAN WALL (Molten Depths, glassy volcanic rock)
+  // =========================
+  else if (t === TileType.OBSIDIAN_WALL) {
+    const stone = h > 0.66 ? '#221c1e' : h > 0.33 ? '#1a1516' : '#141112';
+    ctx.fillStyle = stone;
+    ctx.fillRect(px, py, TILE, TILE);
+
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px, py + 10);
+    ctx.lineTo(px + TILE, py + 10);
+    ctx.moveTo(px, py + 22);
+    ctx.lineTo(px + TILE, py + 22);
+    const offset = (y % 2) * 8;
+    ctx.moveTo(px + 8 + offset, py);
+    ctx.lineTo(px + 8 + offset, py + 10);
+    ctx.stroke();
+
+    // molten cracks running through the rock
+    ctx.strokeStyle = 'rgba(255,110,40,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px + 4, py + 26);
+    ctx.lineTo(px + 12, py + 18);
+    ctx.lineTo(px + 20, py + 24);
+    ctx.stroke();
+
+    // glassy highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
     ctx.fillRect(px + 3, py + 3, TILE - 6, 2);
   }
 
@@ -483,5 +560,56 @@ function drawDecor(ctx, d) {
     ctx.lineTo(px + 19, py + 20);
     ctx.closePath();
     ctx.fill();
+  }
+
+  // MOLTEN DEPTHS DECORATIONS
+  else if (d.type === 'obsidianshard') {
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(px + 16, py + 25, 7, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#2a2226';
+    ctx.beginPath();
+    ctx.moveTo(px + 12, py + 24);
+    ctx.lineTo(px + 16, py + 12);
+    ctx.lineTo(px + 20, py + 24);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,120,50,0.35)';
+    ctx.beginPath();
+    ctx.moveTo(px + 15, py + 22);
+    ctx.lineTo(px + 16, py + 16);
+    ctx.lineTo(px + 17, py + 22);
+    ctx.closePath();
+    ctx.fill();
+  } else if (d.type === 'emberpile') {
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath();
+    ctx.ellipse(px + 16, py + 23, 7, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#2e211c';
+    ctx.beginPath();
+    ctx.arc(px + 16, py + 20, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,140,40,0.6)';
+    ctx.beginPath();
+    ctx.arc(px + 14, py + 19, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(px + 19, py + 21, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (d.type === 'skullpile') {
+    ctx.fillStyle = '#c9c2b0';
+    ctx.beginPath();
+    ctx.arc(px + 13, py + 20, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(px + 20, py + 22, 3.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#1a1410';
+    ctx.fillRect(px + 11.5, py + 19, 1.4, 1.4);
+    ctx.fillRect(px + 14, py + 19, 1.4, 1.4);
+    ctx.fillRect(px + 18.7, py + 21, 1.2, 1.2);
+    ctx.fillRect(px + 21, py + 21, 1.2, 1.2);
   }
 }

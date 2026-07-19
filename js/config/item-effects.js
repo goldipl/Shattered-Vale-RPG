@@ -12,7 +12,9 @@
 const ITEM_PICKUP_EFFECTS = {
   sword: {
     apply: (ctx) => {
+      const alreadyHasOne = ctx.inventory.items.sword > 0 || ctx.player.hasSword;
       ctx.inventory.add('sword', 1);
+      if (alreadyHasOne) return;
       ctx.player.hasSword = true;
       ctx.advanceQuestTo(2);
     },
@@ -47,6 +49,7 @@ const ITEM_PICKUP_EFFECTS = {
       ctx.inventory.add('swordLegendary', 1);
       ctx.player.hasSword = true;
       ctx.player.hasLegendarySword = true;
+      ctx.player.hasMoltenSword = false;
     },
     toast: 'Equipped the Legendary Sword! Attack greatly increased.',
     flash: { color: '63,212,168', alpha: 0.4 },
@@ -62,6 +65,25 @@ const ITEM_PICKUP_EFFECTS = {
   potionBlue: {
     apply: (ctx) => ctx.inventory.add('potionBlue', 1),
     toast: 'Picked up a Blue Potion! (drink to restore mana)',
+  },
+  armorObsidian: {
+    apply: (ctx) => ctx.inventory.add('armorObsidian', 1),
+    toast: 'Picked up Obsidian Armor!',
+  },
+  swordMolten: {
+    apply: (ctx) => {
+      ctx.inventory.add('swordMolten', 1);
+      ctx.player.hasSword = true;
+      ctx.player.hasLegendarySword = false;
+      ctx.player.hasMoltenSword = true;
+    },
+    toast: 'Found the Molten Blade! Attack massively increased.',
+    flash: { color: '255,110,40', alpha: 0.45 },
+  },
+  bootsFireproof: {
+    apply: (ctx) => { ctx.inventory.add('bootsFireproof', 1); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = true; },
+    toast: 'Picked up Fireproof Boots! Lava no longer burns you.',
+    flash: { color: '255,140,40', alpha: 0.35 },
   },
 };
 // Fallback for any world item kind with no entry above (matches the
@@ -96,6 +118,7 @@ const ITEM_EQUIP_EFFECTS = {
       ctx.inventory.equip('sword');
       ctx.player.hasSword = true;
       ctx.player.hasLegendarySword = false;
+      ctx.player.hasMoltenSword = false;
     },
     toast: 'Equipped Iron Sword!',
   },
@@ -104,25 +127,49 @@ const ITEM_EQUIP_EFFECTS = {
       ctx.inventory.equip('swordLegendary');
       ctx.player.hasSword = true;
       ctx.player.hasLegendarySword = true;
+      ctx.player.hasMoltenSword = false;
     },
     toast: 'Equipped the Legendary Sword!',
+  },
+  swordMolten: {
+    apply: (ctx) => {
+      ctx.inventory.equip('swordMolten');
+      ctx.player.hasSword = true;
+      ctx.player.hasLegendarySword = false;
+      ctx.player.hasMoltenSword = true;
+    },
+    toast: 'Equipped the Molten Blade!',
   },
   armor: { apply: (ctx) => ctx.inventory.equip('armor'), toast: 'Equipped Iron Armor!' },
   helmet: { apply: (ctx) => ctx.inventory.equip('helmet'), toast: "Equipped the Devil's Helmet!" },
   armorJungle: { apply: (ctx) => ctx.inventory.equip('armorJungle'), toast: 'Equipped Jungle Armor!' },
+  armorObsidian: { apply: (ctx) => ctx.inventory.equip('armorObsidian'), toast: 'Equipped Obsidian Armor!' },
   boots: {
-    apply: (ctx) => { ctx.inventory.equip('boots'); ctx.player.speed = BOOTS_SPEED; },
+    apply: (ctx) => { ctx.inventory.equip('boots'); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = false; },
     toast: 'Equipped Swift Boots!',
+  },
+  bootsFireproof: {
+    apply: (ctx) => { ctx.inventory.equip('bootsFireproof'); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = true; },
+    toast: 'Equipped Fireproof Boots!',
   },
   shieldBone: { apply: (ctx) => ctx.inventory.equip('shieldBone'), toast: 'Equipped the Bone Shield!' },
   crownSkeleton: { apply: (ctx) => ctx.inventory.equip('crownSkeleton'), toast: 'Equipped the Skeleton Crown!' },
 };
 
 const ITEM_UNEQUIP_EFFECTS = {
-  weapon: (ctx) => { ctx.inventory.unequip('weapon'); ctx.player.hasSword = false; ctx.player.hasLegendarySword = false; },
+  weapon: (ctx) => {
+    ctx.inventory.unequip('weapon');
+    ctx.player.hasSword = false;
+    ctx.player.hasLegendarySword = false;
+    ctx.player.hasMoltenSword = false;
+  },
   armor: (ctx) => ctx.inventory.unequip('armor'),
   helmet: (ctx) => ctx.inventory.unequip('helmet'),
-  boots: (ctx) => { ctx.inventory.unequip('boots'); ctx.player.speed = PLAYER_BASE_STATS.speed; },
+  boots: (ctx) => {
+    ctx.inventory.unequip('boots');
+    ctx.player.speed = PLAYER_BASE_STATS.speed;
+    ctx.player.fireproof = false;
+  },
   shield: (ctx) => ctx.inventory.unequip('shield'),
 };
 
@@ -177,10 +224,11 @@ const BOSS_DEFEAT_EVENTS = {
     ctx.dropItem(2, -8, 'potionBlue');
     ctx.toast('The Skeleton King has fallen! Dropped a Bone Shield, Skeleton Crown, and Blue Potion!');
     ctx.setScreenFlash({ color: '232,226,208', alpha: 0.6 });
+    ctx.map.openLavaGate();
     ctx.openSystemDialogue([
       "The Skeleton King's throne crumbles to dust!",
       'The Skeleton Dungeon falls silent at last.',
-      'You have conquered every corner of the Shattered Vale.',
+      'But the floor cracks beneath it — a Lava Gate has opened to the south, into the Molten Depths.',
     ]);
   },
   devilBoss: (ctx) => {
@@ -193,6 +241,28 @@ const BOSS_DEFEAT_EVENTS = {
       'The Devil of the Sand Oasis has been vanquished!',
       'Its dark hold over the dunes is broken at last.',
       'A Jungle Gate has creaked open to the south — but something ancient stirs within.',
+    ]);
+  },
+  trollChieftain: (ctx) => {
+    ctx.dropItem(10, 8, 'armorObsidian');
+    ctx.map.openPitGate();
+    ctx.toast('The Troll Chieftain dropped Obsidian Armor!');
+    ctx.setScreenFlash({ color: '143,174,90', alpha: 0.5 });
+    ctx.openSystemDialogue([
+      'The Troll Chieftain crashes to the molten rock!',
+      'Deeper in the pit, the Pit Gate grinds open — something far worse waits below.',
+    ]);
+  },
+  pitDevil: (ctx) => {
+    ctx.dropItem(10, 8, 'swordMolten');
+    ctx.dropItem(-10, 8, 'bootsFireproof');
+    ctx.toast('The Pit Devil has fallen! Dropped the Molten Blade and Fireproof Boots!');
+    ctx.setScreenFlash({ color: '255,106,30', alpha: 0.65 });
+    ctx.setVictory();
+    ctx.openSystemDialogue([
+      'The Pit Devil lets out a final, earth-shaking roar before collapsing into ash.',
+      'The Molten Depths fall still. Every corner of the Shattered Vale is finally at peace.',
+      'You have conquered the Shattered Vale.',
     ]);
   },
 };

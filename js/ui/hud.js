@@ -97,10 +97,17 @@ const Hud = {
     ctx.save();
     ctx.textAlign = 'center';
 
+    // Name/bar color: keeps the original amber-for-devil / orange-for-others
+    // scheme for existing bosses exactly as before, and gives the two new
+    // Molten Depths bosses their own distinct colors.
+    const bannerColor = boss.type === 'pitDevil' ? '#ff6a1e'
+      : boss.type === 'trollChieftain' ? '#8fae5a'
+      : boss.isDevil ? '#f4a13c' : '#e8975a';
+
     ctx.font = 'bold 22px sans-serif';
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
     ctx.fillText(name, viewW / 2 + 2, nameY + 2);
-    ctx.fillStyle = boss.isDevil ? '#f4a13c' : '#e8975a';
+    ctx.fillStyle = bannerColor;
     ctx.fillText(name, viewW / 2, nameY);
 
     ctx.fillStyle = 'rgba(10,12,8,0.75)';
@@ -115,7 +122,7 @@ const Hud = {
     roundRect(ctx, x, barY, barW, barH, 4);
     ctx.fill();
 
-    const fillColor = low ? '#da1f1f' : (boss.isDevil ? '#f4a13c' : '#e8975a');
+    const fillColor = low ? '#da1f1f' : bannerColor;
     ctx.fillStyle = fillColor;
     roundRect(ctx, x, barY, Math.max(0, barW * pct), barH, 4);
     ctx.fill();

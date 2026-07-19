@@ -161,13 +161,16 @@ const Screens = {
     ctx.restore();
   },
 
-  // Draws the game-over overlay and stores the restart button on
-  // state.restartButton.
+  // Draws the game-over/victory overlay. Stores state.restartButton
+  // always; victory also stores state.continueButton (letting the player
+  // dismiss the screen and keep exploring instead of forcing a restart).
   drawEnd(ctx, state, viewW, viewH) {
     ctx.save();
     ctx.fillStyle = 'rgba(0,0,0,0.72)';
     ctx.fillRect(0, 0, viewW, viewH);
     ctx.textAlign = 'center';
+
+    const isVictory = state.gameState === 'victory';
 
     if (state.gameState === 'gameover') {
       ctx.fillStyle = '#f09595';
@@ -176,12 +179,30 @@ const Screens = {
       ctx.fillStyle = '#c9c5b8';
       ctx.font = '14px sans-serif';
       ctx.fillText('Try again and save the village!', viewW / 2, viewH / 2 + 20);
+    } else if (isVictory) {
+      ctx.fillStyle = '#ffcf3c';
+      ctx.font = 'bold 30px sans-serif';
+      ctx.fillText('Victory!', viewW / 2, viewH / 2 - 10);
+      ctx.fillStyle = '#e8e4d8';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('You have conquered the Shattered Vale.', viewW / 2, viewH / 2 + 20);
     }
 
     const bw = 150, bh = 38;
-    const bx = viewW / 2 - bw / 2;
-    const by = viewH / 2 + 55;
-    state.restartButton = this.drawButton(ctx, bx, by, bw, bh, 'Play Again', '#3a6b3d');
+
+    if (isVictory) {
+      const gap = 16;
+      const totalW = bw * 2 + gap;
+      const leftX = viewW / 2 - totalW / 2;
+      const by = viewH / 2 + 55;
+      state.continueButton = this.drawButton(ctx, leftX, by, bw, bh, 'Continue', '#3a5a7a');
+      state.restartButton = this.drawButton(ctx, leftX + bw + gap, by, bw, bh, 'Play Again', '#3a6b3d');
+    } else {
+      const bx = viewW / 2 - bw / 2;
+      const by = viewH / 2 + 55;
+      state.continueButton = null;
+      state.restartButton = this.drawButton(ctx, bx, by, bw, bh, 'Play Again', '#3a6b3d');
+    }
 
     ctx.textAlign = 'left';
     ctx.restore();

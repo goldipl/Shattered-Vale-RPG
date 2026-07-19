@@ -259,3 +259,70 @@ function buildSkeletonCrownIcon() {
   ctx.beginPath(); ctx.arc(18, 13, 1.2, 0, Math.PI * 2); ctx.fill();
   return c;
 }
+
+function buildObsidianArmorIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#1c1618';
+  ctx.beginPath();
+  ctx.moveTo(8, 3); ctx.lineTo(10, 5); ctx.lineTo(14, 5); ctx.lineTo(16, 3);
+  ctx.lineTo(20, 7); ctx.lineTo(18, 20); ctx.lineTo(6, 20); ctx.lineTo(4, 7);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#2e2226';
+  ctx.beginPath();
+  ctx.moveTo(9, 6); ctx.lineTo(11, 7); ctx.lineTo(13, 7); ctx.lineTo(15, 6);
+  ctx.lineTo(17, 8); ctx.lineTo(16, 17); ctx.lineTo(8, 17); ctx.lineTo(7, 8);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,110,40,0.7)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(12, 7); ctx.lineTo(10, 12); ctx.lineTo(13, 15); ctx.lineTo(12, 17);
+  ctx.stroke();
+  return c;
+}
+
+function buildMoltenSwordIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.save();
+  ctx.translate(12, 12);
+  ctx.rotate(-0.78);
+  ctx.fillStyle = 'rgba(255,110,40,0.4)';
+  ctx.beginPath(); ctx.ellipse(0, -2, 9, 13, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#2a2020';
+  ctx.fillRect(-2, -11, 4, 17);
+  ctx.fillStyle = '#ff6a1e';
+  ctx.fillRect(-0.7, -11, 1.4, 17);
+  ctx.fillStyle = '#1a1414';
+  ctx.fillRect(-2, -11, 4, 3);
+  ctx.fillStyle = '#3a2418';
+  ctx.fillRect(-6, 5, 12, 3);
+  ctx.fillStyle = '#241a12';
+  ctx.fillRect(-1.5, 8, 3, 7);
+  ctx.fillStyle = '#ff6a1e';
+  ctx.beginPath(); ctx.arc(0, 16, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  return c;
+}
+
+function buildFireproofBootsIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#2a1c14';
+  ctx.fillRect(6, 3, 5, 11);
+  ctx.fillRect(13, 3, 5, 11);
+  ctx.fillStyle = '#1a120c';
+  ctx.beginPath();
+  ctx.moveTo(6, 14); ctx.lineTo(11, 14); ctx.lineTo(11, 17); ctx.lineTo(3, 17);
+  ctx.quadraticCurveTo(3, 15, 6, 14); ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(13, 14); ctx.lineTo(18, 14); ctx.lineTo(18, 17); ctx.lineTo(21, 17);
+  ctx.quadraticCurveTo(21, 15, 18, 14); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,140,40,0.7)';
+  ctx.fillRect(6, 6, 5, 1.5);
+  ctx.fillRect(13, 6, 5, 1.5);
+  ctx.fillStyle = 'rgba(255,180,60,0.55)';
+  ctx.beginPath(); ctx.arc(8.5, 16, 1.6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(15.5, 16, 1.6, 0, Math.PI * 2); ctx.fill();
+  return c;
+}

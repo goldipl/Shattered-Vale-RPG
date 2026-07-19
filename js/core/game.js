@@ -38,10 +38,11 @@
   // --- Sprites & world ---
   initSprites();
 
-  // Map is 109 cols x 166 rows: World 1 (village/forest) + World 2 (beach
-  // oasis) side by side, then the Jungle band, then the Skeleton Dungeon
-  // band beneath that (see world/tilemap.js for the exact row breakdown).
-  const map = new TileMap(109, 166);
+  // Map is 109 cols x 236 rows: World 1 (village/forest) + World 2 (beach
+  // oasis) side by side, then the Jungle band, the Skeleton Dungeon band,
+  // and now the Molten Depths band beneath that (see world/tilemap.js for
+  // the exact row breakdown).
+  const map = new TileMap(109, 236);
   const camera = new Camera(VIEW_W, VIEW_H);
   const particles = new ParticleSystem();
   const dialogue = new DialogueSystem();
@@ -66,6 +67,7 @@
     toastMsg: null,
     toastTimer: 0,
     restartButton: null,
+    continueButton: null,
     startButtons: {},
     howToBackButton: null,
   };
@@ -83,6 +85,8 @@
     player.atk = PLAYER_BASE_STATS.atk;
     player.hasSword = false;
     player.hasLegendarySword = false;
+    player.hasMoltenSword = false;
+    player.fireproof = false;
     player.speed = PLAYER_BASE_STATS.speed;
     player.attacking = 0;
     player.attackCooldown = 0;
@@ -103,6 +107,7 @@
     state.toastMsg = null;
     state.toastTimer = 0;
     state.restartButton = null;
+    state.continueButton = null;
   }
 
   function update() {
@@ -144,6 +149,7 @@
       state.enemies.forEach((en) => en.update(player, map, particles));
 
       Combat.checkGateConditions(state);
+      Combat.checkHazards(state);
       Combat.processWorldItemPickups(state);
 
       if (player.hp <= 0) state.gameState = 'gameover';
@@ -211,7 +217,7 @@
     dialogue.draw(ctx, VIEW_W, VIEW_H);
     inventory.draw(ctx, VIEW_W, VIEW_H);
 
-    if (state.gameState === 'gameover') Screens.drawEnd(ctx, state, VIEW_W, VIEW_H);
+    if (state.gameState === 'gameover' || state.gameState === 'victory') Screens.drawEnd(ctx, state, VIEW_W, VIEW_H);
   }
 
   let domTick = 0;
@@ -250,7 +256,7 @@
     } else if (state.gameState === 'howtoplay') {
       over = Screens.pointInBtn(mx, my, state.howToBackButton);
     } else {
-      over = Screens.pointInBtn(mx, my, state.restartButton);
+      over = Screens.pointInBtn(mx, my, state.restartButton) || Screens.pointInBtn(mx, my, state.continueButton);
     }
     canvas.style.cursor = over ? 'pointer' : 'default';
   });
@@ -293,6 +299,16 @@
     }
 
     if ((state.gameState !== 'gameover' && state.gameState !== 'victory') || !state.restartButton) return;
+    if (Screens.pointInBtn(mx, my, state.continueButton)) {
+      // Dismiss the victory screen and keep playing in the current world —
+      // nothing resets, unlike Play Again. Not offered on the gameover
+      // screen (state.continueButton is null there), since there's nothing
+      // to resume from after the player has died.
+      state.gameState = 'playing';
+      state.continueButton = null;
+      state.restartButton = null;
+      return;
+    }
     if (Screens.pointInBtn(mx, my, state.restartButton)) restartGame();
   });
 

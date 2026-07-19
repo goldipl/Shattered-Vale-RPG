@@ -150,6 +150,25 @@ const ENEMY_PLACEMENTS = [
 
   // World 4 — Skeleton King (throne room, far south of the dungeon)
   { x: 53 * TILE, y: 158 * TILE, type: 'skeletonKing', opts: { aggroRange: 220 } },
+
+  // World 5 — Molten Depths (south of the dungeon, behind the Lava Gate —
+  // opens once the Skeleton King is dead). Troll Chieftain's arena comes
+  // first, then a lava-flanked corridor (behind the Pit Gate, which opens
+  // once the Chieftain is dead) leads to the Pit Devil's arena.
+  { x: 47 * TILE, y: 178 * TILE, type: 'devilLesser' },
+  { x: 59 * TILE, y: 186 * TILE, type: 'devilLesser' },
+  { x: 48 * TILE, y: 191 * TILE, type: 'orcRaider' },
+  { x: 58 * TILE, y: 181 * TILE, type: 'orcRaider' },
+  { x: 53 * TILE, y: 184 * TILE, type: 'troll' },
+  { x: 53 * TILE, y: 202 * TILE, type: 'orcRaider' },
+  { x: 44 * TILE, y: 214 * TILE, type: 'devilLesser' },
+  { x: 62 * TILE, y: 226 * TILE, type: 'devilLesser' },
+  { x: 46 * TILE, y: 228 * TILE, type: 'orcRaider' },
+  { x: 53 * TILE, y: 218 * TILE, type: 'troll' },
+  { x: 60 * TILE, y: 212 * TILE, type: 'troll' },
+
+  { x: 53 * TILE, y: 186 * TILE, type: 'trollChieftain', opts: { aggroRange: 210 } },
+  { x: 53 * TILE, y: 220 * TILE, type: 'pitDevil', opts: { aggroRange: 260 } },
 ];
 
 const BOSS_NAMES = {

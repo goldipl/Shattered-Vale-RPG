@@ -21,6 +21,11 @@ function initSprites() {
   Sprites.spider = buildSpiderSheet();
   Sprites.skeleton = buildSkeletonSheet();
   Sprites.skeletonKing = buildSkeletonKingSheet();
+  Sprites.devilLesser = buildDevilLesserSheet();
+  Sprites.orcRaider = buildOrcRaiderSheet();
+  Sprites.troll = buildTrollSheet();
+  Sprites.trollChieftain = buildTrollChieftainSheet();
+  Sprites.pitDevil = buildPitDevilSheet();
   Sprites.icons = {
     sword: buildSwordIcon(),
     armor: buildArmorIcon(),
@@ -35,5 +40,8 @@ function initSprites() {
     shield: buildShieldIcon(),
     shieldBone: buildBoneShieldIcon(),
     crownSkeleton: buildSkeletonCrownIcon(),
+    armorObsidian: buildObsidianArmorIcon(),
+    swordMolten: buildMoltenSwordIcon(),
+    bootsFireproof: buildFireproofBootsIcon(),
   };
 }
