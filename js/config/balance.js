@@ -61,25 +61,27 @@ const LAVA_DAMAGE_PER_TICK = 8;
 // size, and dirRows tells AnimatedSprite whether the sheet has 4 directional
 // rows (humanoids/skeletons) or just a single animation row (slimes/spider).
 const ENEMY_DEFS = {
-  slimeGreen:   { w: 20, h: 18, drawW: 32, drawH: 28, hp: 10, speed: 0.95, contactDmg: 2, atkRange: 20, spriteKey: 'slimeGreen', frameW: 32, frameH: 28, dirRows: false },
-  slimeBlue:    { w: 20, h: 18, drawW: 32, drawH: 28, hp: 10, speed: 0.95, contactDmg: 2, atkRange: 20, spriteKey: 'slimeBlue', frameW: 32, frameH: 28, dirRows: false },
-  slimeRed:     { w: 20, h: 18, drawW: 32, drawH: 28, hp: 18, speed: 1.1, contactDmg: 3, atkRange: 22, spriteKey: 'slimeRed', frameW: 32, frameH: 28, dirRows: false },
-  slimeJungle:  { w: 20, h: 18, drawW: 32, drawH: 28, hp: 20, speed: 1.15, contactDmg: 3, atkRange: 22, spriteKey: 'slimeJungle', frameW: 32, frameH: 28, dirRows: false },
-  spider:       { w: 20, h: 18, drawW: 32, drawH: 28, hp: 16, speed: 1.6, contactDmg: 4, atkRange: 20, spriteKey: 'spider', frameW: 32, frameH: 28, dirRows: false },
-  skeleton:     { w: 22, h: 26, drawW: 32, drawH: 34, hp: 32, speed: 1.0, contactDmg: 5, atkRange: 24, spriteKey: 'skeleton', frameW: 32, frameH: 34, dirRows: true },
+  slimeGreen:   { w: 20, h: 18, drawW: 32, drawH: 28, hp: 35, speed: 0.95, contactDmg: 5, atkRange: 20, exp: 35, spriteKey: 'slimeGreen', frameW: 32, frameH: 28, dirRows: false },
+  slimeBlue:    { w: 20, h: 18, drawW: 32, drawH: 28, hp: 45, speed: 1.0, contactDmg: 6, atkRange: 20, exp: 50, spriteKey: 'slimeBlue', frameW: 32, frameH: 28, dirRows: false },
+  slimeRed:     { w: 20, h: 18, drawW: 32, drawH: 28, hp: 80, speed: 1.15, contactDmg: 8, atkRange: 22, exp: 80, spriteKey: 'slimeRed', frameW: 32, frameH: 28, dirRows: false },
+  slimeJungle:  { w: 20, h: 18, drawW: 32, drawH: 28, hp: 110, speed: 1.2, contactDmg: 10, atkRange: 22, exp: 90, spriteKey: 'slimeJungle', frameW: 32, frameH: 28, dirRows: false },
+  spider:       { w: 20, h: 18, drawW: 32, drawH: 28, hp: 90, speed: 1.7, contactDmg: 12, atkRange: 20, exp: 85, spriteKey: 'spider', frameW: 32, frameH: 28, dirRows: false },
+  skeleton:     { w: 22, h: 26, drawW: 32, drawH: 34, hp: 180, speed: 1.05, contactDmg: 15, atkRange: 24, exp: 120, spriteKey: 'skeleton', frameW: 32, frameH: 34, dirRows: true },
 
-  goblinBoss:   { w: 30, h: 32, drawW: 40, drawH: 42, hp: 1240, speed: 1.15, contactDmg: 5, atkRange: 30, spriteKey: 'goblin', frameW: 40, frameH: 42, dirRows: true },
-  devilBoss:    { w: 30, h: 32, drawW: 40, drawH: 42, hp: 1180, speed: 1.25, contactDmg: 6, atkRange: 34, spriteKey: 'devil', frameW: 40, frameH: 42, dirRows: true },
-  orcBoss:      { w: 30, h: 32, drawW: 40, drawH: 42, hp: 2800, speed: 1.2, contactDmg: 6, atkRange: 32, spriteKey: 'orcWarlord', frameW: 40, frameH: 42, dirRows: true },
-  witchBoss:    { w: 30, h: 32, drawW: 40, drawH: 42, hp: 3200, speed: 1.1, contactDmg: 5, atkRange: 40, spriteKey: 'jungleWitch', frameW: 40, frameH: 42, dirRows: true },
-  skeletonKing: { w: 60, h: 64, drawW: 80, drawH: 84, hp: 3500, speed: 1.05, contactDmg: 16, atkRange: 46, spriteKey: 'skeletonKing', frameW: 80, frameH: 84, dirRows: true },
+  // --- Bosses ---
+  goblinBoss:   { w: 30, h: 32, drawW: 40, drawH: 42, hp: 1240, speed: 1.15, contactDmg: 5, atkRange: 30, exp: 800, spriteKey: 'goblin', frameW: 40, frameH: 42, dirRows: true },
+  devilBoss:    { w: 30, h: 32, drawW: 40, drawH: 42, hp: 1180, speed: 1.25, contactDmg: 6, atkRange: 34, exp: 900, spriteKey: 'devil', frameW: 40, frameH: 42, dirRows: true },
+  orcBoss:      { w: 30, h: 32, drawW: 40, drawH: 42, hp: 2800, speed: 1.2, contactDmg: 6, atkRange: 32, exp: 1900, spriteKey: 'orcWarlord', frameW: 40, frameH: 42, dirRows: true },
+  witchBoss:    { w: 30, h: 32, drawW: 40, drawH: 42, hp: 3200, speed: 1.1, contactDmg: 5, atkRange: 40, exp: 2400, spriteKey: 'jungleWitch', frameW: 40, frameH: 42, dirRows: true },
+  skeletonKing: { w: 60, h: 64, drawW: 80, drawH: 84, hp: 3500, speed: 1.05, contactDmg: 16, atkRange: 46, exp: 5000, spriteKey: 'skeletonKing', frameW: 80, frameH: 84, dirRows: true },
 
-  // --- Molten Depths (World 5, unlocked after Skeleton King) ---
-  devilLesser:    { w: 24, h: 27, drawW: 34, drawH: 36, hp: 45, speed: 1.3, contactDmg: 6, atkRange: 26, spriteKey: 'devilLesser', frameW: 34, frameH: 36, dirRows: true },
-  orcRaider:      { w: 24, h: 27, drawW: 34, drawH: 36, hp: 50, speed: 1.15, contactDmg: 6, atkRange: 26, spriteKey: 'orcRaider', frameW: 34, frameH: 36, dirRows: true },
-  troll:          { w: 34, h: 36, drawW: 46, drawH: 48, hp: 70, speed: 0.85, contactDmg: 8, atkRange: 30, spriteKey: 'troll', frameW: 46, frameH: 48, dirRows: true },
-  trollChieftain: { w: 44, h: 46, drawW: 58, drawH: 60, hp: 2100, speed: 1.0, contactDmg: 14, atkRange: 40, spriteKey: 'trollChieftain', frameW: 58, frameH: 60, dirRows: true },
-  pitDevil:       { w: 50, h: 52, drawW: 66, drawH: 68, hp: 5000, speed: 1.1, contactDmg: 20, atkRange: 50, spriteKey: 'pitDevil', frameW: 66, frameH: 68, dirRows: true },
+
+  // --- Molten Depths ---
+  devilLesser:    { w: 24, h: 27, drawW: 34, drawH: 36, hp: 200, speed: 1.3, contactDmg: 18, atkRange: 26, exp: 150, spriteKey: 'devilLesser', frameW: 34, frameH: 36, dirRows: true },
+  orcRaider:      { w: 24, h: 27, drawW: 34, drawH: 36, hp: 240, speed: 1.15, contactDmg: 20, atkRange: 26, exp: 180, spriteKey: 'orcRaider', frameW: 34, frameH: 36, dirRows: true },
+  troll:          { w: 34, h: 36, drawW: 46, drawH: 48, hp: 450, speed: 0.85, contactDmg: 25, atkRange: 30, exp: 300, spriteKey: 'troll', frameW: 46, frameH: 48, dirRows: true },
+  trollChieftain: { w: 44, h: 46, drawW: 58, drawH: 60, hp: 2100, speed: 1.0, contactDmg: 14, atkRange: 40, exp: 3000, spriteKey: 'trollChieftain', frameW: 58, frameH: 60, dirRows: true },
+  pitDevil:       { w: 50, h: 52, drawW: 66, drawH: 68, hp: 5000, speed: 1.1, contactDmg: 20, atkRange: 50, exp: 8000, spriteKey: 'pitDevil', frameW: 66, frameH: 68, dirRows: true },
 };
 
 const BOSS_TYPES = new Set(['goblinBoss', 'devilBoss', 'orcBoss', 'witchBoss', 'skeletonKing', 'trollChieftain', 'pitDevil']);
