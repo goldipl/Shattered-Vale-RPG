@@ -70,16 +70,16 @@ const ENEMY_DEFS = {
 
   goblinBoss:   { w: 30, h: 32, drawW: 40, drawH: 42, hp: 1240, speed: 1.15, contactDmg: 5, atkRange: 30, spriteKey: 'goblin', frameW: 40, frameH: 42, dirRows: true },
   devilBoss:    { w: 30, h: 32, drawW: 40, drawH: 42, hp: 1180, speed: 1.25, contactDmg: 6, atkRange: 34, spriteKey: 'devil', frameW: 40, frameH: 42, dirRows: true },
-  orcBoss:      { w: 30, h: 32, drawW: 40, drawH: 42, hp: 900, speed: 1.2, contactDmg: 6, atkRange: 32, spriteKey: 'orcWarlord', frameW: 40, frameH: 42, dirRows: true },
+  orcBoss:      { w: 30, h: 32, drawW: 40, drawH: 42, hp: 2800, speed: 1.2, contactDmg: 6, atkRange: 32, spriteKey: 'orcWarlord', frameW: 40, frameH: 42, dirRows: true },
   witchBoss:    { w: 30, h: 32, drawW: 40, drawH: 42, hp: 3200, speed: 1.1, contactDmg: 5, atkRange: 40, spriteKey: 'jungleWitch', frameW: 40, frameH: 42, dirRows: true },
-  skeletonKing: { w: 60, h: 64, drawW: 80, drawH: 84, hp: 2200, speed: 1.05, contactDmg: 16, atkRange: 46, spriteKey: 'skeletonKing', frameW: 80, frameH: 84, dirRows: true },
+  skeletonKing: { w: 60, h: 64, drawW: 80, drawH: 84, hp: 3500, speed: 1.05, contactDmg: 16, atkRange: 46, spriteKey: 'skeletonKing', frameW: 80, frameH: 84, dirRows: true },
 
   // --- Molten Depths (World 5, unlocked after Skeleton King) ---
   devilLesser:    { w: 24, h: 27, drawW: 34, drawH: 36, hp: 45, speed: 1.3, contactDmg: 6, atkRange: 26, spriteKey: 'devilLesser', frameW: 34, frameH: 36, dirRows: true },
   orcRaider:      { w: 24, h: 27, drawW: 34, drawH: 36, hp: 50, speed: 1.15, contactDmg: 6, atkRange: 26, spriteKey: 'orcRaider', frameW: 34, frameH: 36, dirRows: true },
   troll:          { w: 34, h: 36, drawW: 46, drawH: 48, hp: 70, speed: 0.85, contactDmg: 8, atkRange: 30, spriteKey: 'troll', frameW: 46, frameH: 48, dirRows: true },
   trollChieftain: { w: 44, h: 46, drawW: 58, drawH: 60, hp: 2100, speed: 1.0, contactDmg: 14, atkRange: 40, spriteKey: 'trollChieftain', frameW: 58, frameH: 60, dirRows: true },
-  pitDevil:       { w: 50, h: 52, drawW: 66, drawH: 68, hp: 3300, speed: 1.1, contactDmg: 20, atkRange: 50, spriteKey: 'pitDevil', frameW: 66, frameH: 68, dirRows: true },
+  pitDevil:       { w: 50, h: 52, drawW: 66, drawH: 68, hp: 5000, speed: 1.1, contactDmg: 20, atkRange: 50, spriteKey: 'pitDevil', frameW: 66, frameH: 68, dirRows: true },
 };
 
 const BOSS_TYPES = new Set(['goblinBoss', 'devilBoss', 'orcBoss', 'witchBoss', 'skeletonKing', 'trollChieftain', 'pitDevil']);
