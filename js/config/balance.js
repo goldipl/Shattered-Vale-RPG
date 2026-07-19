@@ -68,10 +68,10 @@ const ENEMY_DEFS = {
   spider:       { w: 20, h: 18, drawW: 32, drawH: 28, hp: 16, speed: 1.6, contactDmg: 4, atkRange: 20, spriteKey: 'spider', frameW: 32, frameH: 28, dirRows: false },
   skeleton:     { w: 22, h: 26, drawW: 32, drawH: 34, hp: 32, speed: 1.0, contactDmg: 5, atkRange: 24, spriteKey: 'skeleton', frameW: 32, frameH: 34, dirRows: true },
 
-  goblinBoss:   { w: 30, h: 32, drawW: 40, drawH: 42, hp: 240, speed: 1.15, contactDmg: 5, atkRange: 30, spriteKey: 'goblin', frameW: 40, frameH: 42, dirRows: true },
-  devilBoss:    { w: 30, h: 32, drawW: 40, drawH: 42, hp: 480, speed: 1.25, contactDmg: 6, atkRange: 34, spriteKey: 'devil', frameW: 40, frameH: 42, dirRows: true },
-  orcBoss:      { w: 30, h: 32, drawW: 40, drawH: 42, hp: 700, speed: 1.2, contactDmg: 6, atkRange: 32, spriteKey: 'orcWarlord', frameW: 40, frameH: 42, dirRows: true },
-  witchBoss:    { w: 30, h: 32, drawW: 40, drawH: 42, hp: 6200, speed: 1.1, contactDmg: 5, atkRange: 40, spriteKey: 'jungleWitch', frameW: 40, frameH: 42, dirRows: true },
+  goblinBoss:   { w: 30, h: 32, drawW: 40, drawH: 42, hp: 1240, speed: 1.15, contactDmg: 5, atkRange: 30, spriteKey: 'goblin', frameW: 40, frameH: 42, dirRows: true },
+  devilBoss:    { w: 30, h: 32, drawW: 40, drawH: 42, hp: 1180, speed: 1.25, contactDmg: 6, atkRange: 34, spriteKey: 'devil', frameW: 40, frameH: 42, dirRows: true },
+  orcBoss:      { w: 30, h: 32, drawW: 40, drawH: 42, hp: 900, speed: 1.2, contactDmg: 6, atkRange: 32, spriteKey: 'orcWarlord', frameW: 40, frameH: 42, dirRows: true },
+  witchBoss:    { w: 30, h: 32, drawW: 40, drawH: 42, hp: 3200, speed: 1.1, contactDmg: 5, atkRange: 40, spriteKey: 'jungleWitch', frameW: 40, frameH: 42, dirRows: true },
   skeletonKing: { w: 60, h: 64, drawW: 80, drawH: 84, hp: 2200, speed: 1.05, contactDmg: 16, atkRange: 46, spriteKey: 'skeletonKing', frameW: 80, frameH: 84, dirRows: true },
 
   // --- Molten Depths (World 5, unlocked after Skeleton King) ---
