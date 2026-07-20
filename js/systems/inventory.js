@@ -342,13 +342,6 @@ class Inventory {
     const weaponKind = this.equipped.weapon;
     const weaponStats = weaponKind && getItemStats(weaponKind);
     statRow('ATK', String(player.attackDamage), '#e8c93c');
-    if (weaponStats && weaponStats.atk) {
-      ctx.fillStyle = 'rgba(232,201,60,0.6)';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText(`(+${weaponStats.atk} ${weaponStats.name})`, sx + 168, ry - 9);
-      ctx.textAlign = 'left';
-    }
     statRow('DEF', String(player.defense), '#85b7eb');
     statRow('SPD', player.speed.toFixed(1), '#78e0a8');
     statRow('MANA', `${Math.floor(player.mana)}/${player.maxMana}`, '#a878e0');
