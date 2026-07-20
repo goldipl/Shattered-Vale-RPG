@@ -12,7 +12,7 @@ const PLAYER_BASE_STATS = {
   hp: 150,
   maxHp: 150,
   atk: 3,
-  speed: 2.6,
+  speed: 1.1,
   mana: 100,
   maxMana: 100,
   manaRegen: 0.04,
