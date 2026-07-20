@@ -18,6 +18,7 @@ No installation or server required — just open `index.html` in a browser.
     ├── config/                     ← pure data, no rendering, no class instantiation
     │   ├── balance.js               every balance number: player stats (hp/atk/speed/mana), level-up progression, weapon bonuses (incl. Molten Blade's top tier), per-enemy-type stats (ENEMY_DEFS, now 16 types incl. Molten Depths), XP/gold kill rewards (COMBAT_REWARDS), lava damage-per-tick
     │   ├── level-layout.js          world content: NPC dialogue (Elder, Merchant), world item placements, the full 99-entry enemy list (86 original + 13 Molten Depths — previously duplicated between initial setup and restartGame, now defined once), boss display names, player spawn point
+    │   ├── item-stats.js            what to SHOW the player about each item: its attack/defense/speed bonus and a one-line description
     │   └── item-effects.js          pickup/equip/unequip effect tables (toast text, player-state changes, screen-flash colors — incl. Obsidian Armor, Molten Blade, Fireproof Boots), boss-defeat drop/cutscene scripts (Skeleton King now opens the Lava Gate instead of ending the game; Troll Chieftain opens the Pit Gate; Pit Devil triggers victory), gate-unlock conditions (which enemies must be dead before a gate opens), sword pickup guarded so only the first one auto-equips
     │
     ├── sprites/                    ← procedural pixel-art generation
