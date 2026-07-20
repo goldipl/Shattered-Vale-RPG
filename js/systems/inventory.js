@@ -146,10 +146,11 @@ class Inventory {
   }
 
   // Shared geometry for the panel: equip-slot column on the left (character
-  // gear), backpack grid on the right (found items). Computed once per call
-  // so hit-testing and drawing can never drift apart.
+  // gear), backpack grid in the middle (found items), character/item stats
+  // column on the right. Computed once per call so hit-testing and drawing
+  // can never drift apart.
   _layout(canvasW, canvasH) {
-    const w = 570, h = 280; 
+    const w = 800, h = 280;
     const x = (canvasW - w) / 2, y = (canvasH - h) / 2;
 
     const equipX = x + 18, equipY = y + 74; 
@@ -187,12 +188,23 @@ class Inventory {
       });
     }
 
-    return { w, h, x, y, equipX, equipY, bpX, bpY, equipSlots, backpackItems };
+    const statsX = bpX + 6 * CELL + 24, statsY = y + 74;
+
+    return { w, h, x, y, equipX, equipY, bpX, bpY, statsX, statsY, equipSlots, backpackItems };
   }
 
-  draw(ctx, canvasW, canvasH) {
+  // Resolves whatever's currently hovered (a backpack item or an equip
+  // slot) down to a single item kind, for the tooltip in the stats column.
+  // Returns null if nothing's hovered, or an equip slot is hovered but empty.
+  _hoveredItemKind() {
+    if (this.hoveredKind) return this.hoveredKind;
+    if (this.hoveredSlot) return this.equipped[this.hoveredSlot] || null;
+    return null;
+  }
+
+  draw(ctx, canvasW, canvasH, player) {
     if (!this.open) return;
-    const { w, h, x, y, equipX, equipY, bpX, bpY, equipSlots, backpackItems } =
+    const { w, h, x, y, equipX, equipY, bpX, bpY, statsX, statsY, equipSlots, backpackItems } =
       this._layout(canvasW, canvasH);
 
     ctx.save();
@@ -243,7 +255,7 @@ class Inventory {
       }
     });
 
-    // --- Right side: backpack grid (found items) ---
+    // --- Middle: backpack grid (found items) ---
     ctx.fillStyle = 'rgba(232,228,216,0.6)';
     ctx.font = 'bold 11px sans-serif';
     ctx.fillText('BACKPACK', bpX, bpY - 16);
@@ -282,16 +294,118 @@ class Inventory {
       }
     });
 
-    // Vertical divider between the two panes.
+    // --- Right column: character sheet + hovered-item tooltip ---
+    if (player) this._drawStatsColumn(ctx, statsX, statsY, player);
+
+    // Divider between equip column and backpack.
     ctx.strokeStyle = 'rgba(232,228,216,0.15)';
     ctx.beginPath();
     ctx.moveTo(bpX - 16, y + 46);
     ctx.lineTo(bpX - 16, y + h - 36);
     ctx.stroke();
 
+    // Divider between backpack and the stats column.
+    ctx.beginPath();
+    ctx.moveTo(statsX - 16, y + 46);
+    ctx.lineTo(statsX - 16, y + h - 36);
+    ctx.stroke();
+
     ctx.fillStyle = 'rgba(232,228,216,0.4)';
     ctx.font = '11px sans-serif';
     ctx.fillText('[Esc to close] · click a backpack item to use/equip it', x + 18, y + h - 14);
     ctx.restore();
+  }
+
+  // Character stats (top) + whichever item is currently hovered, if any
+  // (bottom). Shown together so the player can see both their current
+  // totals and exactly what a candidate item would add before equipping it.
+  _drawStatsColumn(ctx, sx, sy, player) {
+    ctx.fillStyle = 'rgba(232,228,216,0.6)';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('CHARACTER', sx, sy - 16);
+
+    const rowH = 20;
+    let ry = sy + 4;
+    const statRow = (label, value, color) => {
+      ctx.fillStyle = 'rgba(232,228,216,0.55)';
+      ctx.font = '11px sans-serif';
+      ctx.fillText(label, sx, ry);
+      ctx.fillStyle = color || '#e8e4d8';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(value, sx + 168, ry);
+      ctx.textAlign = 'left';
+      ry += rowH;
+    };
+
+    statRow('HP', `${player.hp}/${player.maxHp}`, '#e88a8a');
+    const weaponKind = this.equipped.weapon;
+    const weaponStats = weaponKind && getItemStats(weaponKind);
+    statRow('ATK', String(player.attackDamage), '#e8c93c');
+    if (weaponStats && weaponStats.atk) {
+      ctx.fillStyle = 'rgba(232,201,60,0.6)';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`(+${weaponStats.atk} ${weaponStats.name})`, sx + 168, ry - 9);
+      ctx.textAlign = 'left';
+    }
+    statRow('DEF', String(player.defense), '#85b7eb');
+    statRow('SPD', player.speed.toFixed(1), '#78e0a8');
+    statRow('MANA', `${Math.floor(player.mana)}/${player.maxMana}`, '#a878e0');
+
+    // --- Hovered item tooltip ---
+    const ty = sy + rowH * 5 + 20;
+    ctx.strokeStyle = 'rgba(232,228,216,0.15)';
+    ctx.beginPath(); ctx.moveTo(sx, ty - 12); ctx.lineTo(sx + 190, ty - 12); ctx.stroke();
+
+    ctx.fillStyle = 'rgba(232,228,216,0.6)';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('ITEM', sx, ty);
+
+    const hoveredKind = this._hoveredItemKind();
+    let iy = ty + 20;
+    if (!hoveredKind) {
+      ctx.fillStyle = 'rgba(232,228,216,0.4)';
+      ctx.font = '11px sans-serif';
+      const lines = wrapPlainText(ctx, 'Hover an item to see what it does.', 180);
+      lines.forEach(line => { ctx.fillText(line, sx, iy); iy += 15; });
+      return;
+    }
+
+    const stats = getItemStats(hoveredKind);
+    ctx.fillStyle = '#f1efe8';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.fillText(stats.name, sx, iy);
+    iy += 20;
+
+    if (stats.atk) {
+      ctx.fillStyle = '#e8c93c';
+      ctx.font = '12px sans-serif';
+      ctx.fillText(`Attack  +${stats.atk}`, sx, iy);
+      iy += 17;
+    }
+    if (stats.def) {
+      ctx.fillStyle = '#85b7eb';
+      ctx.font = '12px sans-serif';
+      ctx.fillText(`Defense  +${stats.def}`, sx, iy);
+      iy += 17;
+    }
+    if (stats.spd) {
+      ctx.fillStyle = '#78e0a8';
+      ctx.font = '12px sans-serif';
+      ctx.fillText(`Speed  +${stats.spd}`, sx, iy);
+      iy += 17;
+    }
+    if (stats.extra) {
+      ctx.fillStyle = 'rgba(232,228,216,0.7)';
+      ctx.font = 'italic 11px sans-serif';
+      const lines = wrapPlainText(ctx, stats.extra, 180);
+      lines.forEach(line => { ctx.fillText(line, sx, iy); iy += 14; });
+    }
+    if (!stats.atk && !stats.def && !stats.spd && !stats.extra) {
+      ctx.fillStyle = 'rgba(232,228,216,0.4)';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('No combat effect.', sx, iy);
+    }
   }
 }

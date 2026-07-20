@@ -87,6 +87,7 @@
     player.hasLegendarySword = false;
     player.hasMoltenSword = false;
     player.fireproof = false;
+    player.defense = 0;
     player.speed = PLAYER_BASE_STATS.speed;
     player.attacking = 0;
     player.attackCooldown = 0;
@@ -215,7 +216,7 @@
 
     Hud.draw(ctx, state, VIEW_W, VIEW_H);
     dialogue.draw(ctx, VIEW_W, VIEW_H);
-    inventory.draw(ctx, VIEW_W, VIEW_H);
+    inventory.draw(ctx, VIEW_W, VIEW_H, player);
 
     if (state.gameState === 'gameover' || state.gameState === 'victory') Screens.drawEnd(ctx, state, VIEW_W, VIEW_H);
   }

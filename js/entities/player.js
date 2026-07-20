@@ -28,6 +28,7 @@ class Player {
     this.hasLegendarySword = false;
     this.hasMoltenSword = false;
     this.fireproof = false; // true while Fireproof Boots are equipped — negates lava damage
+    this.defense = 0; // sum of equipped armor/helmet/shield (see Combat.recomputeDefense)
     this.attacking = 0;
     this.attackCooldown = 0;
     this.invuln = 0;
@@ -150,11 +151,12 @@ class Player {
 
   takeDamage(amount, particles) {
     if (this.invuln > 0) return;
-    this.hp = clamp(this.hp - amount, 0, this.maxHp);
+    const reduced = Math.max(1, Math.round(amount - this.defense));
+    this.hp = clamp(this.hp - reduced, 0, this.maxHp);
     this.invuln = 45;
     this.hitFlash = 12;
     particles.burst(this.centerX, this.centerY, '#e24b4a', 8);
-    particles.floatText(this.centerX, this.y - 4, '-' + amount, '#f09595');
+    particles.floatText(this.centerX, this.y - 4, '-' + reduced, '#f09595');
   }
 
   gainXP(amount, particles) {

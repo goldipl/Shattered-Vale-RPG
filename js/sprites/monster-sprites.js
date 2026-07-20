@@ -355,6 +355,77 @@ function buildSpiderSheet() {
   return sheet;
 }
 
+// ---------- Sand Scorpion (World 2 oasis, strong grunt) ----------
+function buildSandScorpionSheet() {
+  const FW = 36, FH = 30;
+  const sheet = makeCanvas(FW * 4, FH * 1); // no directions, just leg-scuttle + tail-curl frames
+  const ctx = sheet.getContext('2d');
+  for (let f = 0; f < 4; f++) {
+    ctx.save();
+    ctx.translate(f * FW, 0);
+    const legSpread = [0, 2, 0, -2][f];
+    const tailCurl = [0, 1, 2, 1][f];
+    const cx = 16, cy = 17;
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath(); ctx.ellipse(cx + 2, 27, 13, 3, 0, 0, Math.PI * 2); ctx.fill();
+    // legs (4 per side, wider stance than the spider)
+    ctx.strokeStyle = '#5a3a1e';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 4; i++) {
+      const ly = cy - 4 + i * 3;
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, ly);
+      ctx.lineTo(cx - 15 - legSpread, ly - 2 + i);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + 5, ly);
+      ctx.lineTo(cx + 15 + legSpread, ly - 2 + i);
+      ctx.stroke();
+    }
+    // curled tail with stinger (rises up over the back)
+    ctx.strokeStyle = '#a8763c';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cx + 6, cy);
+    ctx.quadraticCurveTo(cx + 16, cy - 6 - tailCurl, cx + 14, cy - 14 - tailCurl);
+    ctx.stroke();
+    ctx.fillStyle = '#3a2412';
+    ctx.beginPath();
+    ctx.moveTo(cx + 14, cy - 14 - tailCurl);
+    ctx.lineTo(cx + 17, cy - 19 - tailCurl);
+    ctx.lineTo(cx + 12, cy - 16 - tailCurl);
+    ctx.closePath();
+    ctx.fill();
+    // abdomen (segmented)
+    ctx.fillStyle = '#c9985a';
+    ctx.beginPath(); ctx.ellipse(cx + 2, cy + 2, 9, 7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(90,58,30,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx - 3, cy + 2); ctx.lineTo(cx + 7, cy + 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - 2, cy - 2); ctx.lineTo(cx + 6, cy - 2); ctx.stroke();
+    // head/thorax
+    ctx.fillStyle = '#a8763c';
+    ctx.beginPath(); ctx.ellipse(cx - 6, cy, 6, 5, 0, 0, Math.PI * 2); ctx.fill();
+    // pincers (front claws)
+    ctx.fillStyle = '#c9985a';
+    ctx.beginPath();
+    ctx.moveTo(cx - 10, cy - 3); ctx.lineTo(cx - 17, cy - 7); ctx.lineTo(cx - 15, cy - 2);
+    ctx.lineTo(cx - 18, cy - 1); ctx.lineTo(cx - 11, cy + 1);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx - 10, cy + 3); ctx.lineTo(cx - 17, cy + 7); ctx.lineTo(cx - 15, cy + 2);
+    ctx.lineTo(cx - 18, cy + 1); ctx.lineTo(cx - 11, cy - 1);
+    ctx.closePath(); ctx.fill();
+    // eyes
+    ctx.fillStyle = '#e8975a';
+    ctx.beginPath(); ctx.arc(cx - 8, cy - 2, 1.4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - 8, cy + 2, 1.4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  return sheet;
+}
+
 // ---------- Skeleton (crypt warrior) ----------
 function buildSkeletonSheet() {
   const FW = 32, FH = 34;

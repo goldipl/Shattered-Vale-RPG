@@ -151,10 +151,30 @@ const Combat = {
       if (effect) {
         effect.apply({ inventory, player });
         if (effect.toast) this.toast(state, effect.toast);
+        this.recomputeDefense(state);
       }
     } else if (hit.region === 'equip') {
       const unequip = ITEM_UNEQUIP_EFFECTS[hit.slotId];
-      if (unequip) unequip({ inventory, player });
+      if (unequip) {
+        unequip({ inventory, player });
+        this.recomputeDefense(state);
+      }
     }
+  },
+
+  // Sums the defense value (see ARMOR_DEFENSE in config/item-stats.js) of
+  // everything currently in inventory.equipped and stores the total on
+  // player.defense. Recomputed from scratch rather than incrementally
+  // adjusted, so slot-swaps (equipping over an already-occupied slot) can
+  // never drift out of sync with what's actually worn.
+  recomputeDefense(state) {
+    const { player, inventory } = state;
+    let total = 0;
+    for (const slotId in inventory.equipped) {
+      const kind = inventory.equipped[slotId];
+      const stats = kind && ITEM_STATS[kind];
+      if (stats && stats.def) total += stats.def;
+    }
+    player.defense = total;
   },
 };

@@ -13,6 +13,7 @@ function initSprites() {
   Sprites.slimeGreen = buildSlimeSheet('#7bbf5e', '#4a8a35');
   Sprites.slimeBlue = buildSlimeSheet('#5e9ebf', '#356e8a');
   Sprites.slimeRed = buildSlimeSheet('#b93244', '#da2121');
+  Sprites.sandScorpion = buildSandScorpionSheet();
   Sprites.slimeJungle = buildSlimeSheet('#6ec95e', '#2a8a3a');
   Sprites.goblin = buildGoblinSheet();
   Sprites.devil = buildDevilSheet();

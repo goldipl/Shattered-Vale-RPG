@@ -6,7 +6,7 @@ const { createSandbox } = require('./dom-shim');
 const ROOT = path.resolve(__dirname, '..');
 const FILES = [
   'js/utils.js',
-  'js/config/balance.js', 'js/config/level-layout.js', 'js/config/item-effects.js',
+  'js/config/balance.js', 'js/config/level-layout.js', 'js/config/item-effects.js', 'js/config/item-stats.js',
   'js/sprites/humanoid-sprites.js', 'js/sprites/monster-sprites.js', 'js/sprites/molten-sprites.js', 'js/sprites/icon-sprites.js', 'js/sprites/sprites.js',
   'js/world/tilemap-builder.js', 'js/world/tilemap-renderer.js', 'js/world/tilemap.js',
   'js/entities/animated-sprite.js', 'js/entities/player.js', 'js/entities/npc.js', 'js/entities/enemy.js', 'js/entities/fireball.js',
@@ -58,7 +58,7 @@ check('map is 109x236 (grew to fit Molten Depths)', map.cols === 109 && map.rows
 check('gates start closed', !map.isGateOpen && !map.isWorldTwoGateOpen && !map.isJungleGateOpen && !map.isSkeletonGateOpen && !map.isLavaGateOpen && !map.isPitGateOpen);
 
 console.log('\n=== World factory counts ===');
-check('99 enemies spawned (86 original + 13 Molten Depths)', dbg.state.enemies.length === 99);
+check('129 enemies spawned (86 original + 13 Molten Depths + 30 Sand Scorpions)', dbg.state.enemies.length === 129);
 check('2 npcs spawned', dbg.state.npcs.length === 2);
 check('elder resolved', dbg.state.elder && dbg.state.elder.name === 'Elder Rowan');
 check('merchant resolved', dbg.state.merchant && dbg.state.merchant.name === 'Wandering Merchant');
@@ -113,7 +113,7 @@ console.log('\n=== Simulate restart ===');
 dbg.restartGame();
 check('restart resets hp', dbg.state.player.hp === PLAYER_BASE_STATS_REF.hp);
 check('restart resets gold', dbg.state.player.gold === 0);
-check('restart rebuilds 99 enemies', dbg.state.enemies.length === 99);
+check('restart rebuilds 129 enemies', dbg.state.enemies.length === 129);
 check('restart resets gameState to playing', dbg.state.gameState === 'playing');
 check('restart does NOT reset gates (world persists)', map.isGateOpen && map.isWorldTwoGateOpen);
 
@@ -277,6 +277,58 @@ dbg.state.player.fireproof = true;
 dbg.restartGame();
 check('restart clears hasMoltenSword (was a gap before this fix)', dbg.state.player.hasMoltenSword === false);
 check('restart clears fireproof (was a gap before this fix)', dbg.state.player.fireproof === false);
+
+console.log('\n=== Sand Scorpion (World 2) ===');
+check('Sprites.sandScorpion exists', !!Sprites.sandScorpion);
+const scorpions = dbg.state.enemies.filter(e => e.type === 'sandScorpion');
+check('30 sand scorpions in roster', scorpions.length === 30);
+check('sandScorpion is notably stronger than slimeRed', scorpions[0].maxHp > 18 * 2);
+let scorpionSolidFails = 0;
+scorpions.forEach(e => {
+  const tx = Math.floor(e.x / 32), ty = Math.floor(e.y / 32);
+  if (map.isSolid(tx, ty)) scorpionSolidFails++;
+});
+check('no sand scorpion spawns on a solid tile', scorpionSolidFails === 0);
+
+console.log('\n=== Defense mechanic ===');
+const ITEM_STATS_REF = pull('ITEM_STATS');
+check('ARMOR_DEFENSE values loaded (armorObsidian)', ITEM_STATS_REF.armorObsidian.def === 12);
+dbg.state.player.hp = dbg.state.player.maxHp;
+dbg.state.player.defense = 0;
+dbg.state.player.invuln = 0;
+const hpBeforeNoDef = dbg.state.player.hp;
+dbg.state.player.takeDamage(10, dbg.state.particles);
+const dmgTakenNoDef = hpBeforeNoDef - dbg.state.player.hp;
+check('takeDamage with 0 defense deals full damage', dmgTakenNoDef === 10);
+
+dbg.state.inventory.add('armorObsidian', 1);
+CombatRef.handleInventoryClick(dbg.state, { region: 'backpack', kind: 'armorObsidian' });
+check('equipping Obsidian Armor sets player.defense to 12', dbg.state.player.defense === 12);
+
+dbg.state.player.hp = dbg.state.player.maxHp;
+dbg.state.player.invuln = 0;
+const hpBeforeDef = dbg.state.player.hp;
+dbg.state.player.takeDamage(10, dbg.state.particles);
+const dmgTakenWithDef = hpBeforeDef - dbg.state.player.hp;
+check('10 damage with 12 defense reduces to the 1-damage floor', dmgTakenWithDef === 1);
+
+CombatRef.handleInventoryClick(dbg.state, { region: 'equip', slotId: 'armor' });
+check('unequipping armor resets defense to 0', dbg.state.player.defense === 0);
+
+console.log('\n=== Inventory stats panel renders ===');
+dbg.state.inventory.open = true;
+dbg.state.inventory.add('swordMolten', 1);
+dbg.state.inventory.hoveredKind = 'swordMolten';
+dbg.state.inventory.draw(fakeCtx, 960, 600, dbg.state.player);
+check('inventory.draw with player arg runs without throwing (hovering an item)', true);
+dbg.state.inventory.hoveredKind = null;
+dbg.state.inventory.hoveredSlot = null;
+dbg.state.inventory.draw(fakeCtx, 960, 600, dbg.state.player);
+check('inventory.draw runs without throwing (nothing hovered)', true);
+dbg.state.inventory.open = false;
+
+sandbox.__tick(20);
+check('20 more frames after stats-panel tests, no throw', true);
 
 console.log(`\n=== FINAL RESULTS: ${pass} passed, ${fail} failed ===`);
 process.exit(fail > 0 ? 1 : 0);
