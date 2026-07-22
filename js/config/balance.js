@@ -55,6 +55,19 @@ const BOOTS_SPEED = 3.2;
 // (see Combat.checkHazards), same as taking a hit from an enemy.
 const LAVA_DAMAGE_PER_TICK = 8;
 
+// Every 3rd melee swing knocks back whatever it hits (see Player.attackCount
+// and Combat.handleAttack). Bosses are immune — see Enemy.applyKnockback.
+const KNOCKBACK_EVERY_NTH_ATTACK = 3;
+const KNOCKBACK_SPEED = 6;      // initial push speed, px/frame
+const KNOCKBACK_DURATION = 12;  // frames the push lasts
+const KNOCKBACK_DECAY = 0.85;   // multiplicative falloff applied each frame
+
+// Gentle push-apart speed used to resolve an enemy that's ended up
+// overlapping the player (e.g. the player walked onto a stationary one) —
+// see Enemy._separateFromPlayer. Independent of any enemy's own `speed`
+// stat so separation is consistent regardless of monster type.
+const ENEMY_SEPARATION_SPEED = 2;
+
 // --- Enemies ---
 // One row per enemy `type`. `spriteKey` indexes into the Sprites registry
 // (see sprites/sprites.js), frameW/frameH is the sprite sheet's per-frame

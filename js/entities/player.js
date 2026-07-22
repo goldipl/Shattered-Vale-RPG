@@ -31,6 +31,7 @@ class Player {
     this.defense = 0; // sum of equipped armor/helmet/shield (see Combat.recomputeDefense)
     this.attacking = 0;
     this.attackCooldown = 0;
+    this.attackCount = 0; // total swings landed — every KNOCKBACK_EVERY_NTH_ATTACK triggers a knockback (see Combat.handleAttack)
     this.invuln = 0;
 
     this.anim = new AnimatedSprite(Sprites.player, 32, 34);
@@ -146,6 +147,7 @@ class Player {
     if (this.attackCooldown > 0) return false;
     this.attacking = 14;
     this.attackCooldown = 20;
+    this.attackCount++;
     return true;
   }
 

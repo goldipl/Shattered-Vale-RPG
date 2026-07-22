@@ -91,6 +91,7 @@
     player.speed = PLAYER_BASE_STATS.speed;
     player.attacking = 0;
     player.attackCooldown = 0;
+    player.attackCount = 0;
     player.invuln = 0;
     // (mana/fireball cooldown intentionally carry over — matches the
     // original restart behavior, which never reset them either.)

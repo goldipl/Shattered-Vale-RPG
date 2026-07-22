@@ -39,17 +39,24 @@ const Combat = {
   },
 
   // Player's melee swing: damages every living enemy caught in the attack
-  // hitbox, then resolves rewards/drops for any that died from it.
+  // hitbox, then resolves rewards/drops for any that died from it. Every
+  // KNOCKBACK_EVERY_NTH_ATTACK-th swing also knocks back anything it hits
+  // and doesn't kill.
   handleAttack(state) {
     const { player, enemies, particles, camera } = state;
     if (!player.startAttack()) return;
 
+    const isKnockbackSwing = player.attackCount % KNOCKBACK_EVERY_NTH_ATTACK === 0;
     const hb = player.attackHitbox();
     enemies.forEach((en) => {
       if (!en.alive || !rectsOverlap(hb, en)) return;
       en.takeDamage(player.attackDamage, particles);
-      camera.shake(2, 4);
-      if (!en.alive) this._onEnemyDefeated(state, en);
+      camera.shake(isKnockbackSwing ? 4 : 2, isKnockbackSwing ? 6 : 4);
+      if (!en.alive) {
+        this._onEnemyDefeated(state, en);
+        return;
+      }
+      if (isKnockbackSwing) en.applyKnockback(player.centerX, player.centerY);
     });
   },
 

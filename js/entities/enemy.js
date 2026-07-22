@@ -72,6 +72,12 @@ class Enemy {
     this.homeY = y;
     this.deathTimer = 0;
     this.telegraphing = 0;
+
+    // Knockback (see applyKnockback / Combat.handleAttack) — a short burst
+    // of forced movement that overrides normal AI while active.
+    this.knockbackVX = 0;
+    this.knockbackVY = 0;
+    this.knockbackTimer = 0;
   }
   get centerX() { return this.x + this.w / 2; }
   get centerY() { return this.y + this.h / 2; }
@@ -86,6 +92,59 @@ class Enemy {
     return { x: ax, y: ay, w: this.w, h: this.h };
   }
 
+  // Pushes this enemy directly away from (fromX, fromY) — the player's
+  // center at the moment of the hit. Bosses stand their ground; getting
+  // launched across the screen doesn't read well at boss scale.
+  applyKnockback(fromX, fromY) {
+    if (this.isBoss) return;
+    const dx = this.centerX - fromX, dy = this.centerY - fromY;
+    const len = Math.hypot(dx, dy) || 1;
+    this.knockbackVX = (dx / len) * KNOCKBACK_SPEED;
+    this.knockbackVY = (dy / len) * KNOCKBACK_SPEED;
+    this.knockbackTimer = KNOCKBACK_DURATION;
+  }
+
+  // How close this enemy's center is allowed to get to the player's center
+  // before its own movement is blocked ("a monster can't stand where the
+  // player stands"). Deliberately a plain radius, smaller than atkRange,
+  // rather than full bounding-box non-overlap: atkRange represents attack
+  // reach and is often smaller than the two entities' combined half-widths
+  // (especially at diagonal approach angles), so a full no-overlap block
+  // would stop the enemy just outside atkRange and it could never actually
+  // trigger its own attack. This keeps a meaningful personal-space buffer
+  // while guaranteeing atkRange always stays reachable.
+  _personalSpaceRadius() {
+    return Math.max(6, this.atkRange - 10);
+  }
+
+  // Gently pushes this enemy directly away from the player if the two are
+  // currently closer than its personal-space radius. The movement-resolution
+  // check in update() only stops an enemy from *walking into* that radius —
+  // it can't help if the player instead walks onto a stationary/wandering
+  // enemy, which leaves the enemy already too close once it wakes up and
+  // needs a way back out.
+  _separateFromPlayer(player, map) {
+    const dx = this.centerX - player.centerX, dy = this.centerY - player.centerY;
+    const len = Math.hypot(dx, dy) || 1;
+    const pushX = (dx / len) * ENEMY_SEPARATION_SPEED;
+    const pushY = (dy / len) * ENEMY_SEPARATION_SPEED;
+
+    const fullX = this.x + pushX, fullY = this.y + pushY;
+    if (!map.isSolid(Math.floor((fullX + this.w / 2) / TILE), Math.floor((fullY + this.h / 2) / TILE))) {
+      this.x = fullX;
+      this.y = fullY;
+      return;
+    }
+    // A wall sits on the direct escape line — try each axis alone so the
+    // enemy can still slide out along whichever side is actually open.
+    if (!map.isSolid(Math.floor((this.x + pushX + this.w / 2) / TILE), Math.floor((this.y + this.h / 2) / TILE))) {
+      this.x += pushX;
+    }
+    if (!map.isSolid(Math.floor((this.x + this.w / 2) / TILE), Math.floor((this.y + pushY + this.h / 2) / TILE))) {
+      this.y += pushY;
+    }
+  }
+
   update(player, map, particles) {
     if (!this.alive) {
       this.deathTimer++;
@@ -93,6 +152,28 @@ class Enemy {
     }
     if (this.hitFlash > 0) this.hitFlash--;
     if (this.atkCd > 0) this.atkCd--;
+
+    if (this.knockbackTimer > 0) {
+      this.knockbackTimer--;
+      const nx = this.x + this.knockbackVX, ny = this.y + this.knockbackVY;
+      if (!map.isSolid(Math.floor((nx + this.w / 2) / TILE), Math.floor((ny + this.h / 2) / TILE))) {
+        this.x = nx;
+        this.y = ny;
+      }
+      this.knockbackVX *= KNOCKBACK_DECAY;
+      this.knockbackVY *= KNOCKBACK_DECAY;
+      this.anim.update(true);
+      return; // knockback overrides normal AI for its duration
+    }
+
+    // However it happened (usually the player walking onto a stationary
+    // enemy), if this enemy is currently closer than its personal-space
+    // radius, push it back out first — "a monster can't stand where the
+    // player stands" should hold regardless of which of the two caused it.
+    if (dist(this.centerX, this.centerY, player.centerX, player.centerY) < this._personalSpaceRadius()) {
+      this._separateFromPlayer(player, map);
+    }
+
     if (this.telegraphing > 0) {
       this.telegraphing--;
       if (this.telegraphing === 0 && rectsOverlap(player, this.attackHitbox())) {
@@ -134,10 +215,21 @@ class Enemy {
     }
 
     if (mx !== 0 || my !== 0) {
-      const nx = this.x + mx, ny = this.y + my;
-      if (!map.isSolid(Math.floor((nx + this.w / 2) / TILE), Math.floor((ny + this.h / 2) / TILE))) {
-        this.x = nx;
-        this.y = ny;
+      const personalSpace = this._personalSpaceRadius();
+      const canMoveTo = (nx, ny) => {
+        const tileBlocked = map.isSolid(Math.floor((nx + this.w / 2) / TILE), Math.floor((ny + this.h / 2) / TILE));
+        const tooCloseToPlayer = dist(nx + this.w / 2, ny + this.h / 2, player.centerX, player.centerY) < personalSpace;
+        return !tileBlocked && !tooCloseToPlayer;
+      };
+      const fullX = this.x + mx, fullY = this.y + my;
+      if (canMoveTo(fullX, fullY)) {
+        this.x = fullX;
+        this.y = fullY;
+      } else {
+        // Blocked (wall or the player standing there) — try sliding along
+        // one axis at a time instead of freezing entirely.
+        if (mx !== 0 && canMoveTo(this.x + mx, this.y)) this.x += mx;
+        if (my !== 0 && canMoveTo(this.x, this.y + my)) this.y += my;
       }
     }
 
