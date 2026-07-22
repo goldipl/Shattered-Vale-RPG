@@ -48,7 +48,7 @@ const FIREBALL_STATS = {
 
 // Swift Boots (see config/item-effects.js) set the player's speed directly
 // rather than adding a bonus, so both values live here for symmetry.
-const BOOTS_SPEED = 3.2;
+const BOOTS_SPEED = 0.6;
 
 // Molten Depths lava hazard: damage dealt when standing on a LAVA tile
 // without Fireproof Boots equipped. Reuses player.invuln as its cooldown
