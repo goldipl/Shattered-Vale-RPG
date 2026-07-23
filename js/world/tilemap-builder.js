@@ -347,20 +347,6 @@ function buildCrypt(map) {
   const nearSpawn = (x, y) =>
     spawnClearings.some(([sx, sy]) => Math.abs(x - sx) <= 2 && Math.abs(y - sy) <= 2);
 
-  // Wall ring around the whole dungeon
-  for (let x = left - 1; x <= right + 1; x++) {
-    map.set(x, top - 1, TileType.CRYPT_WALL);
-    map.set(x, bottom + 1, TileType.CRYPT_WALL);
-  }
-  for (let y = top - 1; y <= bottom + 1; y++) {
-    map.set(left - 1, y, TileType.CRYPT_WALL);
-    map.set(right + 1, y, TileType.CRYPT_WALL);
-  }
-
-  // Single gate connecting the jungle to the dungeon, centered
-  const gateX = Math.floor((left + right) / 2);
-  map.set(gateX, top - 1, TileType.SKELETON_GATE);
-
   // Dense crypt pillar/rubble clusters spread across the full dungeon area
   const cryptClusters = [
     [6, top + 3, 3], [16, top + 4, 4], [26, top + 3, 3], [36, top + 4, 4],
@@ -395,8 +381,31 @@ function buildCrypt(map) {
     }
   });
 
-  // Skeleton King throne room — a large cleared arena at the dungeon's far south end
+  // Skeleton King throne room — a large cleared arena at the dungeon's far
+  // south end. Its radius (10) reaches 3 tiles past `bottom` toward the
+  // south wall row — the wall ring and both gates are built AFTER this on
+  // purpose (see below), so that reach can never carve a hole in the
+  // boundary the way it used to.
   clearArena(map, 53, top + 71, 10, TileType.CRYPT);
+
+  // Wall ring around the whole dungeon, built last so nothing generated
+  // above (clusters, the throne room's clearArena) can ever punch a hole
+  // in it — this was the actual bug: the throne room used to run before
+  // the wall existed at all, then got walled over eventually, but the
+  // wall itself used to be built *before* the throne room clearArena wiped
+  // out a stretch of it.
+  for (let x = left - 1; x <= right + 1; x++) {
+    map.set(x, top - 1, TileType.CRYPT_WALL);
+    map.set(x, bottom + 1, TileType.CRYPT_WALL);
+  }
+  for (let y = top - 1; y <= bottom + 1; y++) {
+    map.set(left - 1, y, TileType.CRYPT_WALL);
+    map.set(right + 1, y, TileType.CRYPT_WALL);
+  }
+
+  // Single gate connecting the jungle to the dungeon, centered
+  const gateX = Math.floor((left + right) / 2);
+  map.set(gateX, top - 1, TileType.SKELETON_GATE);
 
   // Lava Gate — the dungeon's south wall used to be a solid cap (this was
   // the end of the map); now it opens into the Molten Depths once the
