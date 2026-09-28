@@ -76,6 +76,7 @@ const ITEM_PICKUP_EFFECTS = {
       ctx.player.hasSword = true;
       ctx.player.hasLegendarySword = false;
       ctx.player.hasMoltenSword = true;
+      ctx.player.hasFrostbrand = false;
     },
     toast: 'Found the Molten Blade! Attack massively increased.',
     flash: { color: '255,110,40', alpha: 0.45 },
@@ -84,6 +85,38 @@ const ITEM_PICKUP_EFFECTS = {
     apply: (ctx) => { ctx.inventory.add('bootsFireproof', 1); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = true; },
     toast: 'Picked up Fireproof Boots! Lava no longer burns you.',
     flash: { color: '255,140,40', alpha: 0.35 },
+  },
+  frostplateArmor: {
+    apply: (ctx) => ctx.inventory.add('frostplateArmor', 1),
+    toast: 'Picked up Frostplate Armor!',
+  },
+  wraithVeil: {
+    apply: (ctx) => ctx.inventory.add('wraithVeil', 1),
+    toast: 'Picked up the Wraith Veil!',
+  },
+  spectralWard: {
+    apply: (ctx) => ctx.inventory.add('spectralWard', 1),
+    toast: 'Picked up the Spectral Ward!',
+  },
+  frostbrand: {
+    apply: (ctx) => {
+      ctx.inventory.add('frostbrand', 1);
+      ctx.player.hasSword = true;
+      ctx.player.hasLegendarySword = false;
+      ctx.player.hasMoltenSword = false;
+      ctx.player.hasFrostbrand = true;
+    },
+    toast: 'Found the Frostbrand! Attack increased beyond anything forged before it.',
+    flash: { color: '150,220,255', alpha: 0.5 },
+  },
+  frostwalkerBoots: {
+    apply: (ctx) => { ctx.inventory.add('frostwalkerBoots', 1); ctx.player.speed = BOOTS_SPEED; ctx.player.frostImmune = true; },
+    toast: 'Picked up Frostwalker Boots! Frostbite no longer chills you.',
+    flash: { color: '160,220,255', alpha: 0.35 },
+  },
+  potionWinter: {
+    apply: (ctx) => ctx.inventory.add('potionWinter', 1),
+    toast: "Picked up a vial of Winter's Grace!",
   },
 };
 // Fallback for any world item kind with no entry above (matches the
@@ -110,6 +143,13 @@ const USABLE_POTIONS = {
       ctx.toast('Consumed a Blue Potion — Mana fully restored!');
     },
   },
+  potionWinter: {
+    use: (ctx) => ctx.inventory.usePotionWinter(ctx.player),
+    onUsed: (ctx) => {
+      ctx.particles.floatText(ctx.player.centerX, ctx.player.y - 10, 'Restored!', '#bfe8ff');
+      ctx.toast("Drank Winter's Grace — HP and Mana fully restored!");
+    },
+  },
 };
 
 const ITEM_EQUIP_EFFECTS = {
@@ -119,6 +159,7 @@ const ITEM_EQUIP_EFFECTS = {
       ctx.player.hasSword = true;
       ctx.player.hasLegendarySword = false;
       ctx.player.hasMoltenSword = false;
+      ctx.player.hasFrostbrand = false;
     },
     toast: 'Equipped Iron Sword!',
   },
@@ -128,6 +169,7 @@ const ITEM_EQUIP_EFFECTS = {
       ctx.player.hasSword = true;
       ctx.player.hasLegendarySword = true;
       ctx.player.hasMoltenSword = false;
+      ctx.player.hasFrostbrand = false;
     },
     toast: 'Equipped the Legendary Sword!',
   },
@@ -137,20 +179,38 @@ const ITEM_EQUIP_EFFECTS = {
       ctx.player.hasSword = true;
       ctx.player.hasLegendarySword = false;
       ctx.player.hasMoltenSword = true;
+      ctx.player.hasFrostbrand = false;
     },
     toast: 'Equipped the Molten Blade!',
+  },
+  frostbrand: {
+    apply: (ctx) => {
+      ctx.inventory.equip('frostbrand');
+      ctx.player.hasSword = true;
+      ctx.player.hasLegendarySword = false;
+      ctx.player.hasMoltenSword = false;
+      ctx.player.hasFrostbrand = true;
+    },
+    toast: 'Equipped the Frostbrand!',
   },
   armor: { apply: (ctx) => ctx.inventory.equip('armor'), toast: 'Equipped Iron Armor!' },
   helmet: { apply: (ctx) => ctx.inventory.equip('helmet'), toast: "Equipped the Devil's Helmet!" },
   armorJungle: { apply: (ctx) => ctx.inventory.equip('armorJungle'), toast: 'Equipped Jungle Armor!' },
   armorObsidian: { apply: (ctx) => ctx.inventory.equip('armorObsidian'), toast: 'Equipped Obsidian Armor!' },
+  frostplateArmor: { apply: (ctx) => ctx.inventory.equip('frostplateArmor'), toast: 'Equipped Frostplate Armor!' },
+  wraithVeil: { apply: (ctx) => ctx.inventory.equip('wraithVeil'), toast: 'Equipped the Wraith Veil!' },
+  spectralWard: { apply: (ctx) => ctx.inventory.equip('spectralWard'), toast: 'Equipped the Spectral Ward!' },
   boots: {
-    apply: (ctx) => { ctx.inventory.equip('boots'); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = false; },
+    apply: (ctx) => { ctx.inventory.equip('boots'); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = false; ctx.player.frostImmune = false; },
     toast: 'Equipped Swift Boots!',
   },
   bootsFireproof: {
-    apply: (ctx) => { ctx.inventory.equip('bootsFireproof'); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = true; },
+    apply: (ctx) => { ctx.inventory.equip('bootsFireproof'); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = true; ctx.player.frostImmune = false; },
     toast: 'Equipped Fireproof Boots!',
+  },
+  frostwalkerBoots: {
+    apply: (ctx) => { ctx.inventory.equip('frostwalkerBoots'); ctx.player.speed = BOOTS_SPEED; ctx.player.fireproof = false; ctx.player.frostImmune = true; },
+    toast: 'Equipped Frostwalker Boots!',
   },
   shieldBone: { apply: (ctx) => ctx.inventory.equip('shieldBone'), toast: 'Equipped the Bone Shield!' },
   crownSkeleton: { apply: (ctx) => ctx.inventory.equip('crownSkeleton'), toast: 'Equipped the Skeleton Crown!' },
@@ -162,6 +222,7 @@ const ITEM_UNEQUIP_EFFECTS = {
     ctx.player.hasSword = false;
     ctx.player.hasLegendarySword = false;
     ctx.player.hasMoltenSword = false;
+    ctx.player.hasFrostbrand = false;
   },
   armor: (ctx) => ctx.inventory.unequip('armor'),
   helmet: (ctx) => ctx.inventory.unequip('helmet'),
@@ -169,6 +230,7 @@ const ITEM_UNEQUIP_EFFECTS = {
     ctx.inventory.unequip('boots');
     ctx.player.speed = PLAYER_BASE_STATS.speed;
     ctx.player.fireproof = false;
+    ctx.player.frostImmune = false;
   },
   shield: (ctx) => ctx.inventory.unequip('shield'),
 };
@@ -258,11 +320,45 @@ const BOSS_DEFEAT_EVENTS = {
     ctx.dropItem(-10, 8, 'bootsFireproof');
     ctx.toast('The Pit Devil has fallen! Dropped the Molten Blade and Fireproof Boots!');
     ctx.setScreenFlash({ color: '255,106,30', alpha: 0.65 });
-    ctx.setVictory();
+    ctx.map.openFrostGate();
     ctx.openSystemDialogue([
       'The Pit Devil lets out a final, earth-shaking roar before collapsing into ash.',
-      'The Molten Depths fall still. Every corner of the Shattered Vale is finally at peace.',
-      'You have conquered the Shattered Vale.',
+      'The Molten Depths fall still — but the rift its death tore in the world does not close.',
+      'A Frost Gate has opened beyond the pit, into a realm of endless winter. Something colder than fire waits there.',
+    ]);
+  },
+  frostSentinel: (ctx) => {
+    ctx.dropItem(10, 8, 'frostplateArmor');
+    ctx.map.openRimeGate1();
+    ctx.toast('The Frost Sentinel dropped Frostplate Armor!');
+    ctx.setScreenFlash({ color: '160,220,255', alpha: 0.5 });
+    ctx.openSystemDialogue([
+      'The Frost Sentinel shatters into a thousand shards of ice!',
+      'The Rime Gate grinds open — deeper into the Frostspire, something ancient still watches.',
+    ]);
+  },
+  wraithQueen: (ctx) => {
+    ctx.dropItem(10, 8, 'wraithVeil');
+    ctx.dropItem(-10, 8, 'spectralWard');
+    ctx.map.openRimeGate2();
+    ctx.toast('Wraith Queen Isolde dropped the Wraith Veil and the Spectral Ward!');
+    ctx.setScreenFlash({ color: '180,200,255', alpha: 0.55 });
+    ctx.openSystemDialogue([
+      'Wraith Queen Isolde dissolves into a cloud of frozen mist!',
+      'The second Rime Gate opens. At the very peak of the Frostspire, Glacius stirs.',
+    ]);
+  },
+  glacius: (ctx) => {
+    ctx.dropItem(10, 8, 'frostbrand');
+    ctx.dropItem(-10, 8, 'frostwalkerBoots');
+    ctx.dropItem(0, -10, 'potionWinter');
+    ctx.toast("Glacius has fallen! Dropped the Frostbrand, Frostwalker Boots, and Winter's Grace!");
+    ctx.setScreenFlash({ color: '210,240,255', alpha: 0.7 });
+    ctx.setVictory();
+    ctx.openSystemDialogue([
+      'Glacius, the Everfrost Wyrm, lets out a final frozen breath and crumbles into drifting snow.',
+      'The Frostspire falls silent. The rift below seals shut at last.',
+      'From the grass valley to the peak of endless winter, you have conquered the Shattered Vale.',
     ]);
   },
 };

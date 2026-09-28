@@ -16,6 +16,11 @@ const ENEMY_FX_COLOR = {
   skeleton: '#d8d2c0',
   trollChieftain: '#8fae5a',
   pitDevil: '#ff6a1e',
+  frostSentinel: '#a8dfff',
+  wraithQueen: '#b4c8ff',
+  glacius: '#d8f2ff',
+  wraith: '#b4c8ff',
+  crystalSpider: '#8fd0e8',
 };
 const DEFAULT_ENEMY_FX_COLOR = '#a8e07a';
 const BOSS_FX_COLOR = '#e8975a'; // any boss not covered by a more specific entry above
@@ -30,6 +35,9 @@ function getEnemyFxColor(enemy) {
 // general read as red here, not the amber used for hit/death sparks).
 function getEnemyHpBarColor(enemy) {
   if (enemy.isSkeletonKing) return '#e8e2d0';
+  if (enemy.type === 'glacius') return '#d8f2ff';
+  if (enemy.type === 'wraithQueen') return '#b4c8ff';
+  if (enemy.type === 'frostSentinel') return '#a8dfff';
   if (enemy.type === 'pitDevil') return '#ff6a1e';
   if (enemy.type === 'trollChieftain') return '#8fae5a';
   if (enemy.isDevil) return '#f4a13c';

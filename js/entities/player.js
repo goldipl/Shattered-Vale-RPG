@@ -27,7 +27,9 @@ class Player {
     this.hasSword = false;
     this.hasLegendarySword = false;
     this.hasMoltenSword = false;
+    this.hasFrostbrand = false;
     this.fireproof = false; // true while Fireproof Boots are equipped — negates lava damage
+    this.frostImmune = false; // true while Frostwalker Boots are equipped — negates frostbite damage
     this.defense = 0; // sum of equipped armor/helmet/shield (see Combat.recomputeDefense)
     this.attacking = 0;
     this.attackCooldown = 0;
@@ -52,6 +54,7 @@ class Player {
 
   // Total melee damage per swing, including the equipped weapon's bonus.
   get attackDamage() {
+    if (this.hasFrostbrand) return this.atk + WEAPON_ATTACK_BONUS.frostbrand;
     if (this.hasMoltenSword) return this.atk + WEAPON_ATTACK_BONUS.swordMolten;
     if (this.hasLegendarySword) return this.atk + WEAPON_ATTACK_BONUS.swordLegendary;
     if (this.hasSword) return this.atk + WEAPON_ATTACK_BONUS.sword;

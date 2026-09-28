@@ -42,7 +42,7 @@
   // oasis) side by side, then the Jungle band, the Skeleton Dungeon band,
   // and now the Molten Depths band beneath that (see world/tilemap.js for
   // the exact row breakdown).
-  const map = new TileMap(109, 236);
+  const map = new TileMap(109, 366);
   const camera = new Camera(VIEW_W, VIEW_H);
   const particles = new ParticleSystem();
   const dialogue = new DialogueSystem();
@@ -86,7 +86,9 @@
     player.hasSword = false;
     player.hasLegendarySword = false;
     player.hasMoltenSword = false;
+    player.hasFrostbrand = false;
     player.fireproof = false;
+    player.frostImmune = false;
     player.defense = 0;
     player.speed = PLAYER_BASE_STATS.speed;
     player.attacking = 0;

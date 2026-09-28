@@ -27,6 +27,12 @@ const TileType = {
   LAVA: 19,            // World 5 — walkable hazard, damages the player over time
   LAVA_GATE: 20,       // gate from the dungeon into the Molten Depths
   PIT_GATE: 21,        // gate guarding the Pit Devil's arena within the Molten Depths
+  FROST: 22,            // World 6 — Frostspire floor
+  ICE_WALL: 23,         // World 6 — glacial rock wall
+  FROSTBITE: 24,        // World 6 — walkable hazard, damages the player over time
+  FROST_GATE: 25,       // gate from the Molten Depths into the Frostspire
+  RIME_GATE_1: 26,      // gate guarding the Wraith Queen's approach (opens on Frost Sentinel's death)
+  RIME_GATE_2: 27,      // gate guarding Glacius's arena (opens on Wraith Queen's death)
 };
 
 const SOLID_TILES = new Set([
@@ -42,7 +48,11 @@ const SOLID_TILES = new Set([
   TileType.OBSIDIAN_WALL,
   TileType.LAVA_GATE,
   TileType.PIT_GATE,
-  // NOTE: LAVA is intentionally NOT solid — it's a walkable hazard (see
+  TileType.ICE_WALL,
+  TileType.FROST_GATE,
+  TileType.RIME_GATE_1,
+  TileType.RIME_GATE_2,
+  // NOTE: LAVA and FROSTBITE are intentionally NOT solid — it's a walkable hazard (see
   // Combat.checkHazards), not a wall.
 ]);
 
@@ -57,6 +67,9 @@ const GATE_DEFS = {
   skeleton: { tile: TileType.SKELETON_GATE, flag: 'isSkeletonGateOpen' },
   lava: { tile: TileType.LAVA_GATE, flag: 'isLavaGateOpen' },
   pit: { tile: TileType.PIT_GATE, flag: 'isPitGateOpen' },
+  frost: { tile: TileType.FROST_GATE, flag: 'isFrostGateOpen' },
+  rime1: { tile: TileType.RIME_GATE_1, flag: 'isRimeGate1Open' },
+  rime2: { tile: TileType.RIME_GATE_2, flag: 'isRimeGate2Open' },
 };
 
 function buildWorld(map) {
@@ -139,6 +152,11 @@ function buildWorld(map) {
   // MOLTEN DEPTHS (below the dungeon)
   // =========================
   buildMoltenDepths(map);
+
+  // =========================
+  // THE FROSTSPIRE (above/beyond the Molten Depths)
+  // =========================
+  buildFrostspire(map);
 
   // =========================
   // TROLL CASTLE
@@ -240,6 +258,15 @@ function buildWorld(map) {
           map.decor.push({ x, y, type: 'emberpile' });
         } else if (h > 0.8) {
           map.decor.push({ x, y, type: 'obsidianshard' });
+        }
+      }
+      else if (tile === TileType.FROST) {
+        if (h > 0.94) {
+          map.decor.push({ x, y, type: 'icicle' });
+        } else if (h > 0.87) {
+          map.decor.push({ x, y, type: 'frostcrystal' });
+        } else if (h > 0.8) {
+          map.decor.push({ x, y, type: 'snowdrift' });
         }
       }
     }
@@ -422,7 +449,7 @@ function buildMoltenDepths(map) {
   // One row past the shared wall/gate row buildCrypt already drew at
   // dungeonSouthEdge + 1 — this zone's own floor starts right after it.
   const top = map.dungeonSouthEdge + 2;
-  const bottom = map.rows - 2;
+  const bottom = map.moltenSouthEdge;
 
   // Side walls for the full height of the zone, plus a south cap.
   for (let y = top - 1; y <= bottom + 1; y++) {
@@ -494,6 +521,11 @@ function buildMoltenDepths(map) {
       }
     }
   });
+
+  // Frost Gate — the Molten Depths' south wall used to be a solid cap
+  // (this was the end of the map); now it opens into the Frostspire once
+  // the Pit Devil is dead (see BOSS_DEFEAT_EVENTS.pitDevil).
+  map.set(53, bottom + 1, TileType.FROST_GATE);
 }
 
 function clearArena(map, cx, cy, r, tileType = TileType.JUNGLE) {
@@ -504,4 +536,81 @@ function clearArena(map, cx, cy, r, tileType = TileType.JUNGLE) {
       }
     }
   }
+}
+
+// =========================
+// BUILD THE FROSTSPIRE (World 6, beyond the Molten Depths)
+// =========================
+// A three-stage gauntlet: Frost Sentinel guards the entrance and opens
+// Rime Gate 1 on death; Wraith Queen guards the middle stretch and opens
+// Rime Gate 2 on death; Glacius waits at the very end as the true final
+// boss. Same wide-clear-band construction as buildMoltenDepths, just with
+// three arenas instead of two.
+function buildFrostspire(map) {
+  const left = map.dungeonLeftEdge;
+  const right = map.cols - 2;
+  const top = map.moltenSouthEdge + 2;
+  const bottom = map.rows - 2; // this is the last zone, so tying to map.rows is fine here
+
+  for (let y = top - 1; y <= bottom + 1; y++) {
+    map.set(left - 1, y, TileType.ICE_WALL);
+    map.set(right + 1, y, TileType.ICE_WALL);
+  }
+  for (let x = left - 1; x <= right + 1; x++) {
+    map.set(x, bottom + 1, TileType.ICE_WALL);
+  }
+
+  const bandLeft = 38, bandRight = 68;
+  for (let y = top; y <= bottom; y++) {
+    for (let x = bandLeft; x <= bandRight; x++) {
+      map.set(x, y, TileType.FROST);
+    }
+  }
+
+  const gate1Row = top + 27;
+  for (let x = bandLeft; x <= bandRight; x++) map.set(x, gate1Row, TileType.ICE_WALL);
+  for (let x = 51; x <= 55; x++) map.set(x, gate1Row, TileType.RIME_GATE_1);
+
+  const gate2Row = top + 63;
+  for (let x = bandLeft; x <= bandRight; x++) map.set(x, gate2Row, TileType.ICE_WALL);
+  for (let x = 51; x <= 55; x++) map.set(x, gate2Row, TileType.RIME_GATE_2);
+
+  const clusters = [
+    [14, top + 8, 4], [92, top + 8, 4], [20, top + 22, 3], [86, top + 22, 3],
+    [12, top + 38, 4], [95, top + 38, 4], [22, top + 52, 3], [84, top + 52, 3],
+    [16, top + 70, 4], [90, top + 70, 4], [20, top + 86, 3], [86, top + 86, 3],
+    [14, top + 100, 4], [92, top + 100, 4],
+  ];
+  clusters.forEach(([cx, cy, r]) => {
+    for (let y = cy - r; y <= cy + r; y++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (
+          x > left && x < right && y > top - 1 && y < bottom &&
+          (x < bandLeft - 1 || x > bandRight + 1) &&
+          hashTile(x + 41, y + 19) > 0.32 && dist(x, y, cx, cy) <= r
+        ) {
+          map.set(x, y, TileType.ICE_WALL);
+        }
+      }
+    }
+  });
+
+  const frostbitePatches = [
+    [26, top + 16, 3], [80, top + 16, 3], [30, top + 34, 3], [76, top + 34, 3],
+    [26, top + 48, 3], [80, top + 48, 3], [28, top + 62, 3], [78, top + 62, 3],
+    [26, top + 80, 3], [80, top + 80, 3], [30, top + 96, 3], [76, top + 96, 3],
+  ];
+  frostbitePatches.forEach(([cx, cy, r]) => {
+    for (let y = cy - r; y <= cy + r; y++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (
+          x > left && x < right && y > top - 1 && y < bottom &&
+          (x < bandLeft - 1 || x > bandRight + 1) &&
+          dist(x, y, cx, cy) <= r
+        ) {
+          map.set(x, y, TileType.FROSTBITE);
+        }
+      }
+    }
+  });
 }

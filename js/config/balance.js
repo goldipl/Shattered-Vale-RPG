@@ -36,6 +36,7 @@ const WEAPON_ATTACK_BONUS = {
   sword: 2,
   swordLegendary: 8,
   swordMolten: 16,
+  frostbrand: 24,
 };
 
 const FIREBALL_STATS = {
@@ -54,6 +55,10 @@ const BOOTS_SPEED = 1.6;
 // without Fireproof Boots equipped. Reuses player.invuln as its cooldown
 // (see Combat.checkHazards), same as taking a hit from an enemy.
 const LAVA_DAMAGE_PER_TICK = 8;
+
+// The Frostspire's frostbite hazard: same mechanic as lava, themed cold
+// instead of hot. Negated by Frostwalker Boots (player.frostImmune).
+const FROSTBITE_DAMAGE_PER_TICK = 9;
 
 // Every 3rd melee swing knocks back whatever it hits (see Player.attackCount
 // and Combat.handleAttack). Bosses are immune — see Enemy.applyKnockback.
@@ -94,15 +99,29 @@ const ENEMY_DEFS = {
   troll:          { w: 34, h: 36, drawW: 46, drawH: 48, hp: 180, speed: 0.95, contactDmg: 16, atkRange: 30, spriteKey: 'troll', frameW: 46, frameH: 48, dirRows: true },
   trollChieftain: { w: 44, h: 46, drawW: 58, drawH: 60, hp: 1800, speed: 1.05, contactDmg: 26, atkRange: 40, spriteKey: 'trollChieftain', frameW: 58, frameH: 60, dirRows: true },
   pitDevil:       { w: 50, h: 52, drawW: 66, drawH: 68, hp: 5000, speed: 1.20, contactDmg: 40, atkRange: 50, spriteKey: 'pitDevil', frameW: 66, frameH: 68, dirRows: true },
+
+  // --- The Frostspire (World 6, unlocked after the Pit Devil) ---
+  frostWolf:     { w: 26, h: 22, drawW: 38, drawH: 32, hp: 110, speed: 1.50, contactDmg: 14, atkRange: 26, spriteKey: 'frostWolf', frameW: 38, frameH: 32, dirRows: false },
+  crystalSpider: { w: 22, h: 20, drawW: 34, drawH: 30, hp: 100, speed: 1.70, contactDmg: 13, atkRange: 22, spriteKey: 'crystalSpider', frameW: 34, frameH: 30, dirRows: false },
+  wraith:        { w: 24, h: 28, drawW: 34, drawH: 38, hp: 130, speed: 1.30, contactDmg: 15, atkRange: 28, spriteKey: 'wraith', frameW: 34, frameH: 38, dirRows: true },
+  yeti:          { w: 36, h: 38, drawW: 48, drawH: 50, hp: 220, speed: 0.90, contactDmg: 18, atkRange: 32, spriteKey: 'yeti', frameW: 48, frameH: 50, dirRows: true },
+  iceGolem:      { w: 42, h: 44, drawW: 54, drawH: 56, hp: 260, speed: 0.75, contactDmg: 20, atkRange: 30, spriteKey: 'iceGolem', frameW: 54, frameH: 56, dirRows: true },
+
+  frostSentinel: { w: 46, h: 48, drawW: 60, drawH: 62, hp: 2200, speed: 1.00, contactDmg: 30, atkRange: 44, spriteKey: 'frostSentinel', frameW: 60, frameH: 62, dirRows: true },
+  wraithQueen:   { w: 40, h: 46, drawW: 56, drawH: 62, hp: 2800, speed: 1.15, contactDmg: 34, atkRange: 46, spriteKey: 'wraithQueen', frameW: 56, frameH: 62, dirRows: true },
+  glacius:       { w: 62, h: 60, drawW: 84, drawH: 82, hp: 6500, speed: 1.10, contactDmg: 48, atkRange: 56, spriteKey: 'glacius', frameW: 84, frameH: 82, dirRows: true },
 };
 
-const BOSS_TYPES = new Set(['goblinBoss', 'devilBoss', 'orcBoss', 'witchBoss', 'skeletonKing', 'trollChieftain', 'pitDevil']);
+const BOSS_TYPES = new Set(['goblinBoss', 'devilBoss', 'orcBoss', 'witchBoss', 'skeletonKing', 'trollChieftain', 'pitDevil', 'frostSentinel', 'wraithQueen', 'glacius']);
 const DEFAULT_AGGRO_RANGE = 150;
 
 // --- Combat rewards ---
 // XP/gold granted for defeating each enemy type. `gold` may be a fixed
 // number or a `[min, max]` range rolled with randRange(...)|0.
 const COMBAT_REWARDS = {
+  glacius:        { xp: 4500, gold: 4000 },
+  wraithQueen:    { xp: 2400, gold: 2000 },
+  frostSentinel:  { xp: 1800, gold: 1500 },
   pitDevil:       { xp: 3500, gold: 3000 },
   skeletonKing:   { xp: 2200, gold: 1800 },
   trollChieftain: { xp: 1400, gold: 1200 },
@@ -110,6 +129,12 @@ const COMBAT_REWARDS = {
   goblinBoss:     { xp: 500, gold: 400 },
   orcBoss:        { xp: 550, gold: 450 },
   witchBoss:      { xp: 600, gold: 500 },
+
+  iceGolem:       { xp: 220, gold: [45, 65] },
+  yeti:           { xp: 200, gold: [40, 60] },
+  wraith:         { xp: 150, gold: [30, 48] },
+  frostWolf:      { xp: 140, gold: [28, 45] },
+  crystalSpider:  { xp: 130, gold: [26, 42] },
 
   troll:          { xp: 120, gold: [25, 40] },
   orcRaider:      { xp: 90, gold: [18, 30] },

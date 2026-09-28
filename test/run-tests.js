@@ -7,7 +7,7 @@ const ROOT = path.resolve(__dirname, '..');
 const FILES = [
   'js/utils.js',
   'js/config/balance.js', 'js/config/level-layout.js', 'js/config/item-effects.js', 'js/config/item-stats.js',
-  'js/sprites/humanoid-sprites.js', 'js/sprites/monster-sprites.js', 'js/sprites/molten-sprites.js', 'js/sprites/icon-sprites.js', 'js/sprites/sprites.js',
+  'js/sprites/humanoid-sprites.js', 'js/sprites/monster-sprites.js', 'js/sprites/molten-sprites.js', 'js/sprites/frost-sprites.js', 'js/sprites/icon-sprites.js', 'js/sprites/sprites.js',
   'js/world/tilemap-builder.js', 'js/world/tilemap-renderer.js', 'js/world/tilemap.js',
   'js/entities/animated-sprite.js', 'js/entities/player.js', 'js/entities/npc.js', 'js/entities/enemy.js', 'js/entities/fireball.js',
   'js/systems/camera.js', 'js/systems/particles.js', 'js/systems/dialogue.js', 'js/systems/inventory.js',
@@ -54,11 +54,11 @@ console.log('\n=== TileMap ===');
 const dbg = dbgGlobal;
 check('__gameDebug exposed', !!dbg);
 const map = dbg.state.map;
-check('map is 109x236 (grew to fit Molten Depths)', map.cols === 109 && map.rows === 236);
+check('map is 109x366 (grew to fit the Frostspire)', map.cols === 109 && map.rows === 366);
 check('gates start closed', !map.isGateOpen && !map.isWorldTwoGateOpen && !map.isJungleGateOpen && !map.isSkeletonGateOpen && !map.isLavaGateOpen && !map.isPitGateOpen);
 
 console.log('\n=== World factory counts ===');
-check('129 enemies spawned (86 original + 13 Molten Depths + 30 Sand Scorpions)', dbg.state.enemies.length === 129);
+check('143 enemies spawned (129 previous + 14 Frostspire)', dbg.state.enemies.length === 143);
 check('2 npcs spawned', dbg.state.npcs.length === 2);
 check('elder resolved', dbg.state.elder && dbg.state.elder.name === 'Elder Rowan');
 check('merchant resolved', dbg.state.merchant && dbg.state.merchant.name === 'Wandering Merchant');
@@ -113,7 +113,7 @@ console.log('\n=== Simulate restart ===');
 dbg.restartGame();
 check('restart resets hp', dbg.state.player.hp === PLAYER_BASE_STATS_REF.hp);
 check('restart resets gold', dbg.state.player.gold === 0);
-check('restart rebuilds 129 enemies', dbg.state.enemies.length === 129);
+check('restart rebuilds 143 enemies', dbg.state.enemies.length === 143);
 check('restart resets gameState to playing', dbg.state.gameState === 'playing');
 check('restart does NOT reset gates (world persists)', map.isGateOpen && map.isWorldTwoGateOpen);
 

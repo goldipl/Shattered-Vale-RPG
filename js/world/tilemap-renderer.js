@@ -141,6 +141,38 @@ function drawGroundTile(ctx, map, x, y) {
   }
 
   // =========================
+  // FROST GROUND (The Frostspire)
+  // =========================
+  else if (t === TileType.FROST) {
+    ctx.fillStyle = h > 0.5 ? '#dceaf5' : '#cfe0ee';
+    ctx.fillRect(px, py, TILE, TILE);
+    ctx.strokeStyle = 'rgba(150,180,205,0.25)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px, py + ((hashTile(x, y) * 20) | 0));
+    ctx.lineTo(px + TILE, py + ((hashTile(x + 1, y + 2) * 20) | 0));
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    for (let i = 0; i < 2; i++) {
+      const bx = px + ((hashTile(x * 6 + i, y * 4) * TILE) | 0);
+      const by = py + ((hashTile(x * 3, y * 8 + i) * TILE) | 0);
+      ctx.fillRect(bx, by, 1.5, 1.5);
+    }
+  }
+
+  // =========================
+  // FROSTBITE (walkable hazard)
+  // =========================
+  else if (t === TileType.FROSTBITE) {
+    ctx.fillStyle = '#7fb8d8';
+    ctx.fillRect(px, py, TILE, TILE);
+    ctx.fillStyle = '#a8d8ee';
+    ctx.fillRect(px, py + ((h * 8) | 0), TILE, 6);
+    ctx.fillStyle = 'rgba(230,250,255,0.35)';
+    ctx.fillRect(px + 6, py + 12, 9, 3);
+  }
+
+  // =========================
   // SAND
   // =========================
   else if (t === TileType.SAND) {
@@ -192,9 +224,14 @@ function drawGroundTile(ctx, map, x, y) {
     t === TileType.JUNGLE_GATE ||
     t === TileType.SKELETON_GATE ||
     t === TileType.LAVA_GATE ||
-    t === TileType.PIT_GATE
+    t === TileType.PIT_GATE ||
+    t === TileType.FROST_GATE ||
+    t === TileType.RIME_GATE_1 ||
+    t === TileType.RIME_GATE_2
   ) {
+    const isFrost = t === TileType.FROST_GATE || t === TileType.RIME_GATE_1 || t === TileType.RIME_GATE_2;
     ctx.fillStyle =
+      isFrost ? '#1c2e3a' :
       t === TileType.LAVA_GATE || t === TileType.PIT_GATE ? '#3a1810' :
       t === TileType.SKELETON_GATE ? '#2a2620' :
       t === TileType.JUNGLE_GATE ? '#3a3a1e' :
@@ -202,6 +239,7 @@ function drawGroundTile(ctx, map, x, y) {
     ctx.fillRect(px, py, TILE, TILE);
 
     ctx.fillStyle =
+      isFrost ? '#0e1820' :
       t === TileType.LAVA_GATE || t === TileType.PIT_GATE ? '#180a06' :
       t === TileType.SKELETON_GATE ? '#141210' :
       t === TileType.JUNGLE_GATE ? '#1e2210' :
@@ -211,6 +249,7 @@ function drawGroundTile(ctx, map, x, y) {
     }
 
     ctx.fillStyle =
+      isFrost ? 'rgba(160,220,255,0.45)' :
       t === TileType.LAVA_GATE || t === TileType.PIT_GATE ? 'rgba(255,110,40,0.4)' :
       t === TileType.SKELETON_GATE ? 'rgba(232,151,90,0.35)' :
       t === TileType.JUNGLE_GATE ? 'rgba(120,230,140,0.35)' :
@@ -340,6 +379,35 @@ function drawGroundTile(ctx, map, x, y) {
 
     // glassy highlight
     ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.fillRect(px + 3, py + 3, TILE - 6, 2);
+  }
+
+  // =========================
+  // ICE WALL (The Frostspire, glacial rock)
+  // =========================
+  else if (t === TileType.ICE_WALL) {
+    const stone = h > 0.66 ? '#4a6478' : h > 0.33 ? '#3e5468' : '#324658';
+    ctx.fillStyle = stone;
+    ctx.fillRect(px, py, TILE, TILE);
+    ctx.strokeStyle = 'rgba(10,20,30,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px, py + 10);
+    ctx.lineTo(px + TILE, py + 10);
+    ctx.moveTo(px, py + 22);
+    ctx.lineTo(px + TILE, py + 22);
+    const iceOffset = (y % 2) * 8;
+    ctx.moveTo(px + 8 + iceOffset, py);
+    ctx.lineTo(px + 8 + iceOffset, py + 10);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(200,235,255,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px + 4, py + 26);
+    ctx.lineTo(px + 12, py + 18);
+    ctx.lineTo(px + 20, py + 24);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
     ctx.fillRect(px + 3, py + 3, TILE - 6, 2);
   }
 
@@ -611,5 +679,56 @@ function drawDecor(ctx, d) {
     ctx.fillRect(px + 14, py + 19, 1.4, 1.4);
     ctx.fillRect(px + 18.7, py + 21, 1.2, 1.2);
     ctx.fillRect(px + 21, py + 21, 1.2, 1.2);
+  }
+
+  // FROSTSPIRE DECORATIONS
+  else if (d.type === 'icicle') {
+    ctx.fillStyle = 'rgba(120,180,210,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(px + 16, py + 25, 6, 2.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(210,240,255,0.85)';
+    ctx.beginPath();
+    ctx.moveTo(px + 12, py + 8);
+    ctx.lineTo(px + 20, py + 8);
+    ctx.lineTo(px + 16, py + 24);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath();
+    ctx.moveTo(px + 14, py + 9);
+    ctx.lineTo(px + 16, py + 9);
+    ctx.lineTo(px + 15, py + 18);
+    ctx.closePath();
+    ctx.fill();
+  } else if (d.type === 'frostcrystal') {
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.ellipse(px + 16, py + 24, 6, 2.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#8fd0e8';
+    ctx.beginPath();
+    ctx.moveTo(px + 16, py + 10);
+    ctx.lineTo(px + 21, py + 18);
+    ctx.lineTo(px + 16, py + 24);
+    ctx.lineTo(px + 11, py + 18);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.beginPath();
+    ctx.moveTo(px + 16, py + 12);
+    ctx.lineTo(px + 18.5, py + 18);
+    ctx.lineTo(px + 16, py + 21);
+    ctx.closePath();
+    ctx.fill();
+  } else if (d.type === 'snowdrift') {
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.beginPath();
+    ctx.ellipse(px + 16, py + 20, 9, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.beginPath();
+    ctx.ellipse(px + 13, py + 18, 4, 2.2, 0, 0, Math.PI * 2);
+    ctx.fill();
   }
 }

@@ -17,6 +17,9 @@ class TileMap {
     this.isSkeletonGateOpen = false;
     this.isLavaGateOpen = false;
     this.isPitGateOpen = false;
+    this.isFrostGateOpen = false;
+    this.isRimeGate1Open = false;
+    this.isRimeGate2Open = false;
 
     this.trollSpawn = { x: 21, y: 17 };
 
@@ -37,6 +40,7 @@ class TileMap {
     // map further south for the Molten Depths doesn't also grow the crypt.
     this.dungeonLeftEdge = 1;
     this.dungeonSouthEdge = 164;
+    this.moltenSouthEdge = 234;
 
     // World 1 = grass
     // World 2 = beach
@@ -46,7 +50,8 @@ class TileMap {
     for (let y = 0; y < rows; y++) {
       const row = [];
       for (let x = 0; x < cols; x++) {
-        if (y > this.dungeonSouthEdge + 1) row.push(TileType.OBSIDIAN);
+        if (y > this.moltenSouthEdge + 1) row.push(TileType.FROST);
+        else if (y > this.dungeonSouthEdge + 1) row.push(TileType.OBSIDIAN);
         else if (y > this.jungleSouthEdge) row.push(TileType.CRYPT);
         else if (y > this.oasisSouthEdge) row.push(TileType.JUNGLE);
         else if (x >= 28) row.push(TileType.SAND);
@@ -103,6 +108,9 @@ class TileMap {
   openSkeletonGate() { this._openGateType(GATE_DEFS.skeleton); }
   openLavaGate() { this._openGateType(GATE_DEFS.lava); }
   openPitGate() { this._openGateType(GATE_DEFS.pit); }
+  openFrostGate() { this._openGateType(GATE_DEFS.frost); }
+  openRimeGate1() { this._openGateType(GATE_DEFS.rime1); }
+  openRimeGate2() { this._openGateType(GATE_DEFS.rime2); }
 
   // =========================
   // BAKE STATIC LAYER
@@ -152,6 +160,15 @@ class TileMap {
           ctx.fillStyle = `rgba(255,220,90,${0.1 + glow * 0.18})`;
           ctx.beginPath();
           ctx.arc(px + 10 + glow * 4, py + 20 - glow * 6, 2 + glow * 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (tile === TileType.FROSTBITE) {
+          const glow2 = Math.sin(t / 300 + x * 0.6 + y * 0.8) * 0.5 + 0.5;
+          const px2 = x * TILE - camX, py2 = y * TILE - camY;
+          ctx.fillStyle = `rgba(140,210,255,${0.12 + glow2 * 0.16})`;
+          ctx.fillRect(px2, py2, TILE, TILE);
+          ctx.fillStyle = `rgba(220,245,255,${0.1 + glow2 * 0.15})`;
+          ctx.beginPath();
+          ctx.arc(px2 + 22 - glow2 * 4, py2 + 12 + glow2 * 5, 1.5 + glow2 * 1.2, 0, Math.PI * 2);
           ctx.fill();
         }
       }

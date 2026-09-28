@@ -27,6 +27,14 @@ function initSprites() {
   Sprites.troll = buildTrollSheet();
   Sprites.trollChieftain = buildTrollChieftainSheet();
   Sprites.pitDevil = buildPitDevilSheet();
+  Sprites.frostWolf = buildFrostWolfSheet();
+  Sprites.crystalSpider = buildCrystalSpiderSheet();
+  Sprites.wraith = buildWraithSheet();
+  Sprites.yeti = buildYetiSheet();
+  Sprites.iceGolem = buildIceGolemSheet();
+  Sprites.frostSentinel = buildFrostSentinelSheet();
+  Sprites.wraithQueen = buildWraithQueenSheet();
+  Sprites.glacius = buildGlaciusSheet();
   Sprites.icons = {
     sword: buildSwordIcon(),
     armor: buildArmorIcon(),
@@ -44,5 +52,11 @@ function initSprites() {
     armorObsidian: buildObsidianArmorIcon(),
     swordMolten: buildMoltenSwordIcon(),
     bootsFireproof: buildFireproofBootsIcon(),
+    frostplateArmor: buildFrostplateArmorIcon(),
+    wraithVeil: buildWraithVeilIcon(),
+    spectralWard: buildSpectralWardIcon(),
+    frostbrand: buildFrostbrandIcon(),
+    frostwalkerBoots: buildFrostwalkerBootsIcon(),
+    potionWinter: buildWinterPotionIcon(),
   };
 }

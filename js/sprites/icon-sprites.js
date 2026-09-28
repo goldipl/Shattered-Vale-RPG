@@ -326,3 +326,127 @@ function buildFireproofBootsIcon() {
   ctx.beginPath(); ctx.arc(15.5, 16, 1.6, 0, Math.PI * 2); ctx.fill();
   return c;
 }
+
+function buildFrostplateArmorIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#4a6478';
+  ctx.beginPath();
+  ctx.moveTo(8, 3); ctx.lineTo(10, 5); ctx.lineTo(14, 5); ctx.lineTo(16, 3);
+  ctx.lineTo(20, 7); ctx.lineTo(18, 20); ctx.lineTo(6, 20); ctx.lineTo(4, 7);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#8fb4c8';
+  ctx.beginPath();
+  ctx.moveTo(9, 6); ctx.lineTo(11, 7); ctx.lineTo(13, 7); ctx.lineTo(15, 6);
+  ctx.lineTo(17, 8); ctx.lineTo(16, 17); ctx.lineTo(8, 17); ctx.lineTo(7, 8);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(200,240,255,0.8)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(12, 7); ctx.lineTo(10, 12); ctx.lineTo(13, 15); ctx.lineTo(12, 17);
+  ctx.stroke();
+  return c;
+}
+
+function buildWraithVeilIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = 'rgba(140,160,220,0.7)';
+  ctx.beginPath();
+  ctx.moveTo(4, 15);
+  ctx.quadraticCurveTo(4, 4, 12, 4);
+  ctx.quadraticCurveTo(20, 4, 20, 15);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = 'rgba(15,20,35,0.6)';
+  ctx.fillRect(6, 14, 12, 2.5);
+  ctx.fillStyle = '#d8f0ff';
+  ctx.beginPath(); ctx.arc(9, 12, 1.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(15, 12, 1.5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(200,215,255,0.4)';
+  ctx.fillRect(3, 15, 18, 3);
+  return c;
+}
+
+function buildSpectralWardIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = 'rgba(150,175,220,0.65)';
+  ctx.beginPath();
+  ctx.moveTo(12, 3); ctx.lineTo(20, 6); ctx.lineTo(20, 13);
+  ctx.quadraticCurveTo(20, 19, 12, 22);
+  ctx.quadraticCurveTo(4, 19, 4, 13);
+  ctx.lineTo(4, 6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(210,220,255,0.55)';
+  ctx.beginPath();
+  ctx.moveTo(12, 6); ctx.lineTo(17, 8); ctx.lineTo(17, 13);
+  ctx.quadraticCurveTo(17, 16, 12, 18);
+  ctx.quadraticCurveTo(7, 16, 7, 13);
+  ctx.lineTo(7, 8); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#d8f0ff';
+  ctx.beginPath(); ctx.arc(12, 12, 2, 0, Math.PI * 2); ctx.fill();
+  return c;
+}
+
+function buildFrostbrandIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.save();
+  ctx.translate(12, 12);
+  ctx.rotate(-0.78);
+  ctx.fillStyle = 'rgba(150,220,255,0.4)';
+  ctx.beginPath(); ctx.ellipse(0, -2, 9, 13, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#e8f6ff';
+  ctx.fillRect(-2, -11, 4, 17);
+  ctx.fillStyle = '#7fe0ff';
+  ctx.fillRect(-0.7, -11, 1.4, 17);
+  ctx.fillStyle = '#c8ecff';
+  ctx.fillRect(-2, -11, 4, 3);
+  ctx.fillStyle = '#4a6478';
+  ctx.fillRect(-6, 5, 12, 3);
+  ctx.fillStyle = '#2e4050';
+  ctx.fillRect(-1.5, 8, 3, 7);
+  ctx.fillStyle = '#7fe0ff';
+  ctx.beginPath(); ctx.arc(0, 16, 2, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  return c;
+}
+
+function buildFrostwalkerBootsIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#4a6478';
+  ctx.fillRect(6, 3, 5, 11);
+  ctx.fillRect(13, 3, 5, 11);
+  ctx.fillStyle = '#2e4050';
+  ctx.beginPath();
+  ctx.moveTo(6, 14); ctx.lineTo(11, 14); ctx.lineTo(11, 17); ctx.lineTo(3, 17);
+  ctx.quadraticCurveTo(3, 15, 6, 14); ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(13, 14); ctx.lineTo(18, 14); ctx.lineTo(18, 17); ctx.lineTo(21, 17);
+  ctx.quadraticCurveTo(21, 15, 18, 14); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(190,230,255,0.8)';
+  ctx.fillRect(6, 6, 5, 1.5);
+  ctx.fillRect(13, 6, 5, 1.5);
+  ctx.fillStyle = 'rgba(220,245,255,0.6)';
+  ctx.beginPath(); ctx.arc(8.5, 16, 1.6, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(15.5, 16, 1.6, 0, Math.PI * 2); ctx.fill();
+  return c;
+}
+
+function buildWinterPotionIcon() {
+  const c = makeCanvas(24, 24);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#c8c4b8';
+  ctx.fillRect(10, 3, 4, 4);
+  ctx.fillStyle = '#8fd0e8';
+  roundRect(ctx, 6, 8, 12, 12, 4); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillRect(8, 10, 2, 6);
+  ctx.strokeStyle = '#4a6478';
+  ctx.lineWidth = 1;
+  roundRect(ctx, 6, 8, 12, 12, 4); ctx.stroke();
+  ctx.fillStyle = 'rgba(200,240,255,0.7)';
+  ctx.beginPath(); ctx.arc(12, 14, 3, 0, Math.PI * 2); ctx.fill();
+  return c;
+}

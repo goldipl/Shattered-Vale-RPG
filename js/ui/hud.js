@@ -100,7 +100,10 @@ const Hud = {
     // Name/bar color: keeps the original amber-for-devil / orange-for-others
     // scheme for existing bosses exactly as before, and gives the two new
     // Molten Depths bosses their own distinct colors.
-    const bannerColor = boss.type === 'pitDevil' ? '#ff6a1e'
+    const bannerColor = boss.type === 'glacius' ? '#d8f2ff'
+      : boss.type === 'wraithQueen' ? '#b4c8ff'
+      : boss.type === 'frostSentinel' ? '#a8dfff'
+      : boss.type === 'pitDevil' ? '#ff6a1e'
       : boss.type === 'trollChieftain' ? '#8fae5a'
       : boss.isDevil ? '#f4a13c' : '#e8975a';
 

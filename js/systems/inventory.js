@@ -34,11 +34,11 @@ class WorldItem {
 // Equipment slot definitions: slotId -> { label, accepts(kind) }
 // accepts() decides which backpack item kinds are droppable into that slot.
 const EQUIP_SLOTS = [
-  { id: 'helmet', label: 'Helmet', accepts: k => k === 'helmet' || k === 'crownSkeleton' },
-  { id: 'weapon', label: 'Weapon', accepts: k => k === 'sword' || k === 'weapon' || k === 'swordLegendary' || k === 'swordMolten' },
-  { id: 'armor',  label: 'Armor',  accepts: k => k === 'armor' || k === 'armorJungle' || k === 'armorObsidian' },
-  { id: 'shield', label: 'Shield', accepts: k => k === 'shield' || k === 'shieldBone' },
-  { id: 'boots',  label: 'Boots',  accepts: k => k === 'boots' || k === 'bootsFireproof' },
+  { id: 'helmet', label: 'Helmet', accepts: k => k === 'helmet' || k === 'crownSkeleton' || k === 'wraithVeil' },
+  { id: 'weapon', label: 'Weapon', accepts: k => k === 'sword' || k === 'weapon' || k === 'swordLegendary' || k === 'swordMolten' || k === 'frostbrand' },
+  { id: 'armor',  label: 'Armor',  accepts: k => k === 'armor' || k === 'armorJungle' || k === 'armorObsidian' || k === 'frostplateArmor' },
+  { id: 'shield', label: 'Shield', accepts: k => k === 'shield' || k === 'shieldBone' || k === 'spectralWard' },
+  { id: 'boots',  label: 'Boots',  accepts: k => k === 'boots' || k === 'bootsFireproof' || k === 'frostwalkerBoots' },
 ];
 
 class Inventory {
@@ -101,6 +101,14 @@ class Inventory {
     this.items.potionBlue -= 1;
     if (this.items.potionBlue <= 0) delete this.items.potionBlue;
     if (player) player.mana = player.maxMana;
+    return true;
+  }
+
+  usePotionWinter(player) {
+    if (!this.items.potionWinter || this.items.potionWinter <= 0) return false;
+    this.items.potionWinter -= 1;
+    if (this.items.potionWinter <= 0) delete this.items.potionWinter;
+    if (player) { player.hp = player.maxHp; player.mana = player.maxMana; }
     return true;
   }
 

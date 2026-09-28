@@ -112,11 +112,13 @@ const Combat = {
   // tick roughly every 45 frames, not every single frame.
   checkHazards(state) {
     const { player, map, particles } = state;
-    if (player.fireproof) return;
     const tileX = Math.floor(player.centerX / TILE);
     const tileY = Math.floor(player.centerY / TILE);
-    if (map.get(tileX, tileY) === TileType.LAVA) {
+    const tile = map.get(tileX, tileY);
+    if (tile === TileType.LAVA && !player.fireproof) {
       player.takeDamage(LAVA_DAMAGE_PER_TICK, particles);
+    } else if (tile === TileType.FROSTBITE && !player.frostImmune) {
+      player.takeDamage(FROSTBITE_DAMAGE_PER_TICK, particles);
     }
   },
 

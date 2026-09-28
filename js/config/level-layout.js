@@ -204,6 +204,27 @@ const ENEMY_PLACEMENTS = [
 
   { x: 53 * TILE, y: 186 * TILE, type: 'trollChieftain', opts: { aggroRange: 210 } },
   { x: 53 * TILE, y: 220 * TILE, type: 'pitDevil', opts: { aggroRange: 260 } },
+
+  // World 6 — The Frostspire (beyond the Molten Depths, behind the Frost
+  // Gate — opens once the Pit Devil is dead). Three stages: Frost Sentinel
+  // guards the entrance and opens Rime Gate 1 on death; Wraith Queen guards
+  // the middle stretch and opens Rime Gate 2 on death; Glacius, the true
+  // final boss, waits at the very end.
+  { x: 47 * TILE, y: 244 * TILE, type: 'frostWolf' },
+  { x: 59 * TILE, y: 248 * TILE, type: 'crystalSpider' },
+  { x: 52 * TILE, y: 256 * TILE, type: 'frostWolf' },
+  { x: 48 * TILE, y: 272 * TILE, type: 'wraith' },
+  { x: 58 * TILE, y: 278 * TILE, type: 'yeti' },
+  { x: 53 * TILE, y: 288 * TILE, type: 'wraith' },
+  { x: 46 * TILE, y: 296 * TILE, type: 'crystalSpider' },
+  { x: 60 * TILE, y: 308 * TILE, type: 'iceGolem' },
+  { x: 50 * TILE, y: 316 * TILE, type: 'yeti' },
+  { x: 56 * TILE, y: 324 * TILE, type: 'iceGolem' },
+  { x: 48 * TILE, y: 332 * TILE, type: 'wraith' },
+
+  { x: 53 * TILE, y: 251 * TILE, type: 'frostSentinel', opts: { aggroRange: 220 } },
+  { x: 53 * TILE, y: 286 * TILE, type: 'wraithQueen', opts: { aggroRange: 240 } },
+  { x: 53 * TILE, y: 336 * TILE, type: 'glacius', opts: { aggroRange: 280 } },
 ];
 
 const BOSS_NAMES = {
@@ -212,6 +233,11 @@ const BOSS_NAMES = {
   orcBoss: 'Orc Warlord Skarn',
   witchBoss: 'Jungle Witch Maera',
   skeletonKing: 'The Skeleton King',
+  trollChieftain: 'Troll Chieftain',
+  pitDevil: 'The Pit Devil',
+  frostSentinel: 'The Frost Sentinel',
+  wraithQueen: 'Wraith Queen Isolde',
+  glacius: 'Glacius, the Everfrost Wyrm',
 };
 
 // Player spawn point, referenced both at game start and on restart.
