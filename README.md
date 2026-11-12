@@ -1,63 +1,61 @@
 # Shattered Vale
 
-A top-down action RPG built with vanilla JavaScript and HTML5 Canvas — no engine, no build step, no dependencies. Explore a village, talk to NPCs, find a hidden sword, battle slimes, and defeat the goblin chief to save the village.
+A top-down action RPG built with vanilla JavaScript and HTML5 Canvas. It has no engine, no build step and no dependencies, and every sprite is drawn in code. Fight your way from a quiet grass valley through a desert oasis, a jungle, a skeleton crypt, a lava-filled underworld and a frozen mountain peak, defeating ten bosses on the way.
+
+**▶ [Play in the browser](https://goldipl.github.io/Shattered-Vale-RPG/)**
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./screenshots/screenshot01.jpg" alt="Start menu" />
+      <br /><b>Start menu</b>
+      <br /><sub>Title screen with Play, How to Play and Author buttons over the live world map.</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/screenshot02.jpg" alt="Village and forest" />
+      <br /><b>The village and forest</b>
+      <br /><sub>The starting area: slimes, gold coins, a health potion and the walled castle by the river.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./screenshots/screenshot03.jpg" alt="Quest tracker and the Oasis border" />
+      <br /><b>Quest tracker</b>
+      <br /><sub>The active quest is shown in the bottom-left corner. The Beach Oasis waits behind the gate to the east.</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/screenshot05.jpg" alt="Goblin King Grimtooth boss fight" />
+      <br /><b>Boss: Goblin King Grimtooth</b>
+      <br /><sub>The first boss, guarding the castle courtyard. Bosses get a health banner at the top of the screen.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./screenshots/screenshot06.jpg" alt="Devil of the Oasis boss fight" />
+      <br /><b>Boss: Devil of the Oasis</b>
+      <br /><sub>The desert boss of the Beach Oasis, surrounded by sand scorpions and red slimes.</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="./screenshots/screenshot07.jpg" alt="The Skeleton King boss fight" />
+      <br /><b>Boss: The Skeleton King</b>
+      <br /><sub>A giant boss in the torch-lit Skeleton Dungeon. Defeating him opens the Lava Gate.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="./screenshots/screenshot04.jpg" alt="Inventory panel" />
+      <br /><b>Inventory</b>
+      <br /><sub>Equipment slots, a backpack grid, character stats and item details.</sub>
+    </td>
+    <td width="50%"></td>
+  </tr>
+</table>
 
 ## Playing
 
-No installation or server required — just open `index.html` in a browser.
-
-## Architecture
-
-```
-├── index.html                      entry page: game canvas + DOM HUD (hp/xp/mana bars, level, gold), loads all 27 JS files in dependency order
-├── css/
-│   └── style.css                   canvas and HUD panel styling
-└── js/
-    ├── utils.js                    shared math/canvas helpers (clamp, lerp, dist, rectsOverlap, roundRect, hashTile) + makeCanvas (offscreen canvas creation, shared by sprites/tilemap) + wrapPlainText (text wrapping, shared by the UI screens)
-    │
-    ├── config/                     ← pure data, no rendering, no class instantiation
-    │   ├── balance.js               every balance number: player stats (hp/atk/speed/mana), level-up progression, weapon bonuses (incl. Molten Blade's top tier), per-enemy-type stats (ENEMY_DEFS, now 16 types incl. Molten Depths), XP/gold kill rewards (COMBAT_REWARDS), lava damage-per-tick
-    │   ├── level-layout.js          world content: NPC dialogue (Elder, Merchant), world item placements, the full 99-entry enemy list (86 original + 13 Molten Depths — previously duplicated between initial setup and restartGame, now defined once), boss display names, player spawn point
-    │   ├── item-stats.js            what to SHOW the player about each item: its attack/defense/speed bonus and a one-line description
-    │   └── item-effects.js          pickup/equip/unequip effect tables (toast text, player-state changes, screen-flash colors — incl. Obsidian Armor, Molten Blade, Fireproof Boots), boss-defeat drop/cutscene scripts (Skeleton King now opens the Lava Gate instead of ending the game; Troll Chieftain opens the Pit Gate; Pit Devil triggers victory), gate-unlock conditions (which enemies must be dead before a gate opens), sword pickup guarded so only the first one auto-equips
-    │
-    ├── sprites/                    ← procedural pixel-art generation
-    │   ├── humanoid-sprites.js      palette-swappable humanoid sprite-sheet builder (used for player/elder/merchant) + sword weapon overlay
-    │   ├── monster-sprites.js       sprite-sheet builders for the original 8 enemies: slimes, goblin/devil/orc/witch bosses, spider, skeleton, Skeleton King
-    │   ├── molten-sprites.js        sprite-sheet builders for the 5 Molten Depths creatures: devilLesser, orcRaider, troll (grunts), Troll Chieftain and Pit Devil (bosses) — kept in its own file so monster-sprites.js didn't balloon past a comfortable size
-    │   ├── icon-sprites.js          24x24 procedural item icons (sword, potions, armor, coin, key, shield, boots, etc., incl. Obsidian Armor/Molten Blade/Fireproof Boots) used in world pickups and the inventory panel
-    │   └── sprites.js               the Sprites registry object + initSprites(), which calls the builders above once at boot and stores every sheet/icon
-    │
-    ├── world/                      ← the tile map
-    │   ├── tilemap-builder.js       tile type definitions (TileType enum, SOLID_TILES) + world/jungle/crypt/Molten Depths terrain generation (buildMoltenDepths), gate tile definitions (GATE_DEFS, now incl. Lava/Pit gates)
-    │   ├── tilemap-renderer.js      per-tile ground rendering, terrain edge blending, decoration drawing (flowers, rocks, ferns, bones, obsidian shards/embers/skulls, etc.)
-    │   └── tilemap.js               TileMap class: owns the tile grid (now 109x236 — grew south to fit Molten Depths, with the Skeleton Dungeon's own size pinned to a fixed constant so it didn't grow too) and gate state, composes the builder + renderer functions above, bakes the static layer to an offscreen canvas, animates water shimmer and lava glow
-    │
-    ├── entities/
-    │   ├── animated-sprite.js       shared sprite-sheet frame-walker, used by Player/NPC/Enemy to animate their 4-directional walk cycles
-    │   ├── player.js                Player class: movement, melee/fireball combat, leveling — reads starting stats from config/balance.js; tracks weapon tier (incl. Molten Blade) and fireproof status for the lava hazard
-    │   ├── npc.js                   NPC class: talkable characters, also draws its own "Talk with me" speech bubble (moved out of the main draw loop since it's the NPC's own visual state)
-    │   ├── enemy.js                 Enemy class: wander/aggro AI, telegraphed attacks, taking damage — driven entirely by the ENEMY_DEFS table in config/balance.js instead of a 130-line if/else chain; hit/death/HP-bar colors extended for the two new bosses
-    │   └── fireball.js              Fireball projectile class — reads speed/damage/life from config/balance.js's FIREBALL_STATS
-    │
-    ├── systems/
-    │   ├── camera.js                smooth player-follow camera with screen-shake, clamped to map bounds
-    │   ├── particles.js             lightweight particle burst + floating damage/XP text system
-    │   ├── dialogue.js              typewriter-style dialogue box UI (renders whatever npc.dialogue array it's given)
-    │   └── inventory.js             world item pickups + toggleable inventory panel (equip slots, backpack grid); Inventory.reset() used by both the constructor and restart; equip slots now also accept Obsidian Armor/Molten Blade/Fireproof Boots
-    │
-    ├── ui/
-    │   ├── hud.js                   binds/syncs the DOM hp/xp/mana bars, plus the canvas-drawn boss health banner (colors extended for the two new bosses without changing the original 5), toast messages, and quest tracker
-    │   └── screens.js               full-screen canvas UI states: desktop-only block screen; start menu (Play/Continue toggle based on whether a run has started, plus a Restart Game button once it has); how-to-play panel; game-over/victory screen (victory is a new branch, reached for the first time now that Pit Devil sets it)
-    │
-    └── core/
-        ├── input.js                 keyboard state tracking (keys/justPressed) + mobile-device detection
-        ├── world-factory.js         turns the plain data in config/level-layout.js into live NPC/WorldItem/Enemy instances (now 99 enemies); used both at boot and on restart
-        ├── combat.js                 resolves player interaction: talking to NPCs, melee hit resolution, XP/gold/loot rewards, world-item pickups, inventory-panel clicks, gate-unlock checks, and the lava hazard tick (reuses the player's existing hit-invulnerability window as its damage cooldown)
-        └── game.js                   bootstrap + main update/draw loop + restart logic; map grown to 109x236; Escape returns to the start menu mid-run; tracks whether a run has started (for the Continue/Restart buttons); draws the end screen for both gameover and victory
-```
-
-Double-click `index.html`, or serve the folder locally if your browser restricts local file access:
+You don't need to install anything. Use the [live version](https://goldipl.github.io/Shattered-Vale-RPG/), or double-click `index.html`. If your browser blocks local file access, serve the folder instead:
 
 ```bash
 # from inside the shattered-vale-rpg folder
@@ -65,63 +63,136 @@ python3 -m http.server 8000
 # then visit http://localhost:8000
 ```
 
+The game needs a keyboard, so it shows a block screen on mobile devices.
+
 ## Controls
 
-| Key                           | Action                  |
-| ----------------------------- | ----------------------- |
-| `W` `A` `S` `D` or Arrow Keys | Move                    |
-| `Space`                       | Attack                  |
-| `E`                           | Talk to NPCs / interact |
-| `I`                           | Toggle inventory        |
-| `F`                           | Use Fire Ball Attack    |
+| Key                           | Action                                          |
+| ----------------------------- | ----------------------------------------------- |
+| `W` `A` `S` `D` or Arrow Keys | Move                                            |
+| `Space`                       | Melee attack (hold to keep swinging)            |
+| `F`                           | Cast a fireball (uses mana)                     |
+| `E`                           | Talk to NPCs, interact, advance dialogue        |
+| `I`                           | Open or close the inventory                     |
+| `Esc`                         | Close the inventory, or go back to the start menu |
 
 ## How to play
 
-1. Explore the village and find **Elder Rowan** — talk to him (`E`) to start the quest.
+1. Find **Elder Rowan** in the village and talk to him (`E`) to start the quest.
 2. Visit the **Wandering Merchant** for a free health potion.
-3. Head west to the castle and pick up the **Iron Sword** lying in the grass.
-4. Fight **slimes** scattered around the map for gold and XP; leveling up increases your max HP and attack.
-5. Head to the castle and defeat the **Goblin King Grimtooth** to open a New Worlds.
+3. Head west and pick up the **Iron Sword** lying in the grass.
+4. Clear the green and blue slimes to open the castle gate, then defeat **Goblin King Grimtooth**.
+5. Each boss you defeat drops new gear and opens the gate to the next region. Defeat **Glacius, the Everfrost Wyrm** at the top of the Frostspire to win.
 
-Your HP, level/XP, and gold are tracked in the HUD above the game canvas. If your HP reaches 0, refresh the page to try again.
+Your HP, mana, level/XP and gold are shown in the HUD above the game canvas. If your HP reaches 0, the game-over screen lets you restart. After winning you can keep exploring or start again.
+
+## World and bosses
+
+The world is a single 109 × 366 tile map with 143 enemies. Regions open one after another as you defeat their guardians:
+
+| Region              | Boss(es)                                                 | Reward and what it opens                                                         |
+| ------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Village and forest  | Goblin King Grimtooth                                    | Iron Armor; opens the Beach Oasis                                                |
+| Beach Oasis         | Devil of the Oasis                                       | Devil's Helmet, Legendary Sword; opens the Jungle                                |
+| Jungle              | Orc Warlord Skarn, Jungle Witch Maera                    | Jungle Armor, Swift Boots; defeating both opens the Skeleton Dungeon             |
+| Skeleton Dungeon    | The Skeleton King                                        | Bone Shield, Skeleton Crown, Mana Potion; opens the Lava Gate                    |
+| Molten Depths       | Troll Chieftain, then The Pit Devil                      | Obsidian Armor, Molten Blade, Fireproof Boots; opens the Frostspire              |
+| Frostspire          | The Frost Sentinel, Wraith Queen Isolde, then Glacius     | Frostplate Armor, Wraith Veil, Spectral Ward, Frostbrand, Frostwalker Boots, Winter's Grace; **victory** |
+
+Two regions have floor hazards. Lava in the Molten Depths burns you unless you wear **Fireproof Boots**, and frostbite ice in the Frostspire hurts you unless you wear **Frostwalker Boots**.
 
 ## Features
 
-- **Procedurally drawn sprites** — layered, directional character sheets (no external image assets) for the player, elder, merchant, all slime variants, the spider, the skeleton, and all five bosses (Goblin King, Devil, Orc Warlord, Jungle Witch, Skeleton King), each with walk-cycle animation
-- **Textured world spanning four zones** — starting village/forest, beach oasis, jungle, and a skeleton dungeon — with autotile edge-blending between grass/path/sand/water/jungle/crypt floor, a bridge, animated water shimmer, and scattered zone-specific decoration (flowers, rocks, tall grass, shells, ferns, vines, bones, braziers)
-- **Depth-sorted rendering** so characters and items visually overlap correctly based on their position
-- **Combat system** with melee hitboxes, ranged fireball projectiles, telegraphed enemy attacks, hit-flash feedback, and per-enemy HP bars
-- **Boss encounters** with a dedicated health banner, low-HP warning pulse, and unique defeat drops/cutscenes for each of the five bosses
-- **Gated progression** — defeating guardian enemies or specific bosses opens new gates (village → oasis → jungle → dungeon), tracked by a simple quest stage
-- **Leveling system** — gaining XP raises level, max HP, and attack; mana regenerates over time to fuel fireballs
-- **Particle effects** — hit bursts, floating damage/XP/gold numbers, footstep sparkles, camera shake, and full-screen flash on level-up, boss kills, and gate openings
-- **Typewriter-style dialogue box** with one-time quest/gift conversations (Elder Rowan, the Wandering Merchant) and short "System" narration cutscenes after boss fights
-- **Full inventory system** — an equip-slot panel (helmet/weapon/armor/shield/boots) alongside a backpack grid, with click-to-equip/unequip and consumable potions (health/mana)
-- **Smooth camera** that follows the player and clamps to the map bounds
-- **Start menu, how-to-play panel, and game-over/restart screen**, plus a desktop-only block screen for mobile visitors (this game requires a keyboard)
+- **Procedurally drawn sprites.** Layered, directional sprite sheets with walk cycles for the player, NPCs, 15 regular enemy types and all 10 bosses, plus 24×24 item icons. The game uses no image files.
+- **Seven themed regions.** Grass, sand, jungle, crypt, lava and ice terrain, with edge blending between tile types, animated water shimmer and lava glow, and decorations for each region (flowers, shells, ferns, bones, braziers, obsidian shards, ice crystals).
+- **Combat.** Melee hitboxes, mana-powered fireballs, telegraphed enemy attacks, knockback, hit flashes and per-enemy HP bars.
+- **Boss fights.** A health banner with a low-HP warning pulse, plus unique drops and a short story cutscene for each boss.
+- **Gated progression.** Gates open when guardians or bosses fall, and a quest tracker shows the current goal.
+- **Leveling.** XP raises your level, max HP and attack. Mana regenerates over time.
+- **Inventory.** Helmet, weapon, armor, shield and boots slots, a backpack grid, click-to-equip and click-to-unequip, a character stats panel, and consumables (Health Potion, Mana Potion, Winter's Grace).
+- **Effects.** Hit bursts, floating damage/XP/gold numbers, camera shake, and full-screen flashes on level-ups, boss kills and gate openings.
+- **Dialogue.** A typewriter-style dialogue box for NPC conversations and boss cutscenes.
+- **Depth-sorted rendering**, so characters and items overlap correctly.
+- **Menus.** A start menu with Play/Continue, Restart and Author buttons, a how-to-play panel, and game-over and victory screens.
+
+## Architecture
+
+```
+├── index.html                      game canvas + DOM HUD (hp/mana/xp bars, level, gold); loads all 29 JS files in dependency order
+├── css/style.css                   canvas and HUD styling
+├── icons/favicon.ico
+├── screenshots/                    images used in this README
+├── test/
+│   ├── dom-shim.js                 minimal DOM/canvas stand-in so the game runs under Node
+│   └── run-tests.js                loads every game file in a vm sandbox and runs the smoke/regression tests
+├── .github/workflows/static.yml    deploys the repo to GitHub Pages on every push to master
+└── js/
+    ├── utils.js                    shared math/canvas helpers (clamp, lerp, dist, rectsOverlap, roundRect, hashTile, makeCanvas, wrapPlainText)
+    │
+    ├── config/                     ← pure data: no rendering, no class instances
+    │   ├── balance.js               every balance number: player stats, level-up curve, weapon/armor/boots bonuses, ENEMY_DEFS for all 25 enemy types, COMBAT_REWARDS, lava and frostbite damage
+    │   ├── level-layout.js          NPC_DEFS (dialogue), WORLD_ITEM_PLACEMENTS, ENEMY_PLACEMENTS (143 enemies), BOSS_NAMES, PLAYER_SPAWN
+    │   ├── item-stats.js            the stats and description shown for each item
+    │   └── item-effects.js          pickup/equip/unequip effects, GATE_UNLOCK_CONDITIONS, BOSS_DEFEAT_EVENTS (drops, gate openings, cutscenes, victory)
+    │
+    ├── sprites/                    ← procedural pixel art
+    │   ├── humanoid-sprites.js      palette-swappable humanoid sheets (player, elder, merchant) + sword overlay
+    │   ├── monster-sprites.js       slimes, scorpion, spider, skeleton, and the Goblin/Devil/Orc/Witch/Skeleton King bosses
+    │   ├── molten-sprites.js        Molten Depths creatures: lesser devil, orc raider, troll, Troll Chieftain, Pit Devil
+    │   ├── frost-sprites.js         Frostspire creatures: frost wolf, crystal spider, wraith, yeti, ice golem, Frost Sentinel, Wraith Queen, Glacius
+    │   ├── icon-sprites.js          24×24 item icons for world pickups and the inventory
+    │   └── sprites.js               Sprites registry + initSprites(), which builds every sheet and icon once at boot
+    │
+    ├── world/
+    │   ├── tilemap-builder.js       TileType enum, SOLID_TILES, GATE_DEFS, and terrain generation for every region
+    │   ├── tilemap-renderer.js      tile ground rendering, edge blending and decorations
+    │   └── tilemap.js               TileMap class: tile grid, gate state, bakes the static layer to an offscreen canvas, animates water and lava
+    │
+    ├── entities/
+    │   ├── animated-sprite.js       shared sprite-sheet frame walker for 4-directional walk cycles
+    │   ├── player.js                movement, melee/fireball combat, leveling, equipment bonuses, hazard immunities
+    │   ├── npc.js                   talkable characters and their "Talk with me" speech bubble
+    │   ├── enemy.js                 wander/aggro AI, telegraphed attacks and damage, driven by ENEMY_DEFS
+    │   └── fireball.js              fireball projectile
+    │
+    ├── systems/
+    │   ├── camera.js                smooth follow camera with screen shake, clamped to the map
+    │   ├── particles.js             particle bursts + floating damage/XP/gold text
+    │   ├── dialogue.js              typewriter dialogue box
+    │   └── inventory.js             world item pickups + inventory panel (equip slots, backpack grid)
+    │
+    ├── ui/
+    │   ├── hud.js                   DOM HUD bars, boss health banner, toast messages, quest tracker
+    │   └── screens.js               desktop-only block screen, start menu, how-to-play panel, game-over/victory screens
+    │
+    └── core/
+        ├── input.js                 keyboard state (keys/justPressed) + mobile detection
+        ├── world-factory.js         turns level-layout.js data into live NPC/WorldItem/Enemy instances (at boot and on restart)
+        ├── combat.js                interaction, melee hits, rewards, pickups, inventory clicks, gate checks, lava/frostbite hazards
+        └── game.js                  bootstrap, main update/draw loop, restart logic, start-menu/victory flow
+```
+
+## Running the tests
+
+The tests need [Node.js](https://nodejs.org/) and have no other dependencies:
+
+```bash
+node test/run-tests.js
+```
+
+They load all game files into a sandbox with a fake DOM, then check sprite generation, map layout, enemy counts, combat, boss progression, inventory and the restart/victory flow.
 
 ## Customizing
 
-A few starting points if you want to extend it:
-
-- **Add an enemy type** — add a new palette/sprite builder in `sprites.js`, then instantiate it via `new Enemy(x, y, 'yourType')` in `game.js`. Enemy stats (HP, speed, damage) are set in the `Enemy` constructor in `entities.js`.
-- **Expand the map** — edit `TileMap` in `tilemap.js`; increase the `cols`/`rows` passed into `new TileMap(...)` in `game.js` and add new features inside `_buildWorld()`.
-- **Add dialogue/NPCs** — create a new `NPC(...)` in `game.js` with a `dialogue` array of strings; push it into the `npcs` array.
-- **Add items** — draw a new icon function in `sprites.js`, register it in `Sprites.icons`, then place a `new WorldItem(x, y, 'yourKind')` in `game.js`.
+- **Add an enemy type.** Write a sprite builder in one of the `js/sprites/*-sprites.js` files and register it in `sprites.js`. Add its stats to `ENEMY_DEFS` and its XP/gold to `COMBAT_REWARDS` in `config/balance.js`. Place it on the map in `ENEMY_PLACEMENTS` in `config/level-layout.js`.
+- **Add a boss.** Do the same as for an enemy, then add a display name to `BOSS_NAMES` and a defeat script (drops, gates, cutscene) to `BOSS_DEFEAT_EVENTS` in `config/item-effects.js`.
+- **Expand the map.** Change the size in `new TileMap(...)` in `core/game.js` and add terrain in `world/tilemap-builder.js`.
+- **Add dialogue or NPCs.** Edit `NPC_DEFS` in `config/level-layout.js`.
+- **Add items.** Draw an icon in `sprites/icon-sprites.js`, describe it in `config/item-stats.js`, define its effects in `config/item-effects.js`, and place it with `WORLD_ITEM_PLACEMENTS` or as a boss drop.
 
 ## Browser support
 
-Any modern browser with Canvas2D support (Chrome, Firefox, Safari, Edge). No mobile touch controls are implemented — keyboard required.
-
-## Screenshots
-
-![screenshot](./screenshots/screenshot01.jpg)
-![screenshot](./screenshots/screenshot02.jpg)
-![screenshot](./screenshots/screenshot04.jpg)
-![screenshot](./screenshots/screenshot05.jpg)
-![screenshot](./screenshots/screenshot03.jpg)
-![screenshot](./screenshots/screenshot06.jpg)
-![screenshot](./screenshots/screenshot07.jpg)
+Any modern browser with Canvas 2D support (Chrome, Firefox, Safari, Edge). Touch controls are not implemented, so you need a keyboard.
 
 ## License
 
